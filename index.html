@@ -6,20 +6,16 @@
     <title>Peta Sejarah Interaktif</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* Kita hanya butuh sedikit CSS tambahan untuk memastikan peta tidak tertutup */
         #map { height: 100%; width: 100%; z-index: 10; }
-        /* Mengatur agar ikon tidak memiliki latar belakang kotak putih */
         .custom-div-icon {
             background: transparent !important;
             border: none !important;
         }
-        /* Memastikan font symbols dirender dengan benar */
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
@@ -28,60 +24,36 @@
 
 <body class="flex h-screen bg-gray-100 font-sans overflow-hidden">
 
-    <aside class="w-80 bg-white shadow-2xl z-20 flex flex-col">
-        <div class="p-5 border-b border-gray-200 bg-emerald-900 text-white">
+    <aside class="w-80 bg-white shadow-2xl z-20 flex flex-col h-screen overflow-hidden">
+        
+        <div class="p-5 border-b bg-emerald-900 text-white">
             <h1 class="text-xl font-bold">Atlas Sejarah</h1>
-            <p class="text-sm opacity-80">Jelajahi Titik Penting</p>
+            <p class="text-sm opacity-80">Jelajah Titik Penting</p>
         </div>
 
-        <div id="location-list" class="flex-1 overflow-y-auto p-4 space-y-3">
-        </div>
-
-        <div id="list-panel" class="flex-1 overflow-y-auto">
-            <div class="p-5 border-b bg-emerald-900 text-white">
-                <h1 class="text-xl font-bold">Atlas Sejarah</h1>
+        <div class="flex-1 relative overflow-hidden bg-white">
+            
+            <div id="list-panel" class="absolute inset-0 overflow-y-auto p-4 flex flex-col gap-3 transition-all duration-300">
+                <div id="location-list" class="flex flex-col gap-3">
+                    </div>
             </div>
-            <div id="location-list"></div>
+
+            <div id="detail-panel" class="hidden absolute inset-0 overflow-y-auto p-5 transition-all duration-300 bg-white flex flex-col">
+                <button onclick="showList()" class="flex items-center gap-2 text-emerald-900 hover:text-emerald-700 font-semibold mb-4 group text-left cursor-pointer">
+                    <span class="material-symbols-outlined transition-transform group-hover:-translate-x-1">arrow_back</span>
+                    Kembali
+                </button>
+                
+                <h2 id="detail-nama" class="text-xl font-bold text-gray-800 leading-tight"></h2>
+                <p id="detail-tahun" class="text-emerald-700 italic text-xs mt-1"></p>
+                
+                <hr class="my-3 border-gray-200">
+                
+                <p id="detail-deskripsi" class="text-sm text-gray-600 leading-relaxed text-justify"></p>
+            </div>
+
         </div>
-
-    <div id="detail-panel" class="hidden flex-1 p-5 overflow-y-auto">
-        <button onclick="showList()" class="text-emerald-900 mb-4 font-bold">&larr; Kembali</button>
-        <h2 id="detail-nama" class="text-2xl font-bold text-gray-800"></h2>
-        <p id="detail-tahun" class="text-emerald-700 italic"></p>
-        <p id="detail-deskripsi" class="mt-4 text-gray-600"></p>
-    </div>
-
-<!-- Bagian Sidebar -->
-<aside class="w-80 bg-white shadow-2xl z-20 flex flex-col h-screen overflow-hidden">
-    <!-- HEADER (Tetap muncul di atas) -->
-    <div class="p-5 border-b bg-emerald-900 text-white">
-        <h1 class="text-xl font-bold">Atlas Sejarah</h1>
-        <p class="text-sm opacity-80">Jelajah Titik Penting</p>
-    </div>
-
-    <!-- PANEL 1: DAFTAR LOKASI -->
-    <div id="list-panel" class="flex-1 overflow-y-auto transition-all duration-300">
-        <div id="location-list" class="p-4 flex flex-col gap-3">
-            <!-- Tombol-tombol lokasi akan masuk ke sini melalui loader.js -->
-        </div>
-    </div>
-
-    <!-- PANEL 2: DETAIL SEJARAH (Tersembunyi secara default dengan class 'hidden') -->
-    <div id="detail-panel" class="hidden flex-1 p-5 overflow-y-auto transition-all duration-300 flex flex-col">
-        <button onclick="showList()" class="flex items-center gap-2 text-emerald-900 hover:text-emerald-700 font-semibold mb-5 group text-left">
-            <span class="material-symbols-outlined transition-transform group-hover:-translate-x-1">arrow_back</span>
-            Kembali
-        </button>
-        
-        <h2 id="detail-nama" class="text-2xl font-bold text-gray-800 leading-tight"></h2>
-        <p id="detail-tahun" class="text-emerald-700 italic text-sm mt-1"></p>
-        
-        <!-- Pembatas visual -->
-        <hr class="my-4 border-gray-200">
-        
-        <p id="detail-deskripsi" class="text-gray-600 leading-relaxed text-justify"></p>
-    </div>
-</aside>
+    </aside>
 
     <main class="flex-1 relative">
         <div id="map"></div>
@@ -90,8 +62,5 @@
     <script src="js/utils.js"></script>
     <script src="js/map.js"></script>
     <script src="js/loader.js"></script>
-    <script>
-        loadLocations();
-    </script>
 </body>
 </html>
