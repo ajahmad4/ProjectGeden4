@@ -22,10 +22,21 @@ async function loadLocations() {
                 iconAnchor: [15, 30]
             });
 
-            // Pasang marker
-            if (typeof map !== 'undefined') { // Cek apakah map sudah ada
-                const marker = L.marker([loc.lat, loc.lng], { icon: myIcon }).addTo(map);
+            if (typeof map !== 'undefined') {
+                const marker = L.marker([loc.lat, loc.lng], { icon: myIcon });
                 marker.bindPopup(`<b>${loc.nama}</b><br>Tahun: ${loc.tahun}<br>${loc.deskripsi}`);
+
+                // LOGIKA FILTER: Masukkan marker ke layer yang sesuai
+                switch (loc.kategori) {
+                    case 'masjid':
+                        marker.addTo(layerMasjid);
+                        break;
+                    case 'kota':
+                        marker.addTo(layerKota);
+                        break;
+                    default:
+                        marker.addTo(map); // Default jika kategorinya belum terdaftar
+                }
             }
 
             // Tambah ke sidebar
