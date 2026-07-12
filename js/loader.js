@@ -11,10 +11,10 @@ async function loadLocations() {
 
         // 2. Loop data
         locations.forEach(loc => {
-            // Panggil fungsi dari utils.js
+            // Panggil fungsi dari utils.js untuk ikon
             const iconName = getMaterialIcon(loc.kategori); 
             
-            // Buat ikon peta
+            // Buat ikon peta Leaflet
             const myIcon = L.divIcon({
                 className: 'custom-div-icon',
                 html: `<span class="material-symbols-outlined" style="font-size: 32px; color: #064e3b;">${iconName}</span>`,
@@ -22,11 +22,12 @@ async function loadLocations() {
                 iconAnchor: [15, 30]
             });
 
+            // Pasang marker ke layer group yang sesuai (dari map.js)
             if (typeof map !== 'undefined') {
                 const marker = L.marker([loc.lat, loc.lng], { icon: myIcon });
                 marker.bindPopup(`<b>${loc.nama}</b><br>Tahun: ${loc.tahun}<br>${loc.deskripsi}`);
 
-                // LOGIKA FILTER: Masukkan marker ke layer yang sesuai
+                // Filter berdasarkan kategori yang didefinisikan di map.js
                 switch (loc.kategori) {
                     case 'masjid':
                         marker.addTo(layerMasjid);
@@ -35,14 +36,18 @@ async function loadLocations() {
                         marker.addTo(layerKota);
                         break;
                     default:
-                        marker.addTo(map); // Default jika kategorinya belum terdaftar
+                        marker.addTo(map);
                 }
             }
 
-            // Tambah ke sidebar
+            // Amankan teks deskripsi dari karakter kutip agar tidak merusak HTML onclick
+            const safeDeskripsi = loc.deskripsi.replace(/'/g, "\\'");
+            const safeNama = loc.nama.replace(/'/g, "\\'");
+
+            // Tambah ke sidebar (Panel Daftar)
             const buttonHTML = `
-                <button onclick="map.flyTo([${loc.lat}, ${loc.lng}], 12); showDetail('${loc.nama}', '${loc.tahun}', '${loc.deskripsi}')" 
-                    class="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-emerald-50 border border-gray-200 rounded-lg transition-all shadow-sm">
+                <button onclick="map.flyTo([${loc.lat}, ${loc.lng}], 12); showDetail('${safeNama}', '${loc.tahun}', '${safeDeskripsi}')" 
+                    class="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-emerald-50 border border-gray-200 rounded-lg transition-all shadow-sm text-left">
                     <span class="material-symbols-outlined text-emerald-900">${iconName}</span>
                     <div class="text-left">
                         <p class="font-semibold text-gray-800">${loc.nama}</p>
@@ -56,16 +61,27 @@ async function loadLocations() {
         console.error("Error loading data:", error);
     }
 }
+
+// ==========================================
+// FUNGSI MANAJEMEN INTERAKSI UI SIDEBAR
+// ==========================================
+
 function showDetail(nama, tahun, deskripsi) {
+    // Sembunyikan panel daftar, tampilkan panel detail
     document.getElementById('list-panel').classList.add('hidden');
     document.getElementById('detail-panel').classList.remove('hidden');
 
+    // Isi konten detailnya
     document.getElementById('detail-nama').innerText = nama;
     document.getElementById('detail-tahun').innerText = tahun + " M";
     document.getElementById('detail-deskripsi').innerText = deskripsi;
 }
 
 function showList() {
+    // Tampilkan kembali panel daftar, sembunyikan panel detail
     document.getElementById('list-panel').classList.remove('hidden');
     document.getElementById('detail-panel').classList.add('hidden');
 }
+
+// Jalankan fungsi load data saat halaman dimuat
+loadLocations();
