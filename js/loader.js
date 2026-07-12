@@ -1,11 +1,12 @@
 // js/loader.js
-
+let allLocationsData = []; // Variabel global untuk menyimpan data lokasi
 async function loadLocations() {
     try {
         // 1. Ambil data JSON
         const response = await fetch("data/location.json");
         const locations = await response.json();
-        
+        allLocationsData = locations; // Simpan data lokasi ke variabel global
+
         const locationList = document.getElementById('location-list');
         locationList.innerHTML = ''; // Kosongkan daftar sebelum diisi
 
@@ -41,13 +42,14 @@ async function loadLocations() {
             }
 
             // Amankan teks deskripsi dari karakter kutip agar tidak merusak HTML onclick
-            const safeDeskripsi = loc.deskripsi.replace(/'/g, "\\'");
-            const safeNama = loc.nama.replace(/'/g, "\\'");
+            if (allLocationsData.length === 0) {
+                allLocationsData = locations; 
+            }
 
-            // Tambah ke sidebar (Panel Daftar)
+            // Sekarang buttonHTML jauh lebih bersih dan aman dari error tanda kutip:
             const buttonHTML = `
-                <button onclick="map.flyTo([${loc.lat}, ${loc.lng}], 12); showDetail('${safeNama}', '${loc.tahun}', '${safeDeskripsi}')" 
-                    class="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-emerald-50 border border-gray-200 rounded-lg transition-all shadow-sm text-left">
+                <button onclick="map.flyTo([${loc.lat}, ${loc.lng}], 12); handleSidebarClick(${loc.id})" 
+                    class="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-emerald-50 border border-gray-200 rounded-lg transition-all shadow-sm text-left cursor-pointer">
                     <span class="material-symbols-outlined text-emerald-900">${iconName}</span>
                     <div class="text-left">
                         <p class="font-semibold text-gray-800">${loc.nama}</p>
@@ -66,12 +68,22 @@ async function loadLocations() {
 // FUNGSI MANAJEMEN INTERAKSI UI SIDEBAR
 // ==========================================
 
+function handleSidebarClick(id) {
+    // Cari data lokasi yang ID-nya cocok dengan yang diklik
+    const lokasiTerpilih = allLocationsData.find(loc => loc.id === id);
+    
+    if (lokasiTerpilih) {
+        // Jika ketemu, kirim datanya ke fungsi tampil detail
+        showDetail(lokasiTerpilih.nama, lokasiTerpilih.tahun, lokasiTerpilih.deskripsi);
+    }
+}
+
 function showDetail(nama, tahun, deskripsi) {
     // Sembunyikan panel daftar, tampilkan panel detail
     document.getElementById('list-panel').classList.add('hidden');
     document.getElementById('detail-panel').classList.remove('hidden');
 
-    // Isi konten detailnya
+    // Isi konten detailnya dengan aman
     document.getElementById('detail-nama').innerText = nama;
     document.getElementById('detail-tahun').innerText = tahun + " M";
     document.getElementById('detail-deskripsi').innerText = deskripsi;
