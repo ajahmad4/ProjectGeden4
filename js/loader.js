@@ -30,7 +30,7 @@ async function loadLocations() {
 
             // Tambah ke sidebar
             const buttonHTML = `
-                <button onclick="map.flyTo([${loc.lat}, ${loc.lng}], 12)" 
+                <button onclick="map.flyTo([${loc.lat}, ${loc.lng}], 12); showDetail('${loc.nama}', '${loc.tahun}', '${loc.deskripsi}')" 
                     class="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-emerald-50 border border-gray-200 rounded-lg transition-all shadow-sm">
                     <span class="material-symbols-outlined text-emerald-900">${iconName}</span>
                     <div class="text-left">
@@ -44,4 +44,17 @@ async function loadLocations() {
     } catch (error) {
         console.error("Error loading data:", error);
     }
+}
+function showDetail(nama, tahun, deskripsi) {
+    document.getElementById('list-panel').classList.add('hidden');
+    document.getElementById('detail-panel').classList.remove('hidden');
+
+    document.getElementById('detail-nama').innerText = nama;
+    document.getElementById('detail-tahun').innerText = tahun + " M";
+    document.getElementById('detail-deskripsi').innerText = deskripsi;
+}
+
+function showList() {
+    document.getElementById('list-panel').classList.remove('hidden');
+    document.getElementById('detail-panel').classList.add('hidden');
 }
