@@ -13,6 +13,64 @@
  * Membaca data array terpusat 'dataSejarahNusantara' (dari js/data.js),
  * lalu mendistribusikannya secara otomatis ke komponen peta dan panel navigasi kiri.
  */
+// menyimpan seluruh marker berdasarkan id lokasi
+const markerLokasi = {};
+
+function renderDaftarLokasi(dataLokasi) {
+
+    const locationList = document.getElementById("location-list");
+
+    if (!locationList) return;
+
+    locationList.innerHTML = "";
+
+    dataLokasi.forEach(loc => {
+
+        const iconName = getMaterialIcon(loc.kategori);
+
+        const buttonHTML = `
+            <div onclick="eksekusiNavigasiLokal('${loc.id}')"
+                class="w-full flex items-center gap-4 px-5 py-4 bg-[#fcfbf9] hover:bg-[#f6f2ec] border border-[#e7e1da] rounded-2xl transition-all duration-300 cursor-pointer group">
+
+                <div class="w-12 h-12 flex-shrink-0 rounded-full bg-[#edf3ef] text-[#1f4b3a] flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+
+                    <span class="material-symbols-outlined text-[24px]">
+                        ${iconName}
+                    </span>
+
+                </div>
+
+                <div class="flex-1 min-w-0">
+
+                    <p class="font-semibold text-[16px] text-[#2f2f2f] truncate group-hover:text-[#1f4b3a] transition-colors">
+
+                        ${loc.nama}
+
+                    </p>
+
+                    <p class="text-[12px] text-[#8b847a] mt-1">
+
+                        Tahun Kontak: ${loc.tahun} M
+
+                    </p>
+
+                </div>
+
+                <span class="material-symbols-outlined text-[#b4aea6] text-[18px] transition-transform duration-200 group-hover:translate-x-1">
+
+                    arrow_forward_ios
+
+                </span>
+
+            </div>
+        `;
+
+        locationList.innerHTML += buttonHTML;
+
+    });
+
+}
+
 function muatLokasiAplikasi() {
     // Membidik elemen kontainer daftar navigasi pada panel kiri index.html
     const locationList = document.getElementById('location-list');
@@ -218,4 +276,91 @@ function resetTampilanDefault() {
 // 3. PICU UTAMA PEMUATAN SISTEM (INITIALIZER)
 // ==========================================
 // Menjalankan fungsi render otomatis segera setelah seluruh struktur DOM HTML selesai dimuat
-document.addEventListener('DOMContentLoaded', muatLokasiAplikasi);
+document.addEventListener("DOMContentLoaded", function () {
+
+    muatLokasiAplikasi();
+
+    const searchInput = document.getElementById("search-input");
+
+    if (!searchInput) return;
+
+searchInput.addEventListener("input", function () {
+
+    const keyword = this.value.toLowerCase().trim();
+
+    const locationList = document.getElementById("location-list");
+
+    locationList.innerHTML = "";
+
+    let jumlahHasil = 0;
+
+    dataSejarahNusantara.forEach(loc => {
+
+        const cocok =
+            loc.nama.toLowerCase().includes(keyword) ||
+            loc.kategori.toLowerCase().includes(keyword) ||
+            loc.lokasi.toLowerCase().includes(keyword) ||
+            loc.wilayah.toLowerCase().includes(keyword);
+
+        if (!cocok) return;
+
+        jumlahHasil++;
+
+        const iconName = getMaterialIcon(loc.kategori);
+
+        const buttonHTML = `
+            <div onclick="eksekusiNavigasiLokal('${loc.id}')"
+                class="w-full flex items-center gap-4 px-5 py-4 bg-[#fcfbf9] hover:bg-[#f6f2ec] border border-[#e7e1da] rounded-2xl transition-all duration-300 cursor-pointer group">
+
+                <div class="w-12 h-12 flex-shrink-0 rounded-full bg-[#edf3ef] text-[#1f4b3a] flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[24px]">${iconName}</span>
+                </div>
+
+                <div class="flex-1 min-w-0">
+
+                    <p class="font-semibold text-[16px] text-[#2f2f2f] truncate">
+                        ${loc.nama}
+                    </p>
+
+                    <p class="text-[12px] text-[#8b847a] mt-1">
+                        Tahun Kontak: ${loc.tahun} M
+                    </p>
+
+                </div>
+
+                <span class="material-symbols-outlined text-[#b4aea6] text-[18px]">
+                    arrow_forward_ios
+                </span>
+
+            </div>
+        `;
+
+        locationList.innerHTML += buttonHTML;
+
+    });
+
+    if (jumlahHasil === 0) {
+
+        locationList.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-14 text-center">
+
+                <span class="material-symbols-outlined text-[42px] text-[#c6bfb5]">
+                    search_off
+                </span>
+
+                <p class="mt-3 text-[15px] font-semibold text-[#6d675f]">
+                    Lokasi tidak ditemukan
+                </p>
+
+                <p class="mt-1 text-[13px] text-[#9b948b]">
+                    Coba gunakan kata kunci lain.
+                </p>
+
+            </div>
+        `;
+
+    }
+
+});
+
+});

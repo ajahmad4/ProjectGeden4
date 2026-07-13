@@ -19,16 +19,35 @@
 
 <body class="bg-surface font-body-md text-on-surface overflow-hidden h-screen flex flex-col antialiased">
 
-    <header class="fixed top-0 left-0 w-full h-[68px] z-[100] flex items-center justify-between px-7 bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#e4dfd8]">        <h1 onclick="resetTampilanDefault()" class="font-title cursor-pointer text-[2.4rem] leading-none tracking-tight hover:opacity-80 transition-opacity select-none">
-            Atlas Sejarah Kebudayaan Islam
-        </h1>            
-        <div class="flex items-center gap-3">
-            <span class="px-3 py-[5px] rounded-full bg-[#f7f4ef] border border-[#e4ddd5] text-[#8a8379] text-[10px] tracking-[0.14em] uppercase font-medium select-none">
-                Media Pembelajaran SKI
-            </span>
+    <header class="fixed top-0 left-0 w-full h-[68px] z-[100] flex items-center justify-between px-7 bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#e4dfd8]">
+
+        <!-- Logo + Judul -->
+        <div class="flex items-center gap-4">
+
+            <img
+                src="assets/logo/atlas-logo.jpg"
+                alt="Logo Atlas"
+                class="w-11 h-11 object-contain select-none">
+
+            <h1
+                onclick="resetTampilanDefault()"
+                class="font-title cursor-pointer text-[2.45rem] leading-none tracking-tight transition-opacity select-none">
+
+                Atlas Sejarah Kebudayaan Islam
+
+            </h1>
+
         </div>
+
+        <!-- Badge -->
+        <span class="px-3 py-[5px] rounded-full bg-[#f7f4ef] border border-[#e4ddd5] text-[#8a8379] text-[10px] tracking-[0.14em] uppercase font-medium select-none">
+
+            Media Pembelajaran SKI
+
+        </span>
+
     </header>    
-    
+
     <main class="flex flex-1 pt-14 relative overflow-hidden w-full h-full">
     
         <div id="map" class="absolute inset-0 w-full h-full z-10"></div>
@@ -37,6 +56,23 @@
             <div class="px-5 pt-5 pb-4 border-b border-[#e4dfd8] bg-[#fdfcfb] select-none">
                 <h1 class="text-[30px] font-bold tracking-tight text-[#1f4b3a]"> Atlas Sejarah</h1>
                 <p class="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#8d867a]">Jelajah Titik Masuknya Islam di Nusantara</p>
+                <div class="mt-5">
+
+                <div class="relative">
+
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9a9388] text-[20px]">
+                        search
+                    </span>
+
+                    <input
+                        id="search-input"
+                        type="text"
+                        spellcheck="false"
+                        placeholder="Cari lokasi..."
+                        class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[#e3ddd5] bg-[#fcfbf9] text-[14px] text-[#444] placeholder:text-[#8b847a] focus:outline-none focus:border-[#1f4b3a] focus:ring-2 focus:ring-[#1f4b3a]/10 transition">
+
+                </div>
+
             </div>
             <div class="flex-1 overflow-y-auto px-5 py-4 custom-scrollbar">
                 <div id="location-list" class="flex flex-col gap-3">
