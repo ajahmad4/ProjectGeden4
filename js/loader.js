@@ -66,19 +66,29 @@ function muatLokasiAplikasi() {
         
         // Komposisi string HTML komponen button card dengan manipulasi parameter string yang aman
         const buttonHTML = `
-            <div onclick="eksekusiNavigasiLokal('${loc.id}')" 
-                 class="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-emerald-50 border border-gray-200 rounded-lg transition-all shadow-sm text-left cursor-pointer group hover:border-emerald-200">
-                <div class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-900 flex items-center justify-center transition-transform group-hover:scale-105">
-                    <span class="material-symbols-outlined text-xl">${iconName}</span>
+            <div onclick="eksekusiNavigasiLokal('${loc.id}')"
+                class="w-full flex items-center gap-4 px-5 py-4 bg-[#fcfbf9] hover:bg-[#f6f2ec] border border-[#e7e1da] rounded-2xl transition-all duration-300 cursor-pointer group">
+
+                <div class="w-12 h-12 flex-shrink-0 rounded-full bg-[#edf3ef] text-[#1f4b3a] flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+                    <span class="material-symbols-outlined text-[24px]">${iconName}</span>
                 </div>
+
                 <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-gray-800 text-sm truncate group-hover:text-emerald-800 transition-colors">${loc.nama}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">Tahun Kontak: ${loc.tahun} M</p>
+                    <p class="font-semibold text-[16px] text-[#2f2f2f] truncate group-hover:text-[#1f4b3a] transition-colors">
+                        ${loc.nama}
+                    </p>
+
+                    <p class="text-[12px] text-[#8b847a] mt-1">
+                        Tahun Kontak: ${loc.tahun} M
+                    </p>
                 </div>
-                <span class="material-symbols-outlined text-gray-400 group-hover:translate-x-1 transition-transform text-sm">arrow_forward_ios</span>
+
+                <span class="material-symbols-outlined text-[#b4aea6] text-[18px] transition-transform duration-200 group-hover:translate-x-1">
+                    arrow_forward_ios
+                </span>
+
             </div>
-        `;
-        
+        `;        
         // Injeksi elemen HTML card list ke dalam DOM halaman web
         locationList.innerHTML += buttonHTML;
     });

@@ -52,7 +52,7 @@ const overlays = {
 // Menempatkan menu kontrol layer di pojok kanan atas agar estetik dan fungsional
 L.control.layers(baseLayers, overlays, { 
     position: 'topright',
-    collapsed: false // Panel layer tetap terbuka secara default agar interaktif bagi siswa
+    collapsed: true // Panel layer tetap terbuka secara default agar interaktif bagi siswa
 }).addTo(map);
 
 // Menyisipkan kembali tombol kontrol zoom (+/-) tepat di bawah panel manajemen layer
@@ -105,20 +105,25 @@ function buatIkonSejarah(kategori) {
     const namaIkon = getMaterialIcon(kategori);
     
     // Alokasi palet warna fungsional sebagai diferensiasi visual pengelompokan jenis objek sejarah
-    let warnaLatar = "bg-emerald-700";                        // Default Hijau Tua untuk entitas Masjid
-    if (kategori === "pelabuhan") warnaLatar = "bg-blue-700";   // Biru Samudra melambangkan Bandar Pelabuhan Laut
-    if (kategori === "kerajaan") warnaLatar = "bg-amber-700";   // Emas/Cokelat melambangkan Pusat Pemerintahan Kesultanan
-    if (kategori === "kota") warnaLatar = "bg-slate-600";       // Abu-abu Netral untuk Pusat Administrasi Wilayah Umum
-
+    let warnaLatar = "#1f4b3a";  
+    if (kategori === "pelabuhan") warnaLatar = "#547792";   
+    if (kategori === "kerajaan") warnaLatar = "#8a6d3b"; 
+    if (kategori === "kota") warnaLatar = "#687076";     
     // Komposisi struktur kode DOM HTML dan spesifikasi jangkar (anchor) ukuran penanda kustom
     return L.divIcon({
         html: `
-            <div class="flex items-center justify-center w-9 h-9 ${warnaLatar} text-white rounded-full shadow-lg border-2 border-white transform transition-transform hover:scale-110">
-                <span class="material-symbols-outlined text-xl">${namaIkon}</span>
-            </div>
+        <div
+            class="atlas-marker"
+            style="background:${warnaLatar};">
+
+            <span class="material-symbols-outlined">
+                ${namaIkon}
+            </span>
+
+        </div>
         `,
         className: 'bg-transparent', // Menghapus lapisan kotak bawaan native CSS Leaflet
-        iconSize: [36, 36],          // Dimensi fisik total pembungkus ikon kustom
-        iconAnchor: [18, 18]         // Titik sentral penempatan koordinat sumbu X dan Y pada peta
+        iconSize: [42, 42],          // Dimensi fisik total pembungkus ikon kustom
+        iconAnchor: [21, 21]         // Titik sentral penempatan koordinat sumbu X dan Y pada peta
     });
 }

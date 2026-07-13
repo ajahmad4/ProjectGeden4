@@ -19,12 +19,11 @@
 
 <body class="bg-surface font-body-md text-on-surface overflow-hidden h-screen flex flex-col antialiased">
 
-    <header class="fixed top-0 left-0 w-full z-[100] flex justify-between items-center px-6 bg-white/80 backdrop-blur-md border-b border-gray-200/60 shadow-sm h-14">
-        <h1 onclick="resetTampilanDefault()" class="cursor-pointer hover:opacity-85 font-bold text-emerald-950 tracking-tight transition-opacity select-none">
+    <header class="fixed top-0 left-0 w-full h-16 z-[100] flex items-center justify-between px-8 bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#e4dfd8]">        <h1 onclick="resetTampilanDefault()" class="font-title cursor-pointer text-[2.4rem] leading-none tracking-tight hover:opacity-80 transition-opacity select-none">
             Atlas Sejarah Kebudayaan Islam
         </h1>            
-        <div class="flex items-center gap-4">
-            <span class="text-[10px] bg-emerald-100 text-emerald-900 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider select-none">
+        <div class="flex items-center gap-3">
+            <span class="px-3 py-1 rounded-full bg-[#f1ede8] border border-[#ddd6ce] text-[#7a746d] text-[11px] tracking-[0.12em] uppercase font-medium select-none">
                 Media Pembelajaran SKI
             </span>
         </div>
@@ -34,30 +33,29 @@
     
         <div id="map" class="absolute inset-0 w-full h-full z-10"></div>
 
-        <aside id="list-panel" class="absolute left-4 top-4 bottom-4 w-80 z-40 flex flex-col glass-panel border border-gray-200/80 rounded-xl shadow-2xl overflow-hidden transition-all duration-300">
-            <div class="p-4 border-b bg-emerald-900 text-white select-none">
-                <h1 class="text-lg font-bold tracking-tight">Atlas Sejarah</h1>
-                <p class="text-xs opacity-80">Jelajah Titik Masuknya Islam di Nusantara</p>
+        <aside id="list-panel" class="absolute left-4 top-4 bottom-4 w-[320px] z-40 flex flex-col glass-panel border border-gray-200/80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
+            <div class="px-5 pt-5 pb-4 border-b border-[#e4dfd8] bg-[#fdfcfb] select-none">
+                <h1 class="text-[30px] font-bold tracking-tight text-[#1f4b3a]"> Atlas Sejarah</h1>
+                <p class="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#8d867a]">Jelajah Titik Masuknya Islam di Nusantara</p>
             </div>
-            <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto px-5 py-4 custom-scrollbar">
                 <div id="location-list" class="flex flex-col gap-3">
                     </div>
             </div>
         </aside>
 
-        <div id="detail-panel" class="hidden absolute right-4 top-4 bottom-4 w-85 z-40 flex flex-col glass-panel border border-gray-200/80 rounded-xl shadow-2xl p-5 overflow-hidden transition-all duration-300">
-            <button onclick="tutupDetailPanel()" class="flex items-center gap-2 text-emerald-950 hover:text-emerald-700 font-semibold mb-4 group text-left cursor-pointer text-xs select-none transition-colors">
+            <div id="detail-panel" class="hidden absolute right-4 top-4 bottom-4 w-[360px] z-40 flex flex-col glass-panel rounded-2xl p-6 overflow-hidden transition-all duration-300">            <button onclick="tutupDetailPanel()" class="flex items-center gap-2 text-[#6d6a63] hover:text-[#1f4b3a] font-medium mb-5 group text-left cursor-pointer text-[12px] uppercase tracking-[0.15em] transition-colors">
                 <span class="material-symbols-outlined text-sm transition-transform group-hover:translate-x-0.5">close</span>
                 Tutup Detail
             </button>
             
-            <h2 id="detail-nama" class="text-xl font-bold text-gray-800 leading-tight tracking-tight"></h2>
-            <p id="detail-tahun" class="text-emerald-800 font-medium italic text-xs mt-1"></p>
+            <h2 id="detail-nama" class="font-title text-[34px] leading-none"></h2>
+            <p id="detail-tahun" class="mt-2 text-[12px] uppercase tracking-[0.18em] text-[#8b847a]"></p>
             
-            <hr class="my-3 border-gray-200/80">
+            <hr class="my-5 border-[#e4dfd8]">
             
             <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
-                <p id="detail-deskripsi" class="text-sm text-gray-700 leading-relaxed text-justify font-normal"></p>
+                <p id="detail-deskripsi" class="text-[15px] leading-8 text-[#505050] text-justify"></p>
             </div>
         </div>
 
