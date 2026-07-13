@@ -39,9 +39,15 @@ function muatLokasiAplikasi() {
             });
 
             // Sistem Event Klik pada Marker Peta: Mengarahkan kamera dan memicu panel detail
-            marker.on('click', function() {
-                map.flyTo(loc.koordinat, 12, { animate: true, duration: 1.5 });
-                showDetail(loc.nama, loc.tahun, loc.deskripsi);
+            marker.on("click", function () {
+
+                map.flyTo(loc.koordinat, 12, {
+                    animate: true,
+                    duration: 1.5
+                });
+
+                showDetail(loc);
+
             });
 
             // Distribusi marker ke dalam kelompok Layer Group spesifik berdasarkan kategorinya
@@ -116,21 +122,54 @@ function eksekusiNavigasiLokal(targetId) {
         });
         
         // Membuka panel narasi edukasi
-        showDetail(lokasiTerpilih.nama, lokasiTerpilih.tahun, lokasiTerpilih.deskripsi);
+        showDetail(lokasiTerpilih);
     }
 }
 
 /**
  * Mengisi konten teks narasi edukasi dan menampilkan panel informasi detail kanan.
  */
-function showDetail(nama, tahun, deskripsi) {
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.classList.remove('hidden');
-        document.getElementById('detail-nama').innerText = nama;
-        document.getElementById('detail-tahun').innerText = tahun + " M";
-        document.getElementById('detail-deskripsi').innerText = deskripsi;
+function showDetail(lokasi) {
+
+    const detailPanel = document.getElementById("detail-panel");
+
+    if (!detailPanel) return;
+
+    detailPanel.classList.remove("hidden");
+
+    document.getElementById("detail-nama").innerText = lokasi.nama;
+
+    document.getElementById("detail-tahun").innerText = lokasi.periode;
+
+    document.getElementById("detail-lokasi").innerText = lokasi.lokasi;
+
+    document.getElementById("detail-kategori").innerText =
+        lokasi.kategori.charAt(0).toUpperCase() + lokasi.kategori.slice(1);
+
+    document.getElementById("detail-wilayah").innerText = lokasi.wilayah;
+
+    const fotoWrapper = document.getElementById("detail-foto-wrapper");
+    const foto = document.getElementById("detail-foto");
+
+    if (lokasi.foto && lokasi.foto.length > 0) {
+
+        foto.src = lokasi.foto[0];
+        foto.alt = lokasi.nama;
+        foto.onerror = function () {
+            this.src = "assets/images/placeholder.jpg"; // Gambar cadangan jika URL foto tidak valid
+        };
+
+        fotoWrapper.classList.remove("hidden");
+
+    } else {
+
+        fotoWrapper.classList.add("hidden");
+
     }
+
+    document.getElementById("detail-deskripsi").innerText =
+        lokasi.deskripsi;
+
 }
 
 /**
