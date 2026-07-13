@@ -79,11 +79,7 @@ function handleSidebarClick(id) {
 }
 
 function showDetail(nama, tahun, deskripsi) {
-    // Sembunyikan panel daftar, tampilkan panel detail
-    document.getElementById('list-panel').classList.add('hidden');
     document.getElementById('detail-panel').classList.remove('hidden');
-
-    // Isi konten detailnya dengan aman
     document.getElementById('detail-nama').innerText = nama;
     document.getElementById('detail-tahun').innerText = tahun + " M";
     document.getElementById('detail-deskripsi').innerText = deskripsi;
@@ -95,5 +91,58 @@ function showList() {
     document.getElementById('detail-panel').classList.add('hidden');
 }
 
+// Fungsi ini HANYA untuk menutup panel detail kanan, TANPA mengubah posisi kamera peta
+function tutupDetailPanel() {
+    const detailPanel = document.getElementById('detail-panel');
+    if (detailPanel) {
+        detailPanel.classList.add('hidden');
+    }
+    
+    // Segarkan ukuran peta karena area pandang berubah setelah panel kanan hilang
+    if (typeof map !== 'undefined') {
+        setTimeout(() => { map.invalidateSize(); }, 300);
+    }
+}
+
+// Fungsi ini Khusus untuk Reset Total (Zoom Out ke Indonesia) saat judul Atlas diklik
+function resetTampilanDefault() {
+    // 1. Sembunyikan panel detail jika kebetulan lagi terbuka
+    const detailPanel = document.getElementById('detail-panel');
+    if (detailPanel) {
+        detailPanel.classList.add('hidden');
+    }
+
+    // 2. Terbang kembali ke peta Indonesia secara utuh
+    if (typeof map !== 'undefined') {
+        map.flyTo([1.0, 115.0], 5, { // Kembali ke koordinat tengah awalmu [1.0, 115.0] zoom 5
+            animate: true,
+            duration: 1.5
+        });
+    }
+}
+
 // Jalankan fungsi load data saat halaman dimuat
 loadLocations();
+// Tambahkan fungsi ini di bagian paling bawah file js/map.js atau js/loader.js
+function resetTampilanDefault() {
+    // 1. Sembunyikan kembali panel detail
+    const detailPanel = document.getElementById('detail-panel');
+    if (detailPanel) {
+        detailPanel.classList.add('hidden');
+    }
+
+    // 2. Kembalikan kontrol Leaflet ke posisi paling kanan (hapus kelas geser)
+    const kontrolKanan = document.querySelectorAll('.leaflet-right');
+    kontrolKanan.forEach(el => {
+        el.classList.remove('geser-kiri');
+    });
+
+    // 3. Terbang kembali ke Indonesia secara halus
+    if (typeof map !== 'undefined') {
+        map.flyTo([0.7893, 113.9213], 5, {
+            animate: true,
+            duration: 1.5,
+            easeLinearity: 0.25
+        });
+    }
+}

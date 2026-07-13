@@ -1,0 +1,87 @@
+/* style.css */
+
+/* Pengaturan dasar peta utama agar memenuhi layar */
+#map { 
+    height: 100%; 
+    width: 100%; 
+    background: #fcf9f8; 
+}
+
+/* Efek kaca (Glassmorphism) untuk panel UI kiri dan kanan */
+.glass-panel { 
+    background: rgba(252, 249, 248, 0.85); 
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px); /* Dukungan untuk browser Safari */
+}
+
+/* Kustomisasi scrollbar agar tampilannya minimalis dan elegan */
+.custom-scrollbar::-webkit-scrollbar { 
+    height: 6px; 
+    width: 6px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-track { 
+    background: rgba(0, 0, 0, 0.05); 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb { 
+    background: rgba(1, 45, 29, 0.2); 
+    border-radius: 10px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { 
+    background: rgba(1, 45, 29, 0.4); 
+}
+/* Tambahkan ini di bagian paling bawah file style.css */
+#detail-panel {
+    position: absolute !important;
+    right: 16px !important;    /* Memaksa jarak 16px dari tepi kanan layar */
+    top: 16px !important;     /* Menyesuaikan jarak dari bawah header atas */
+    bottom: 16px !important;  /* Memaksa jarak 16px dari bawah layar */
+    left: auto !important;    /* Membatalkan tarikan ke sisi kiri */
+    width: 340px !important;  /* Menentukan lebar panel kanan */
+    z-index: 50 !important;  /* Memastikan panel berada di atas peta */
+}
+/* Tambahkan ini di bagian paling bawah file style.css */
+#list-panel {
+    position: absolute !important;
+    left: 16px !important;
+    top: 72px !important;     /* Jarak aman 72px dari atas agar tidak menumpuk header */
+    bottom: 16px !important;  /* Jarak seimbang dari bawah layar */
+    z-index: 40 !important;
+}
+
+/* Pastikan panel kanan juga menggunakan jarak top yang sama agar simetris kiri-kanan */
+#detail-panel {
+    position: absolute !important;
+    right: 16px !important;
+    top: 72px !important;     /* Samakan menjadi 72px agar sejajar lurus dengan panel kiri */
+    bottom: 16px !important;
+    left: auto !important;
+    width: 340px !important;
+    z-index: 50 !important;
+}
+/* ========================================================
+   PENGATURAN POSISI PATEN KONTROL LEAFLET (DI SISI KIRI)
+   ======================================================== */
+
+/* Posisikan Kontrol Atas (Zoom & Filter Layer) tepat di kanan panel list */
+.leaflet-top.leaflet-right {
+    top: 72px !important;       /* Turun di bawah header */
+    right: auto !important;     /* Matikan kuncian kanan */
+    left: 352px !important;     /* Lebar panel kiri (320px) + Jarak aman (32px) */
+}
+
+/* Posisikan Kontrol Bawah (Minimap) sejajar di bawah kontrol atas */
+.leaflet-bottom.leaflet-right {
+    bottom: 24px !important;    /* Jarak aman dari bawah layar */
+    right: auto !important;     /* Matikan kuncian kanan */
+    left: 352px !important;     /* Sejajar lurus di sebelah kanan panel kiri */
+}
+
+.leaflet-right .leaflet-control {
+    float: left !important; /* Pastikan kontrol mengambang ke kiri agar tidak menumpuk */
+    clear: left !important; /* Bersihkan float sebelumnya agar tidak menumpuk */
+    margin-left: 0 !important; /* Hapus margin default agar tidak menumpuk */
+    margin-right: 10px !important; /* Hapus margin default agar tidak menumpuk */
+}
