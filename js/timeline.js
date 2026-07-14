@@ -17,6 +17,8 @@ const timeline = {
 
     currentYear: 570,
 
+    currentTranslate: 0,
+
     pixelPerYear: 2,
 
     interval: 50,
@@ -94,7 +96,7 @@ function notifyTimelineChanged(){
 
     updateTimelineIndicator();
 
-    moveRuler(timeline.currentYear);
+    renderRuler();
 
 }
 
@@ -103,31 +105,98 @@ function setTimelineYear(year){
     year = Math.round(year);
 
     year = Math.max(
+
         timeline.minYear,
-        Math.min(timeline.maxYear, year)
+
+        Math.min(
+
+            timeline.maxYear,
+
+            year
+
+        )
+
     );
 
     timeline.currentYear = year;
 
+    timeline.currentTranslate =
+
+    translateFromYear(year);
+
     notifyTimelineChanged();
 
 }
-
 function yearFromPixel(deltaX){
 
     return deltaX * YEAR_PER_PIXEL;
 
 }
 
-function dragTimeline(deltaX){
+function translateToYear(translate){
 
-    const deltaYear =
-        yearFromPixel(deltaX);
+    const viewport =
+        document.getElementById("timeline-ruler");
 
-    setTimelineYear(
+    const indicator =
+        document.getElementById("timeline-current");
 
-        timeline.currentYear - deltaYear
+    if(!viewport || !indicator)
+        return timeline.currentYear;
+
+    const indicatorCenter =
+        indicator.getBoundingClientRect().left +
+        (indicator.offsetWidth / 2);
+
+    const viewportLeft =
+        viewport.getBoundingClientRect().left;
+
+    const center =
+        indicatorCenter - viewportLeft;
+
+    const yearPosition =
+        center - translate;
+
+    return Math.round(
+
+        timeline.minYear +
+
+        (yearPosition / timeline.pixelPerYear)
 
     );
+
+}
+
+function dragTimeline(deltaX){
+
+    timeline.currentTranslate += deltaX;
+
+    let year = translateToYear(
+
+        timeline.currentTranslate
+
+    );
+
+    year = Math.max(
+
+        timeline.minYear,
+
+        Math.min(
+
+            timeline.maxYear,
+
+            year
+
+        )
+
+    );
+
+    timeline.currentYear = year;
+
+    timeline.currentTranslate =
+
+        translateFromYear(year);
+
+    notifyTimelineChanged();
 
 }

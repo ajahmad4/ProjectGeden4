@@ -3,19 +3,33 @@
    TIME RULER
 ========================================================== */
 
-let currentTranslate = 0;
+function translateFromYear(year) {
 
-function yearToTranslate(year, viewportWidth) {
+    const viewport =
+        document.getElementById("timeline-ruler");
 
-    const center = viewportWidth / 2;
+    const indicator =
+        document.getElementById("timeline-current");
+
+    if (!viewport || !indicator) return 0;
+
+    const indicatorCenter =
+        indicator.getBoundingClientRect().left +
+        (indicator.offsetWidth / 2);
+
+    const viewportLeft =
+        viewport.getBoundingClientRect().left;
+
+    const center =
+        indicatorCenter - viewportLeft;
 
     const yearPosition =
-        (year - timeline.minyear)
+        (year - timeline.minYear) *
+        timeline.pixelPerYear;
 
     return center - yearPosition;
 
 }
-
 
 function buildRuler() {
 
@@ -66,41 +80,14 @@ function buildRuler() {
    GESER PENGGARIS
 ========================================================== */
 
-function moveRuler(year) {
-
-    const viewport =
-        document.getElementById("timeline-ruler");
+function renderRuler() {
 
     const content =
         document.getElementById("timeline-ruler-content");
 
-    const indicator =
-        document.getElementById("timeline-current");
-
-    if (!viewport || !content || !indicator) return;
-
-    // posisi tengah indikator di layar
-    const indicatorCenter =
-        indicator.getBoundingClientRect().left +
-        (indicator.offsetWidth / 2);
-
-    // posisi kiri viewport ruler
-    const viewportLeft =
-        viewport.getBoundingClientRect().left;
-
-    // posisi indikator relatif terhadap viewport
-    const center =
-        indicatorCenter - viewportLeft;
-
-    // posisi tahun pada ruler
-    const yearPosition =
-        (year - timeline.minYear) * timeline.pixelPerYear;
-
-    // translate ruler agar tahun aktif tepat di bawah indikator
-    currentTranslate =
-        center - yearPosition;
+    if (!content) return;
 
     content.style.transform =
-        `translate3d(${currentTranslate}px,0,0)`;
+        `translate3d(${timeline.currentTranslate}px,0,0)`;
 
 }
