@@ -91,8 +91,6 @@ function setTimelineYear(year) {
 
     timeline.currentYear = Number(year);
 
-    renderTimelineLabels();
-
 }
 
 // ==========================================================
@@ -160,37 +158,5 @@ function updateTimelineIndicator() {
     indicator.style.left = percent + "%";
 
     indicator.textContent = `${value} M`;
-
-}
-
-// ==========================================================
-// RENDER TICK TIMELINE
-// ==========================================================
-
-function renderTimelineTicks() {
-
-    const container = document.getElementById("timeline-ticks");
-
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    const totalTick = timeline.windowSize / 5;
-
-    for(let i = 0; i <= totalTick; i++){
-
-        const tick = document.createElement("div");
-
-        tick.className = "timeline-tick";
-
-        if(i % 10 === 0){
-
-            tick.classList.add("major");
-
-        }
-
-        container.appendChild(tick);
-
-    }
 
 }
