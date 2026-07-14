@@ -17,9 +17,49 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.js"></script>
 </head>
 
+<footer
+    id="timeline-footer">
+    <div class="timeline-wrapper">
+
+        <div id="timeline-indicator">
+        
+            <div id="timeline-current">
+                570 M
+            </div>
+        </div>
+
+        <div id="timeline-track">
+
+            <div id="timeline-ticks"></div>
+
+            <input
+                id="timeline-slider"
+                type="range"
+                min="570"
+                max="2000"
+                value="570">
+
+        </div>
+        <div id="timeline-labels"
+             class="timeline-labels">
+        </div>
+
+        <div id="timeline-track">
+
+            <div id="timeline-ticks"></div>
+
+            <input
+                id="timeline-slider"
+                type="range">
+
+        </div>
+
+    </div>
+</footer>
+
 <body class="bg-surface font-body-md text-on-surface overflow-hidden h-screen flex flex-col antialiased">
 
-    <header class="fixed top-0 left-0 w-full h-[68px] z-[100] flex items-center justify-between px-7 bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#e4dfd8]">
+    <header class="fixed top-0 left-0 w-full h-[56px] z-[100] flex items-center justify-between px-7 bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#e4dfd8]">
 
         <!-- Logo + Judul -->
         <div class="flex items-center gap-4">
@@ -27,11 +67,11 @@
             <img
                 src="assets/logo/atlas-logo.jpg"
                 alt="Logo Atlas"
-                class="w-11 h-11 object-contain select-none">
+                class="w-9 h-9 object-contain select-none">
 
             <h1
                 onclick="resetTampilanDefault()"
-                class="font-title cursor-pointer text-[2.45rem] leading-none tracking-tight transition-opacity select-none">
+                class="font-title cursor-pointer text-[2.05rem] leading-none tracking-tight transition-opacity select-none">
 
                 Atlas Sejarah Kebudayaan Islam
 
@@ -52,8 +92,8 @@
     
         <div id="map" class="absolute inset-0 w-full h-full z-10"></div>
 
-        <aside id="list-panel" class="absolute left-4 top-4 bottom-4 w-[320px] z-40 flex flex-col glass-panel border border-gray-200/80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
-            <div class="px-5 pt-5 pb-4 border-b border-[#e4dfd8] bg-[#fdfcfb] select-none">
+        <aside id="list-panel" class="absolute left-4 top-4 bottom-4 w-[340px] z-40 flex flex-col glass-panel border border-gray-200/80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
+            <div class="px-4 pt-4 pb-3 border-b border-[#e4dfd8] bg-[#fdfcfb] select-none">
                 <h1 class="text-[30px] font-bold tracking-tight text-[#1f4b3a]"> Atlas Sejarah</h1>
                 <p class="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#8d867a]">Jelajah Titik Masuknya Islam di Nusantara</p>
                 <div class="mt-5">
@@ -74,7 +114,7 @@
                 </div>
 
             </div>
-            <div class="flex-1 overflow-y-auto px-5 py-4 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar">
                 <div id="location-list" class="flex flex-col gap-3">
                     </div>
             </div>
@@ -182,6 +222,7 @@
 
     <script src="js/utils.js"></script>
     <script src="js/data.js"></script>
+    <script src="js/timeline.js"></script>
     <script src="js/map.js"></script>
     <script src="js/loader.js"></script>
 </body>

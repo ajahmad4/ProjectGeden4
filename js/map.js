@@ -127,3 +127,30 @@ function buatIkonSejarah(kategori) {
         iconAnchor: [21, 21]         // Titik sentral penempatan koordinat sumbu X dan Y pada peta
     });
 }
+
+// ======================================================
+// BATAS VERTIKAL PETA
+// ======================================================
+
+map.on("moveend", function () {
+
+    const center = map.getCenter();
+
+    let lat = center.lat;
+
+    const lng = center.lng;
+
+    if (lat > 80) lat = 80;
+
+    if (lat < -80) lat = -80;
+
+    if (lat !== center.lat) {
+
+        map.panTo([lat, lng], {
+            animate: true,
+            duration: 0.35
+        });
+
+    }
+
+});

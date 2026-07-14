@@ -90,6 +90,8 @@ function muatLokasiAplikasi() {
             // Inisialisasi objek marker Leaflet memanfaatkan koordinat array [lat, lng]
             const marker = L.marker(loc.koordinat, { icon: ikonPilihan });
             
+            markerLokasi[loc.id] = marker; // Menyimpan referensi marker berdasarkan ID unik lokasi
+
             // Menyisipkan tooltip/popup informatif saat marker berinteraksi dengan pengguna
             marker.bindTooltip(`<b>${loc.nama}</b><br><small>Tahun Kontak: ${loc.tahun} M</small>`, {
                 direction: 'top',
@@ -105,6 +107,7 @@ function muatLokasiAplikasi() {
                 });
 
                 showDetail(loc);
+                aktifkanCard(loc.id);
 
             });
 
@@ -130,24 +133,26 @@ function muatLokasiAplikasi() {
         
         // Komposisi string HTML komponen button card dengan manipulasi parameter string yang aman
         const buttonHTML = `
-            <div onclick="eksekusiNavigasiLokal('${loc.id}')"
-                class="w-full flex items-center gap-4 px-5 py-4 bg-[#fcfbf9] hover:bg-[#f6f2ec] border border-[#e7e1da] rounded-2xl transition-all duration-300 cursor-pointer group">
+            <div 
+                id="card-${loc.id}"
+                onclick="eksekusiNavigasiLokal('${loc.id}')"
+                class="w-full mx-0 flex items-center gap-2.5 px-2.5 py-2.5 bg-[#fcfbf9] hover:bg-[#f6f2ec] border border-[#e7e1da] rounded-2xl transition-all duration-300 cursor-pointer group">
 
-                <div class="w-12 h-12 flex-shrink-0 rounded-full bg-[#edf3ef] text-[#1f4b3a] flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                    <span class="material-symbols-outlined text-[24px]">${iconName}</span>
+                <div class="w-9 h-9 flex-shrink-0 rounded-full bg-[#edf3ef] text-[#1f4b3a] flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+                    <span class="material-symbols-outlined text-[18px]">${iconName}</span>
                 </div>
 
                 <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-[16px] text-[#2f2f2f] truncate group-hover:text-[#1f4b3a] transition-colors">
+                    <p class="font-medium text-[13px] text-[#2f2f2f] truncate group-hover:text-[#1f4b3a] transition-colors">
                         ${loc.nama}
                     </p>
 
-                    <p class="text-[12px] text-[#8b847a] mt-1">
+                    <p class="text-[10px] text-[#8b847a] mt-0.5">
                         Tahun Kontak: ${loc.tahun} M
                     </p>
                 </div>
 
-                <span class="material-symbols-outlined text-[#b4aea6] text-[18px] transition-transform duration-200 group-hover:translate-x-1">
+                <span class="material-symbols-outlined text-[#b4aea6] text-[16px] transition-transform duration-200 group-hover:translate-x-1">
                     arrow_forward_ios
                 </span>
 
@@ -167,6 +172,26 @@ function muatLokasiAplikasi() {
  * dan panel detail kanan menyajikan data historis yang bersesuaian.
  * @param {string} targetId - String ID unik pengenal situs sejarah
  */
+
+function aktifkanCard(id) {
+
+    document.querySelectorAll("#location-list > div").forEach(card => {
+        card.classList.remove("location-card-active");
+    });
+
+    const cardAktif = document.getElementById(`card-${id}`);
+
+    if (cardAktif) {
+        cardAktif.classList.add("location-card-active");
+
+        cardAktif.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest"
+        });
+    }
+
+}
+
 function eksekusiNavigasiLokal(targetId) {
     // Membaca baris array untuk menemukan kecocokan ID objek
     const lokasiTerpilih = dataSejarahNusantara.find(loc => loc.id === targetId);
@@ -181,6 +206,7 @@ function eksekusiNavigasiLokal(targetId) {
         
         // Membuka panel narasi edukasi
         showDetail(lokasiTerpilih);
+        aktifkanCard(targetId);
     }
 }
 
@@ -309,7 +335,9 @@ searchInput.addEventListener("input", function () {
         const iconName = getMaterialIcon(loc.kategori);
 
         const buttonHTML = `
-            <div onclick="eksekusiNavigasiLokal('${loc.id}')"
+            <div 
+                id="card-${loc.id}"
+                onclick="eksekusiNavigasiLokal('${loc.id}')"
                 class="w-full flex items-center gap-4 px-5 py-4 bg-[#fcfbf9] hover:bg-[#f6f2ec] border border-[#e7e1da] rounded-2xl transition-all duration-300 cursor-pointer group">
 
                 <div class="w-12 h-12 flex-shrink-0 rounded-full bg-[#edf3ef] text-[#1f4b3a] flex items-center justify-center">
@@ -362,5 +390,18 @@ searchInput.addEventListener("input", function () {
     }
 
 });
+
+const timelineSlider = document.getElementById("timeline-slider");
+const timelineCurrent = document.getElementById("timeline-current");
+
+if (timelineSlider && timelineCurrent) {
+
+    timelineSlider.addEventListener("input", function () {
+
+        timelineCurrent.textContent = `${this.value} M`;
+
+    });
+
+}
 
 });
