@@ -462,6 +462,8 @@ header h1:hover {
 
     position:absolute;
 
+    left:50%;
+
     top:0;
 
     transform:translateX(-50%);
@@ -474,16 +476,61 @@ header h1:hover {
 
     white-space:nowrap;
 
-    transition:left .08s linear;
+}
+
+/* ===========================================================
+   RULER v2
+=========================================================== */
+
+#timeline-ruler{
+
+    position:absolute;
+
+    inset:0;
+
+    overflow:hidden;
+
+    pointer-events:none;
 
 }
 
+.ruler-line{
 
-/* ===========================================================
-   SLIDER
-=========================================================== */
+    position:absolute;
 
-#timeline-slider{
+    left:0;
+
+    top:6px;
+
+    height:2px;
+
+    background:#7b746b;
+
+}
+
+.ruler-tick{
+
+    width:1px;
+
+    height:12px;
+
+    background:#6d655c;
+
+}
+
+.ruler-label{
+
+    margin-top:4px;
+
+    font-size:12px;
+
+    color:#71695f;
+
+    white-space:nowrap;
+
+}
+
+#timeline-ruler-content{
 
     position:absolute;
 
@@ -491,104 +538,36 @@ header h1:hover {
 
     top:0;
 
-    width:100%;
+    height:100%;
 
-    height:20px;
+    will-change:transform;
 
-    appearance:none;
-
-    background:transparent;
-
-    cursor:pointer;
-
-    z-index:20;
+    transform:translateX(0);
 
 }
 
-/* Track */
+.ruler-mark{
 
-#timeline-slider::-webkit-slider-runnable-track{
+    position:absolute;
 
-    height:2px;
+    top:0;
 
-    background:transparent;
+    transform:translateX(-50%);
 
-    border-radius:999px;
+    display:flex;
 
-}
+    flex-direction:column;
 
-
-/* Thumb */
-
-#timeline-slider::-webkit-slider-thumb{
-
-    appearance:none;
-
-    width:16px;
-
-    height:16px;
-
-    border-radius:50%;
-
-    background:#c96a28;
-
-    border:3px solid #faf8f5;
-
-    margin-top:-7px;
-
-    box-shadow:0 1px 6px rgba(0,0,0,.18);
+    align-items:center;
 
 }
 
-
-/* Firefox */
-
-#timeline-slider::-moz-range-track{
-
-    height:2px;
-
-    background:transparent;
-
-}
-
-#timeline-slider::-moz-range-thumb{
-
-    width:16px;
-
-    height:16px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:#c96a28;
-
-}
-
-/* ===========================================================
-   RULER
-=========================================================== */
-
-#timeline-ruler{
+#timeline-track{
 
     position:relative;
 
     width:100%;
 
-    height:34px;
-
-    overflow:hidden;
-
-}
-
-.timeline-line{
-
-    width:100%;
-
-    height:2px;
-
-    background:#7b746b;
-
-    border-radius:999px;
+    height:46px;
 
 }

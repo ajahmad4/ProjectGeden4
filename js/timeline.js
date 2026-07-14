@@ -1,3 +1,4 @@
+//js/timeline.js
 /* ==========================================================
    ATLAS SEJARAH KEBUDAYAAN ISLAM
    TIMELINE ENGINE
@@ -7,156 +8,126 @@
 // KONFIGURASI TIMELINE
 // ==========================================================
 
+const YEAR_PER_PIXEL = 1;
+
 const timeline = {
 
-    // Rentang sejarah global
     minYear: 570,
     maxYear: 2000,
 
-    // Tahun aktif
     currentYear: 570,
 
-    // Lebar jendela yang ditampilkan
-    windowSize: 300,
+    pixelPerYear: 2,
 
-    // Jarak antar label
-    interval: 50
+    interval: 50,
+
+    dragging: false,
+
+    startX: 0
 
 };
 
-
 // ==========================================================
-// MENGHITUNG VIEWPORT TIMELINE
-// ==========================================================
-
-function getTimelineViewport() {
-
-    let start = timeline.currentYear - (timeline.windowSize / 2);
-    let end = timeline.currentYear + (timeline.windowSize / 2);
-
-    if (start < timeline.minYear) {
-
-        start = timeline.minYear;
-        end = start + timeline.windowSize;
-
-    }
-
-    if (end > timeline.maxYear) {
-
-        end = timeline.maxYear;
-        start = end - timeline.windowSize;
-
-    }
-
-    return {
-
-        start: Math.round(start),
-        end: Math.round(end)
-
-    };
-
-}
-
-
-// ==========================================================
-// MEMBUAT LABEL TAHUN
+// UPDATE INDIKATOR
 // ==========================================================
 
-function generateTimelineLabels() {
+function updateTimelineIndicator() {
 
-    const viewport = getTimelineViewport();
+    const indicator =
+        document.getElementById("timeline-current");
 
-    const labels = [];
+    if (!indicator) return;
 
-    for (
-        let year = viewport.start;
-        year <= viewport.end;
-        year += timeline.interval
-    ) {
-
-        labels.push(year);
-
-    }
-
-    return labels;
-
-}
-
-
-// ==========================================================
-// MENGUBAH TAHUN AKTIF
-// ==========================================================
-
-function setTimelineYear(year) {
-
-    timeline.currentYear = Number(year);
+    indicator.textContent =
+        `${timeline.currentYear} M`;
 
 }
 
 // ==========================================================
-// RENDER LABEL TIMELINE
+// INITIALIZE
 // ==========================================================
 
-function renderTimelineLabels() {
+document.addEventListener("DOMContentLoaded", () => {
 
-    const container = document.getElementById("timeline-labels");
+    buildRuler();
 
-    if (!container) return;
+    setTimelineYear(timeline.currentYear);
 
-    container.innerHTML = "";
+    const timelineTrack =
+        document.getElementById("timeline-track");
 
-    const labels = generateTimelineLabels();
+    if (!timelineTrack) return;
 
-    labels.forEach(year => {
+    timelineTrack.addEventListener("mousedown", (e) => {
 
-        const item = document.createElement("span");
+        timeline.dragging = true;
 
-        item.textContent = year;
-
-        container.appendChild(item);
+        timeline.startX = e.clientX;
 
     });
 
-}
+    window.addEventListener("mousemove", (e) => {
 
-document.addEventListener("DOMContentLoaded", function () {
+        if (!timeline.dragging) return;
 
-    const slider = document.getElementById("timeline-slider");
+        const deltaX =
+            e.clientX - timeline.startX;
 
-    updateTimelineIndicator();
+        timeline.startX = e.clientX;
 
-    if (!slider) return;
+        dragTimeline(deltaX);
 
-    slider.addEventListener("input", function () {
+    });
 
-        setTimelineYear(this.value);
+    window.addEventListener("mouseup", () => {
 
-        updateTimelineIndicator();
+        timeline.dragging = false;
 
     });
 
 });
 
-// ==========================================================
-// POSISI LABEL TAHUN
-// ==========================================================
+//=========================================================
+//=========================================================
 
-function updateTimelineIndicator() {
+function notifyTimelineChanged(){
 
-    const slider = document.getElementById("timeline-slider");
+    updateTimelineIndicator();
 
-    const indicator = document.getElementById("timeline-current");
+    moveRuler(timeline.currentYear);
 
-    if (!slider || !indicator) return;
+}
 
-    const min = Number(slider.min);
-    const max = Number(slider.max);
-    const value = Number(slider.value);
+function setTimelineYear(year){
 
-    const percent = ((value - min) / (max - min)) * 100;
+    year = Math.round(year);
 
-    indicator.style.left = percent + "%";
+    year = Math.max(
+        timeline.minYear,
+        Math.min(timeline.maxYear, year)
+    );
 
-    indicator.textContent = `${value} M`;
+    timeline.currentYear = year;
+
+    notifyTimelineChanged();
+
+}
+
+function yearFromPixel(deltaX){
+
+    return deltaX * YEAR_PER_PIXEL;
+
+}
+
+function dragTimeline(deltaX){
+
+    const deltaYear =
+        yearFromPixel(deltaX);
+
+    setTimelineYear(
+
+        timeline.currentYear - deltaYear
+
+    );
 
 }
