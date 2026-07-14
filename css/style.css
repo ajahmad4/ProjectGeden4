@@ -410,11 +410,9 @@ header h1:hover {
     position:fixed;
 
     left:0;
-
     bottom:0;
 
     width:100%;
-
     height:72px;
 
     background:#faf8f5;
@@ -422,143 +420,26 @@ header h1:hover {
     border-top:1px solid #e4dfd8;
 
     display:flex;
-
     align-items:center;
-
     justify-content:center;
 
-    z-index:90;
-
     padding:0 28px;
+
+    z-index:90;
 
 }
 
 .timeline-wrapper{
 
     width:100%;
-
     max-width:1200px;
 
     display:flex;
-
     flex-direction:column;
-
     align-items:center;
 
 }
 
-#timeline-slider{
-
-    position:absolute;
-
-    inset:0;
-
-    width:100%;
-
-    appearance:none;
-
-    background:transparent;
-
-    z-index:5;
-
-}
-
-/* Track */
-
-#timeline-slider::-webkit-slider-runnable-track{
-
-    height:2px;
-
-    background:#7b746b;
-
-    border-radius:999px;
-
-}
-
-/* Thumb */
-
-#timeline-slider::-webkit-slider-thumb{
-
-    appearance:none;
-
-    width:18px;
-
-    height:18px;
-
-    border-radius:50%;
-
-    background:#c96a28;
-
-    border:5px solid #faf8f5;
-
-    margin-top:-8px;
-
-    cursor:pointer;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.18);
-
-}
-
-/* Firefox */
-
-#timeline-slider::-moz-range-track{
-
-    height:2px;
-
-    background:#7b746b;
-
-}
-
-#timeline-slider::-moz-range-thumb{
-
-    width:18px;
-
-    height:18px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:#c96a28;
-
-}
-
-/* Label Tahun */
-
-.timeline-labels{
-
-    margin-top:10px;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    width:100%;
-
-    font-size:12px;
-
-    color:#71695f;
-
-    user-select:none;
-
-    letter-spacing:.04em;
-}
-
-.timeline-labels span{
-
-    flex:1;
-
-    text-align:center;
-
-    font-size:12px;
-
-    color:#71695f;
-
-    user-select:none;
-
-}
 
 /* ===========================================================
    INDIKATOR TAHUN
@@ -569,7 +450,6 @@ header h1:hover {
     position:relative;
 
     width:100%;
-
     height:26px;
 
     margin-bottom:8px;
@@ -596,54 +476,111 @@ header h1:hover {
 
 }
 
+
 /* ===========================================================
-   TRACK TIMELINE
+   SLIDER
 =========================================================== */
 
-#timeline-track{
-
-    position:relative;
+#timeline-slider{
 
     width:100%;
 
-    height:22px;
+    appearance:none;
+
+    background:transparent;
 
 }
 
+
+/* Track */
+
+#timeline-slider::-webkit-slider-runnable-track{
+
+    height:2px;
+
+    background:#7b746b;
+
+    border-radius:999px;
+
+}
+
+
+/* Thumb */
+
+#timeline-slider::-webkit-slider-thumb{
+
+    appearance:none;
+
+    width:18px;
+    height:18px;
+
+    border-radius:50%;
+
+    background:#c96a28;
+
+    border:5px solid #faf8f5;
+
+    margin-top:-8px;
+
+    cursor:pointer;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.18);
+
+}
+
+
+/* Firefox */
+
+#timeline-slider::-moz-range-track{
+
+    height:2px;
+
+    background:#7b746b;
+
+}
+
+#timeline-slider::-moz-range-thumb{
+
+    width:18px;
+    height:18px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#c96a28;
+
+}
+
+
 /* ===========================================================
-   TICK TIMELINE
+   LABEL TAHUN
 =========================================================== */
 
-#timeline-ticks{
+.timeline-labels{
 
-    position:absolute;
+    width:100%;
 
-    inset:0;
+    margin-top:10px;
 
     display:flex;
 
     justify-content:space-between;
 
-    align-items:center;
-
-    pointer-events:none;
-
 }
 
-.timeline-tick{
+.timeline-labels span{
 
-    width:1px;
+    flex:1;
 
-    height:8px;
+    text-align:center;
 
-    background:#a79f93;
+    font-size:12px;
 
-}
+    color:#71695f;
 
-.timeline-tick.major{
+    user-select:none;
 
-    height:16px;
-
-    background:#756c61;
+    letter-spacing:.04em;
 
 }

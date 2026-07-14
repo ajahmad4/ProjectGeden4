@@ -17,46 +17,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.js"></script>
 </head>
 
-<footer
-    id="timeline-footer">
-    <div class="timeline-wrapper">
-
-        <div id="timeline-indicator">
-        
-            <div id="timeline-current">
-                570 M
-            </div>
-        </div>
-
-        <div id="timeline-track">
-
-            <div id="timeline-ticks"></div>
-
-            <input
-                id="timeline-slider"
-                type="range"
-                min="570"
-                max="2000"
-                value="570">
-
-        </div>
-        <div id="timeline-labels"
-             class="timeline-labels">
-        </div>
-
-        <div id="timeline-track">
-
-            <div id="timeline-ticks"></div>
-
-            <input
-                id="timeline-slider"
-                type="range">
-
-        </div>
-
-    </div>
-</footer>
-
 <body class="bg-surface font-body-md text-on-surface overflow-hidden h-screen flex flex-col antialiased">
 
     <header class="fixed top-0 left-0 w-full h-[56px] z-[100] flex items-center justify-between px-7 bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#e4dfd8]">
@@ -219,6 +179,35 @@
         </div>
 
     </main>
+
+<footer id="timeline-footer">
+
+    <div class="timeline-wrapper">
+
+        <div id="timeline-indicator">
+
+            <div id="timeline-current">
+                570 M
+            </div>
+
+        </div>
+
+        <input
+            id="timeline-slider"
+            type="range"
+            min="570"
+            max="2000"
+            value="570">
+
+        <div
+            id="timeline-labels"
+            class="timeline-labels">
+        </div>
+
+    </div>
+
+</footer>
+
 
     <script src="js/utils.js"></script>
     <script src="js/data.js"></script>

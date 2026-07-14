@@ -125,10 +125,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const slider = document.getElementById("timeline-slider");
 
-    renderTimelineLabels();
-
-    renderTimelineTicks();
-
     updateTimelineIndicator();
 
     if (!slider) return;
