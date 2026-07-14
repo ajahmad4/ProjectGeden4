@@ -478,6 +478,27 @@ header h1:hover {
 
 }
 
+#timeline-pointer{
+
+    position:absolute;
+
+    left:50%;
+
+    top:22px;
+
+    transform:translateX(-50%);
+
+    width:0;
+    height:0;
+
+    border-left:6px solid transparent;
+    border-right:6px solid transparent;
+    border-top:8px solid #c96a28;
+
+    pointer-events:none;
+
+}
+
 /* ===========================================================
    RULER v2
 =========================================================== */

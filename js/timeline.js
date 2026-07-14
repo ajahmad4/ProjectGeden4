@@ -8,16 +8,12 @@
 // KONFIGURASI TIMELINE
 // ==========================================================
 
-const YEAR_PER_PIXEL = 1;
-
 const timeline = {
 
     minYear: 570,
     maxYear: 2000,
 
     currentYear: 570,
-
-    currentTranslate: 0,
 
     pixelPerYear: 2,
 
@@ -68,6 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
+    window.addEventListener("mouseleave", () => {
+
+    timeline.dragging = false;
+
+});
+    
     window.addEventListener("mousemove", (e) => {
 
         if (!timeline.dragging) return;
@@ -80,6 +82,12 @@ document.addEventListener("DOMContentLoaded", () => {
         dragTimeline(deltaX);
 
     });
+
+    window.addEventListener("blur", () => {
+
+    timeline.dragging = false;
+
+});
 
     window.addEventListener("mouseup", () => {
 
@@ -105,90 +113,8 @@ function setTimelineYear(year){
     year = Math.round(year);
 
     year = Math.max(
-
         timeline.minYear,
-
-        Math.min(
-
-            timeline.maxYear,
-
-            year
-
-        )
-
-    );
-
-    timeline.currentYear = year;
-
-    timeline.currentTranslate =
-
-    translateFromYear(year);
-
-    notifyTimelineChanged();
-
-}
-function yearFromPixel(deltaX){
-
-    return deltaX * YEAR_PER_PIXEL;
-
-}
-
-function translateToYear(translate){
-
-    const viewport =
-        document.getElementById("timeline-ruler");
-
-    const indicator =
-        document.getElementById("timeline-current");
-
-    if(!viewport || !indicator)
-        return timeline.currentYear;
-
-    const indicatorCenter =
-        indicator.getBoundingClientRect().left +
-        (indicator.offsetWidth / 2);
-
-    const viewportLeft =
-        viewport.getBoundingClientRect().left;
-
-    const center =
-        indicatorCenter - viewportLeft;
-
-    const yearPosition =
-        center - translate;
-
-    return Math.round(
-
-        timeline.minYear +
-
-        (yearPosition / timeline.pixelPerYear)
-
-    );
-
-}
-
-function dragTimeline(deltaX){
-
-    timeline.currentTranslate += deltaX;
-
-    let year = translateToYear(
-
-        timeline.currentTranslate
-
-    );
-
-    year = Math.max(
-
-        timeline.minYear,
-
-        Math.min(
-
-            timeline.maxYear,
-
-            year
-
-        )
-
+        Math.min(timeline.maxYear, year)
     );
 
     timeline.currentYear = year;
@@ -198,5 +124,24 @@ function dragTimeline(deltaX){
         translateFromYear(year);
 
     notifyTimelineChanged();
+
+}
+
+function yearFromPixel(deltaX){
+
+    return deltaX / timeline.pixelPerYear;
+
+}
+
+function dragTimeline(deltaX){
+
+    const deltaYear =
+        yearFromPixel(deltaX);
+
+    setTimelineYear(
+
+        timeline.currentYear - deltaYear
+
+    );
 
 }
