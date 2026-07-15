@@ -19,12 +19,14 @@ const timeline = {
     
     pixelPerYear: 2,
 
+    zoomStep: 0.25,
+
     minPixelPerYear: 1,
     maxPixelPerYear: 20,
 
     interval: 50,
 
-    majorInterval:50,
+    majorInterval:100,
 
     dragging: false,
 
@@ -43,8 +45,8 @@ function updateTimelineIndicator() {
 
     if (!indicator) return;
 
-    indicator.textContent =
-        `${timeline.currentYear} M`;
+    indicator.value =
+        timeline.currentYear;
 
 }
 
@@ -64,6 +66,22 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("timeline-track");
 
     if (!timelineTrack) return;
+
+    timelineTrack.addEventListener("wheel", (e) => {
+
+        e.preventDefault();
+
+        if (e.deltaY < 0) {
+
+            zoomTimeline(timeline.zoomStep);
+
+        } else {
+
+            zoomTimeline(-timeline.zoomStep);
+
+        }
+
+    }, { passive: false });
 
     timelineTrack.addEventListener("mousedown", (e) => {
 
@@ -98,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     timeline.dragging = false;
 
-});
+    });
 
     window.addEventListener("mouseup", () => {
 
@@ -112,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             e.preventDefault();
 
-            zoomTimeline(0.25);
+            zoomTimeline(timeline.zoomStep);
 
         }
 
@@ -120,10 +138,91 @@ document.addEventListener("DOMContentLoaded", () => {
 
             e.preventDefault();
 
-            zoomTimeline(-0.25);
+            zoomTimeline(-timeline.zoomStep);
+
+        }
+    });
+
+    window.addEventListener("resize", () =>{
+
+        buildRuler();
+
+        moveRuler(timeline.currentYear);
+    });
+
+    const yearInput =
+    document.getElementById(
+        "timeline-year-input"
+    );
+
+    const yearButton =
+        document.getElementById(
+            "timeline-year-button"
+        );
+
+    if(yearInput && yearButton){
+
+        yearButton.addEventListener("click", () => {
+
+            const year =
+                Number(
+                    yearInput.value
+                );
+
+            if(Number.isNaN(year)) return;
+
+            animateTimelineYear(year);
+
+        });
+
+        yearInput.addEventListener("keydown", (e) => {
+
+            if(e.key !== "Enter") return;
+
+            const year =
+                Number(
+                    yearInput.value
+                );
+
+            if(Number.isNaN(year)) return;
+
+            animateTimelineYear(year);
+
+        });
 
     }
-});
+
+    const indicator =
+    document.getElementById(
+        "timeline-current"
+    );
+
+    indicator.addEventListener("keydown", (e) => {
+
+        if(e.key !== "Enter") return;
+
+        const year =
+            Number(indicator.value);
+
+        if(Number.isNaN(year)){
+
+            indicator.value =
+                timeline.currentYear;
+
+            return;
+
+        }
+
+        animateTimelineYear(year);
+
+    });
+
+        indicator.addEventListener("blur", () => {
+
+        indicator.value =
+            timeline.currentYear;
+
+    });
 
 });
 
@@ -154,6 +253,75 @@ function setTimelineYear(year){
         translateFromYear(year);
 
     notifyTimelineChanged();
+
+}
+
+function animateTimelineYear(targetYear){
+
+    targetYear = Math.round(targetYear);
+
+    targetYear = Math.max(
+
+        timeline.minYear,
+
+        Math.min(
+
+            timeline.maxYear,
+
+            targetYear
+
+        )
+
+    );
+
+    const startYear =
+        timeline.currentYear;
+
+    const startTime =
+        performance.now();
+
+    const duration =
+        300;
+
+    function frame(now){
+
+        const t = Math.min(
+
+            (now - startTime) / duration,
+
+            1
+
+        );
+
+        const progress =
+
+            1 - Math.pow(1 - t, 3);
+
+        const year =
+
+            startYear +
+
+            (
+
+                targetYear -
+
+                startYear
+
+            )
+
+            * progress;
+
+        setTimelineYear(year);
+
+        if(t < 1){
+
+            requestAnimationFrame(frame);
+
+        }
+
+    }
+
+    requestAnimationFrame(frame);
 
 }
 

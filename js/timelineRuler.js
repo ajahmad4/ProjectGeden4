@@ -31,62 +31,217 @@ function translateFromYear(year) {
 
 }
 
-function buildRuler() {
+function yearToPixel(year){
 
-    const container = document.getElementById("timeline-ruler-content");
+    return (
+        year - timeline.minYear
+    ) * timeline.pixelPerYear;
 
-    if (!container) return;
+}
 
-    container.innerHTML = "";
+function getVisibleYears(){
 
-    const totalWidth =
-        (timeline.maxYear - timeline.minYear) * timeline.pixelPerYear;
+    const viewport =
+        document.getElementById("timeline-ruler");
 
-    container.style.width = totalWidth + "px";
+    if(!viewport){
 
-    // Garis utama
-    const line = document.createElement("div");
-    line.className = "ruler-line";
-    line.style.left = "0px";
-    line.style.width = totalWidth + "px";
-
-    container.appendChild(line);
-
-    // Tick + Label
-    for (let year = timeline.minYear; year <= timeline.maxYear; year += timeline.interval) {
-
-        const x =
-            (year - timeline.minYear) * timeline.pixelPerYear;
-
-        const mark = document.createElement("div");
-        mark.className = "ruler-mark";
-        mark.style.left = x + "px";
-
-        const tick = document.createElement("div");
-        tick.className = "ruler-tick";
-
-        if(year % timeline.majorInterval === 0){
-            tick.classList.add("major")
-        }
-
-        const label = document.createElement("div");
-        label.className = "ruler-label";
-
-        if(year % timeline.majorInterval === 0){
-
-            label.textContent = year;
-        }else{
-            label.remove();
-        }
-
-        mark.appendChild(tick);
-        mark.appendChild(label);
-
-        container.appendChild(mark);
+        return null;
 
     }
 
-}/* ==========================================================
+    const leftPixel =
+        -timeline.currentTranslate;
+
+    const rightPixel =
+        leftPixel + viewport.clientWidth;
+
+    const leftYear =
+        timeline.minYear +
+        (leftPixel / timeline.pixelPerYear);
+
+    const rightYear =
+        timeline.minYear +
+        (rightPixel / timeline.pixelPerYear);
+
+    const firstYear =
+
+        Math.floor(
+
+            leftYear /
+
+            timeline.interval
+
+        ) * timeline.interval;
+
+    const lastYear =
+
+        Math.ceil(
+
+            rightYear /
+
+            timeline.interval
+
+        ) * timeline.interval;
+
+    return {
+
+        firstYear,
+
+        lastYear
+
+    };
+
+}
+
+function debugVisibleYears(){
+
+    const range =
+        getVisibleYears();
+
+    if(!range) return;
+
+    console.log(
+
+        "Visible:",
+
+        range.firstYear,
+
+        "-",
+
+        range.lastYear
+
+    );
+
+}
+
+function createLine(width){
+
+    const line =
+        document.createElement("div");
+
+    line.className = "ruler-line";
+
+    line.style.left = "0px";
+
+    line.style.width =
+        width + "px";
+
+    return line;
+
+}
+
+function createTick(year, x){
+
+    const mark =
+        document.createElement("div");
+
+    mark.className = "ruler-mark";
+
+    mark.style.left =
+        x + "px";
+
+    const tick =
+        document.createElement("div");
+
+    tick.className =
+        "ruler-tick";
+
+    if(
+        year % timeline.majorInterval === 0
+    ){
+
+        tick.classList.add("major");
+
+    }
+
+    mark.appendChild(tick);
+
+    if(
+        year % timeline.majorInterval === 0
+    ){
+
+        const label =
+            document.createElement("div");
+
+        label.className =
+            "ruler-label";
+
+        label.textContent =
+            year;
+
+        mark.appendChild(label);
+
+    }
+
+    return mark;
+
+}
+
+function clearRuler(){
+
+    const container =
+        document.getElementById(
+            "timeline-ruler-content"
+        );
+
+    if(!container) return null;
+
+    container.innerHTML = "";
+
+    return container;
+
+}
+
+function buildRuler() {
+
+    const container =
+        clearRuler()
+        
+    if (!container) return;
+
+    const totalWidth =
+        yearToPixel(
+            timeline.maxYear
+        );
+
+    container.style.width =
+        totalWidth + "px";
+
+    // Garis utama
+    container.appendChild(
+        createLine(totalWidth)
+    );
+
+    // Tick + Label
+    for (
+
+        let year = timeline.minYear;
+
+        year <= timeline.maxYear;
+
+        year += timeline.interval
+
+    ){
+
+        const x =
+            yearToPixel(year);
+
+        container.appendChild(
+
+            createTick(
+
+                year,
+
+                x
+
+            )
+
+        );
+
+    }
+}
+/* ==========================================================
    GESER PENGGARIS
 ========================================================== */
 

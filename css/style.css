@@ -465,20 +465,30 @@ header h1:hover {
 
 #timeline-current{
 
-    pointer-events: none;
-
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-
     position:absolute;
 
     left:50%;
-
     top:0;
 
     transform:translateX(-50%);
+
+    width:5ch;
+
+    padding:0;
+
+    margin:0;
+
+    border:none;
+
+    outline:none;
+
+    text-align:center;
+
+    border: 1px solid #d8d8d8;
+
+    border-radius:3px;
+
+    background: #fff;
 
     font-size:15px;
 
@@ -486,7 +496,21 @@ header h1:hover {
 
     color:#c96a28;
 
-    white-space:nowrap;
+    cursor:text;
+
+    pointer-events:auto;
+
+    user-select:text;
+
+    z-index:10;
+
+}
+
+#timeline-current:focus{
+
+    border-color: #c96a28;
+
+    box-shadow: 0 0 0 2px rgba(201,106,40,.15);
 
 }
 
