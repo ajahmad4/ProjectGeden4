@@ -65,9 +65,19 @@ function buildRuler() {
         const tick = document.createElement("div");
         tick.className = "ruler-tick";
 
+        if(year % timeline.majorInterval === 0){
+            tick.classList.add("major")
+        }
+
         const label = document.createElement("div");
         label.className = "ruler-label";
-        label.textContent = year;
+
+        if(year % timeline.majorInterval === 0){
+
+            label.textContent = year;
+        }else{
+            label.remove();
+        }
 
         mark.appendChild(tick);
         mark.appendChild(label);
@@ -80,12 +90,15 @@ function buildRuler() {
    GESER PENGGARIS
 ========================================================== */
 
-function renderRuler() {
+function moveRuler(year) {
 
     const content =
         document.getElementById("timeline-ruler-content");
 
     if (!content) return;
+
+    timeline.currentTranslate =
+        translateFromYear(year);
 
     content.style.transform =
         `translate3d(${timeline.currentTranslate}px,0,0)`;

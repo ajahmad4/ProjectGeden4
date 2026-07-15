@@ -440,6 +440,11 @@ header h1:hover {
     flex-direction:column;
     align-items:center;
 
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
 }
 
 
@@ -459,6 +464,13 @@ header h1:hover {
 }
 
 #timeline-current{
+
+    pointer-events: none;
+
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 
     position:absolute;
 
@@ -505,6 +517,9 @@ header h1:hover {
 
 #timeline-ruler{
 
+    user-select:none;
+    -webkit-user-select:none;
+
     position:absolute;
 
     inset:0;
@@ -536,6 +551,16 @@ header h1:hover {
     height:12px;
 
     background:#6d655c;
+
+}
+
+.ruler-tick.major{
+
+    height:18px;
+
+    width:2px;
+
+    background:#555;
 
 }
 

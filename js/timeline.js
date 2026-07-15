@@ -15,9 +15,16 @@ const timeline = {
 
     currentYear: 570,
 
+    currentTranslate:0,
+    
     pixelPerYear: 2,
 
+    minPixelPerYear: 1,
+    maxPixelPerYear: 20,
+
     interval: 50,
+
+    majorInterval:50,
 
     dragging: false,
 
@@ -47,6 +54,8 @@ function updateTimelineIndicator() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    updateTimelineInterval();
+    
     buildRuler();
 
     setTimelineYear(timeline.currentYear);
@@ -57,6 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!timelineTrack) return;
 
     timelineTrack.addEventListener("mousedown", (e) => {
+
+        e.preventDefault();
 
         timeline.dragging = true;
 
@@ -95,6 +106,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
+    window.addEventListener("keydown",(e)=>{
+
+        if(e.key==="="){
+
+            e.preventDefault();
+
+            zoomTimeline(0.25);
+
+        }
+
+        if(e.key==="-"){
+
+            e.preventDefault();
+
+            zoomTimeline(-0.25);
+
+    }
+});
+
 });
 
 //=========================================================
@@ -104,7 +134,7 @@ function notifyTimelineChanged(){
 
     updateTimelineIndicator();
 
-    renderRuler();
+    moveRuler(timeline.currentYear);
 
 }
 
@@ -143,5 +173,66 @@ function dragTimeline(deltaX){
         timeline.currentYear - deltaYear
 
     );
+
+}
+
+function zoomTimeline(step){
+
+    const nextZoom = timeline.pixelPerYear + step;
+
+    if(
+        nextZoom < timeline.minPixelPerYear ||
+        nextZoom > timeline.maxPixelPerYear
+    ){
+        return;
+    }
+
+    const currentYear = timeline.currentYear;
+
+    timeline.pixelPerYear = nextZoom;
+
+    updateTimelineInterval();
+
+    buildRuler();
+
+    setTimelineYear(currentYear);
+
+}
+
+function updateTimelineInterval(){
+
+    const p = timeline.pixelPerYear;
+
+    if(p < 1){
+
+        timeline.interval = 100;
+        timeline.majorInterval = 500;
+
+    }else if(p < 2){
+
+        timeline.interval = 50;
+        timeline.majorInterval = 100;
+
+    }else if(p < 4){
+
+        timeline.interval = 20;
+        timeline.majorInterval = 100;
+
+    }else if(p < 8){
+
+        timeline.interval = 10;
+        timeline.majorInterval = 50;
+
+    }else if(p < 16){
+
+        timeline.interval = 5;
+        timeline.majorInterval = 20;
+
+    }else{
+
+        timeline.interval = 1;
+        timeline.majorInterval = 10;
+
+    }
 
 }
