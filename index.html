@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atlas Sejarah Kebudayaan Islam Interaktif</title>
     
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.css" />
     <link rel="stylesheet" href="css/style.css" />
-
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,32 +20,16 @@
 <body class="bg-surface font-body-md text-on-surface overflow-hidden h-screen flex flex-col antialiased">
 
     <header class="fixed top-0 left-0 w-full h-[56px] z-[100] flex items-center justify-between px-7 bg-[#faf8f5]/95 backdrop-blur-md border-b border-[#e4dfd8]">
-
-        <!-- Logo + Judul -->
         <div class="flex items-center gap-4">
-
-            <img
-                src="assets/logo/atlas-logo.jpg"
-                alt="Logo Atlas"
-                class="w-9 h-9 object-contain select-none">
-
-            <h1
-                onclick="resetTampilanDefault()"
-                class="font-title cursor-pointer text-[2.05rem] leading-none tracking-tight transition-opacity select-none">
-
+            <img src="assets/logo/atlas-logo.jpg" alt="Logo Atlas" class="w-9 h-9 object-contain select-none">
+            <h1 onclick="resetTampilanDefault()" class="font-title cursor-pointer text-[2.05rem] leading-none tracking-tight transition-opacity select-none">
                 Atlas Sejarah Kebudayaan Islam
-
             </h1>
-
         </div>
 
-        <!-- Badge -->
         <span class="px-3 py-[5px] rounded-full bg-[#f7f4ef] border border-[#e4ddd5] text-[#8a8379] text-[10px] tracking-[0.14em] uppercase font-medium select-none">
-
             Media Pembelajaran SKI
-
         </span>
-
     </header>    
 
     <main class="flex flex-1 pt-14 relative overflow-hidden w-full h-full">
@@ -54,158 +38,86 @@
 
         <aside id="list-panel" class="absolute left-4 top-4 bottom-4 w-[340px] z-40 flex flex-col glass-panel border border-gray-200/80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
             <div class="px-4 pt-4 pb-3 border-b border-[#e4dfd8] bg-[#fdfcfb] select-none">
-                <h1 class="text-[30px] font-bold tracking-tight text-[#1f4b3a]"> Atlas Sejarah</h1>
+                <h1 class="text-[30px] font-bold tracking-tight text-[#1f4b3a]">Atlas Sejarah</h1>
                 <p class="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#8d867a]">Jelajah Titik Masuknya Islam di Nusantara</p>
+                
                 <div class="mt-5">
-
-                <div class="relative">
-
-                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9a9388] text-[20px]">
-                        search
-                    </span>
-
-                    <input
-                        id="search-input"
-                        type="text"
-                        spellcheck="false"
-                        placeholder="Cari lokasi..."
-                        class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[#e3ddd5] bg-[#fcfbf9] text-[14px] text-[#444] placeholder:text-[#8b847a] focus:outline-none focus:border-[#1f4b3a] focus:ring-2 focus:ring-[#1f4b3a]/10 transition">
-
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9a9388] text-[20px]">
+                            search
+                        </span>
+                        <input id="search-input" type="text" spellcheck="false" placeholder="Cari lokasi..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[#e3ddd5] bg-[#fcfbf9] text-[14px] text-[#444] placeholder:text-[#8b847a] focus:outline-none focus:border-[#1f4b3a] focus:ring-2 focus:ring-[#1f4b3a]/10 transition">
+                    </div>
                 </div>
-
-            </div>
-            <div class="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar">
+            </div> <div class="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar">
                 <div id="location-list" class="flex flex-col gap-3">
                     </div>
             </div>
         </aside>
 
-            <div id="detail-panel" class="hidden absolute right-4 top-4 bottom-4 w-[360px] z-40 flex flex-col glass-panel rounded-2xl p-6 overflow-hidden transition-all duration-300">            <button onclick="tutupDetailPanel()" class="flex items-center gap-2 text-[#6d6a63] hover:text-[#1f4b3a] font-medium mb-5 group text-left cursor-pointer text-[12px] uppercase tracking-[0.15em] transition-colors">
+        <aside id="detail-panel" class="hidden absolute right-4 top-4 bottom-4 w-[360px] z-40 flex flex-col glass-panel rounded-2xl p-6 overflow-hidden transition-all duration-300">            
+            <button onclick="tutupDetailPanel()" class="flex items-center gap-2 text-[#6d6a63] hover:text-[#1f4b3a] font-medium mb-5 group text-left cursor-pointer text-[12px] uppercase tracking-[0.15em] transition-colors">
                 <span class="material-symbols-outlined text-sm transition-transform group-hover:translate-x-0.5">close</span>
                 Tutup Detail
             </button>
             
             <h2 id="detail-nama" class="font-title text-[34px] leading-none"></h2>
-
-            <p id="detail-tahun"
-            class="mt-2 text-[12px] uppercase tracking-[0.18em] text-[#8b847a]">
-            </p>
+            <p id="detail-tahun" class="mt-2 text-[12px] uppercase tracking-[0.18em] text-[#8b847a]"></p>
 
             <div id="detail-foto-wrapper" class="mt-5 mb-5 hidden">
-
-                <img
-                    id="detail-foto"
-                    src=""
-                    alt=""
-                    class="w-full h-48 object-cover rounded-2xl border border-[#e7e1da] shadow-sm">
-
+                <img id="detail-foto" src="" alt="" class="w-full h-48 object-cover rounded-2xl border border-[#e7e1da] shadow-sm">
             </div>
 
             <hr class="my-5 border-[#e4dfd8]">
 
             <div id="detail-metadata" class="mb-6 space-y-3">
-
                 <div class="flex items-start gap-3">
-
-                    <span class="material-symbols-outlined text-[18px] text-[#8b847a]">
-                        location_on
-                    </span>
-
+                    <span class="material-symbols-outlined text-[18px] text-[#8b847a]">location_on</span>
                     <div>
-
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-[#8b847a]">
-                            Lokasi
-                        </p>
-
-                        <p id="detail-lokasi"
-                        class="text-[14px] text-[#444]">
-                        </p>
-
+                        <p class="text-[11px] uppercase tracking-[0.18em] text-[#8b847a]">Lokasi</p>
+                        <p id="detail-lokasi" class="text-[14px] text-[#444]"></p>
                     </div>
-
                 </div>
 
                 <div class="flex items-start gap-3">
-
-                    <span class="material-symbols-outlined text-[18px] text-[#8b847a]">
-                        account_balance
-                    </span>
-
+                    <span class="material-symbols-outlined text-[18px] text-[#8b847a]">account_balance</span>
                     <div>
-
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-[#8b847a]">
-                            Kategori
-                        </p>
-
-                        <p id="detail-kategori"
-                        class="text-[14px] text-[#444]">
-                        </p>
-
+                        <p class="text-[11px] uppercase tracking-[0.18em] text-[#8b847a]">Kategori</p>
+                        <p id="detail-kategori" class="text-[14px] text-[#444]"></p>
                     </div>
-
                 </div>
 
                 <div class="flex items-start gap-3">
-
-                    <span class="material-symbols-outlined text-[18px] text-[#8b847a]">
-                        public
-                    </span>
-
+                    <span class="material-symbols-outlined text-[18px] text-[#8b847a]">public</span>
                     <div>
-
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-[#8b847a]">
-                            Wilayah
-                        </p>
-
-                        <p id="detail-wilayah"
-                        class="text-[14px] text-[#444]">
-                        </p>
-
+                        <p class="text-[11px] uppercase tracking-[0.18em] text-[#8b847a]">Wilayah</p>
+                        <p id="detail-wilayah" class="text-[14px] text-[#444]"></p>
                     </div>
-
                 </div>
-
             </div>
 
             <hr class="mb-6 border-[#e4dfd8]">
 
             <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
-
-                <p id="detail-deskripsi"
-                class="text-[15px] leading-8 text-[#505050] text-justify">
-                </p>
-
+                <p id="detail-deskripsi" class="text-[15px] leading-8 text-[#505050] text-justify"></p>
             </div>
-        </div>
+        </aside>
 
     </main>
 
-<footer id="timeline-footer">
-
-    <div class="timeline-wrapper">
-
-        <div id="timeline-indicator">
-
-            <input
-                id="timeline-current"
-                type="text"
-                value="570"
-                spellcheck="false">
-
-            <div id="timeline-pointer"></div>
-
-        </div>
-        <div id="timeline-track">
-        
-            <div id="timeline-ruler">
-
-                <div id="timeline-ruler-content"></div>
-
+    <footer id="timeline-footer">
+        <div class="timeline-wrapper">
+            <div id="timeline-indicator">
+                <input id="timeline-current" type="text" value="570" spellcheck="false">
+                <div id="timeline-pointer"></div>
             </div>
-
-    </div>
-
-</footer>
+            
+            <div id="timeline-track">
+                <div id="timeline-ruler">
+                    <div id="timeline-ruler-content"></div>
+                </div>
+            </div> </div>
+    </footer>
 
     <script src="js/utils.js"></script>
     <script src="js/data.js"></script>

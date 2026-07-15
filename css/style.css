@@ -1,29 +1,30 @@
-/* style.css */
+/* =========================================================================
+   ATLAS SEJARAH KEBUDAYAAN ISLAM - CUSTOM STYLESHEET
+   File: css/style.css
+   ========================================================================= */
 
-/* ======================================================
+/* =========================================================================
    1. DESIGN SYSTEM & VARIABLES
-====================================================== */
+   ========================================================================= */
 :root {
-    /* Background */
+    /* Background & Panels */
     --bg-page: #f7f5f2;
     --bg-panel: rgba(252, 248, 245, 0.94);
 
-    /* Border */
+    /* Borders & Outlines */
     --border: #e3ddd5;
 
-    /* Typography */
+    /* Typography Colors */
     --title: #1f4b3a;
     --subtitle: #8d867d;
     --text: #4d4d4d;
 
-    /* Accent */
+    /* Brand Accent Colors */
     --accent: #1f4b3a;
     --accent-soft: #edf3ef;
 
-    /* Shadow */
+    /* Shadows & Spacing */
     --shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-
-    /* Spacing */
     --space-1: 4px;
     --space-2: 8px;
     --space-3: 12px;
@@ -32,9 +33,9 @@
     --space-6: 32px;
 }
 
-/* ======================================================
+/* =========================================================================
    2. BASE ELEMENTS & TYPOGRAPHY
-====================================================== */
+   ========================================================================= */
 html, 
 body {
     background: var(--bg-page);
@@ -59,21 +60,19 @@ p {
     color: #505050;
 }
 
-header{
-
-    border-bottom:1px solid rgba(210,203,194,.65);
-    box-shadow:0 1px 8px rgba(0,0,0,.035);
+/* --- Header & Brand Title --- */
+header {
+    border-bottom: 1px solid rgba(210, 203, 194, 0.65);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.035);
 }
 
-header h1{
-
-    font-size:2.45rem;
-    font-weight:600;
-    line-height:.95;
-    letter-spacing:-.03em;
-    color:#1f4b3a;
-    transition:opacity .2s ease;
-
+header h1 {
+    font-size: 2.45rem;
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: #1f4b3a;
+    transition: opacity 0.2s ease;
 }
 
 header h1:hover {
@@ -94,9 +93,9 @@ header h1:hover {
     color: #8b847a;
 }
 
-/* ======================================================
-   3. LAYOUT & PANELS UI
-====================================================== */
+/* =========================================================================
+   3. LAYOUT & PANELS (LEFT & RIGHT)
+   ========================================================================= */
 #map { 
     height: 100%; 
     width: 100%; 
@@ -106,13 +105,13 @@ header h1:hover {
 /* Glassmorphism Effect */
 .glass-panel { 
     background: var(--bg-panel); 
-    backdrop-filter: blur(10px); 
-    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    backdrop-filter: blur(14px); 
+    -webkit-backdrop-filter: blur(14px); /* Safari support */
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
 }
 
-/* Left Panel UI */
+/* --- Left Side Panel (Location List) --- */
 #list-panel {
     position: absolute !important;
     left: 16px !important;
@@ -137,32 +136,35 @@ header h1:hover {
 
 #location-list > div {
     min-height: 60px;
-
-    box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.03);
-
-    transition:
-        transform .25s ease,
-        box-shadow .25s ease,
-        background .25s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
 #location-list > div:hover {
     transform: translateY(-2px);
-
-    box-shadow:
-        0 10px 28px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
 }
 
-/* Right Detail Panel UI */
+/* --- Active State for Location Cards --- */
+.location-card-active {
+    background: #edf3ef !important;
+    border-color: #1f4b3a !important;
+    box-shadow: 0 8px 20px rgba(31, 75, 58, 0.12);
+}
+
+.location-card-active .material-symbols-outlined {
+    color: #1f4b3a;
+}
+
+/* --- Right Side Panel (Detail View) --- */
 #detail-panel {
     position: absolute !important;
-    right: 16px !important;     /* Memaksa jarak 16px dari tepi kanan */
-    top: 60px !important;       /* Sejajar lurus secara simetris dengan panel kiri */
-    bottom: 70px !important;    /* Memaksa jarak 16px dari bawah */
-    left: auto !important;      /* Membatalkan tarikan ke sisi kiri */
-    width: 340px !important;    /* Menentukan lebar panel kanan */
-    z-index: 50 !important;     /* Memastikan panel berada di atas peta */
+    right: 16px !important;     /* Jarak 16px dari tepi kanan */
+    top: 60px !important;       /* Sejajar secara simetris dengan panel kiri */
+    bottom: 70px !important;    /* Jarak dari bawah */
+    left: auto !important;      
+    width: 340px !important;    
+    z-index: 50 !important;     
     padding: 20px !important;
 }
 
@@ -171,8 +173,8 @@ header h1:hover {
     line-height: 1;
     font-weight: 600;
     letter-spacing: -0.02em;
-    color:#1f4b3a;
-    margin:10px 0 6px;
+    color: #1f4b3a;
+    margin: 10px 0 6px;
 }
 
 #detail-tahun {
@@ -183,22 +185,11 @@ header h1:hover {
     margin-bottom: 22px;
 }
 
-#detail-panel hr{
-
-    border:none;
-
-    height:1px;
-
-    background:#e7e1da;
-
-    margin-bottom:26px;
-
-}
-
-#detail-panel{
-
-    backdrop-filter:blur(14px);
-
+#detail-panel hr {
+    border: none;
+    height: 1px;
+    background: #e7e1da;
+    margin-bottom: 26px;
 }
 
 #detail-deskripsi {
@@ -210,23 +201,40 @@ header h1:hover {
     text-align: justify;
 }
 
-#detail-panel button{
-
-    letter-spacing:.15em;
-
+#detail-panel button {
+    letter-spacing: 0.15em;
 }
 
-/* ======================================================
-   4. LEAFLET CONTROLS CONFIGURATION
-====================================================== */
-/* Kontrol Atas (Zoom & Filter Layer) - Tepat di kanan panel list */
+/* --- Detail Panel Media/Photo --- */
+#detail-foto-wrapper {
+    overflow: hidden;
+    border-radius: 18px;
+}
+
+#detail-foto {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    border: 1px solid #e7e1da;
+    transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+#detail-foto:hover {
+    transform: scale(1.03);
+    filter: brightness(1.03);
+}
+
+/* =========================================================================
+   4. LEAFLET INTERACTION & MARKERS
+   ========================================================================= */
+/* --- Position Adjustments for Controls --- */
 .leaflet-top.leaflet-right {
     top: 60px !important;
     right: auto !important;
     left: 352px !important;     /* Lebar panel kiri (320px) + Jarak aman (32px) */
 }
 
-/* Kontrol Bawah (Minimap) - Sejajar di bawah kontrol atas */
 .leaflet-bottom.leaflet-right {
     bottom: 78px !important;
     right: auto !important;
@@ -240,7 +248,7 @@ header h1:hover {
     margin-right: 10px !important;
 }
 
-/* Custom UI Leaflet Elements */
+/* --- Custom Map Element Styles --- */
 .leaflet-control-zoom {
     border: none !important;
     border-radius: 14px !important;
@@ -281,9 +289,7 @@ header h1:hover {
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.10);
 }
 
-/* ======================================================
-   5. MAP MARKERS
-====================================================== */
+/* --- Map Custom Markers --- */
 .atlas-marker {
     width: 42px;
     height: 42px;
@@ -306,9 +312,15 @@ header h1:hover {
     font-size: 22px;
 }
 
-/* ======================================================
-   6. CUSTOM SCROLLBAR
-====================================================== */
+.atlas-marker-active {
+    transform: scale(1.18);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+    z-index: 1000;
+}
+
+/* =========================================================================
+   5. UTILITIES (SCROLLBAR)
+   ========================================================================= */
 .custom-scrollbar::-webkit-scrollbar { 
     height: 6px; 
     width: 4px; 
@@ -327,317 +339,144 @@ header h1:hover {
     background: #bdb5aa; 
 }
 
-/* ======================================================
-   DETAIL PHOTO
-====================================================== */
-
-#detail-foto-wrapper{
-
-    overflow:hidden;
-
-    border-radius:18px;
-
+/* =========================================================================
+   6. TIMELINE FOOTER & TRACK AREA
+   ========================================================================= */
+#timeline-footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 72px;
+    background: #faf8f5;
+    border-top: 1px solid #e4dfd8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 28px;
+    z-index: 90;
 }
 
-#detail-foto{
-
-    width:100%;
-
-    height:160px;
-
-    object-fit:cover;
-
-    display:block;
-
-    border:1px solid #e7e1da;
-
-    transition:
-        transform .35s ease,
-        filter .35s ease;
-
-}
-
-#detail-foto:hover{
-
-    transform:scale(1.03);
-
-    filter:brightness(1.03);
-
-}
-
-/* ======================================================
-   ACTIVE LOCATION CARD
-====================================================== */
-
-.location-card-active{
-
-    background:#edf3ef !important;
-
-    border-color:#1f4b3a !important;
-
-    box-shadow:
-        0 8px 20px rgba(31,75,58,.12);
-
-}
-
-.location-card-active .material-symbols-outlined{
-
-    color:#1f4b3a;
-
-}
-
-/* ======================================================
-   ACTIVE MARKER
-====================================================== */
-
-.atlas-marker-active{
-
-    transform:scale(1.18);
-
-    box-shadow:
-        0 10px 24px rgba(0,0,0,.24);
-
-    z-index:1000;
-
-}
-
-/* ===========================================================
-   TIMELINE
-=========================================================== */
-
-#timeline-footer{
-
-    position:fixed;
-
-    left:0;
-    bottom:0;
-
-    width:100%;
-    height:72px;
-
-    background:#faf8f5;
-
-    border-top:1px solid #e4dfd8;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    padding:0 28px;
-
-    z-index:90;
-
-}
-
-.timeline-wrapper{
-
-    position:relative;
-    
-    width:100%;
-    max-width:1200px;
-
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-
+.timeline-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-
 }
 
-
-/* ===========================================================
-   INDIKATOR TAHUN
-=========================================================== */
-
-#timeline-indicator{
-
-    position:relative;
-
-    width:100%;
-    height:26px;
-
-    margin-bottom:8px;
-
+#timeline-track {
+    position: relative;
+    width: 100%;
+    height: 46px;
 }
 
-#timeline-current{
+/* =========================================================================
+   7. TIMELINE INDICATOR & RULER
+   ========================================================================= */
+/* --- Year Input Indicator --- */
+#timeline-indicator {
+    position: relative;
+    width: 100%;
+    height: 26px;
+    margin-bottom: 8px;
+}
 
-    position:absolute;
-
-    left:50%;
-    top:0;
-
-    transform:translateX(-50%);
-
-    width:5ch;
-
-    padding:0;
-
-    margin:0;
-
-    border:none;
-
-    outline:none;
-
-    text-align:center;
-
+#timeline-current {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 5ch;
+    padding: 0;
+    margin: 0;
     border: 1px solid #d8d8d8;
-
-    border-radius:3px;
-
+    border-radius: 3px;
     background: #fff;
-
-    font-size:15px;
-
-    font-weight:700;
-
-    color:#c96a28;
-
-    cursor:text;
-
-    pointer-events:auto;
-
-    user-select:text;
-
-    z-index:10;
-
+    font-size: 15px;
+    font-weight: 700;
+    color: #c96a28;
+    cursor: text;
+    pointer-events: auto;
+    user-select: text;
+    z-index: 10;
+    text-align: center;
 }
 
-#timeline-current:focus{
-
+#timeline-current:focus {
     border-color: #c96a28;
-
-    box-shadow: 0 0 0 2px rgba(201,106,40,.15);
-
+    box-shadow: 0 0 0 2px rgba(201, 106, 40, 0.15);
 }
 
-#timeline-pointer{
-
-    position:absolute;
-
-    left:50%;
-
-    top:22px;
-
-    transform:translateX(-50%);
-
-    width:0;
-    height:0;
-
-    border-left:6px solid transparent;
-    border-right:6px solid transparent;
-    border-top:8px solid #c96a28;
-
-    pointer-events:none;
-
+#timeline-pointer {
+    position: absolute;
+    left: 50%;
+    top: 22px;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #c96a28;
+    pointer-events: none;
 }
 
-/* ===========================================================
-   RULER v2
-=========================================================== */
-
-#timeline-ruler{
-
-    user-select:none;
-    -webkit-user-select:none;
-
-    position:absolute;
-
-    inset:0;
-
-    overflow:hidden;
-
-    pointer-events:none;
-
+/* --- Ruler Layout & Marks --- */
+#timeline-ruler {
+    user-select: none;
+    -webkit-user-select: none;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
 }
 
-.ruler-line{
-
-    position:absolute;
-
-    left:0;
-
-    top:6px;
-
-    height:2px;
-
-    background:#7b746b;
-
+#timeline-ruler-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    will-change: transform;
+    transform: translateX(0);
 }
 
-.ruler-tick{
-
-    width:1px;
-
-    height:12px;
-
-    background:#6d655c;
-
+.ruler-line {
+    position: absolute;
+    left: 0;
+    top: 6px;
+    height: 2px;
+    background: #7b746b;
 }
 
-.ruler-tick.major{
-
-    height:18px;
-
-    width:2px;
-
-    background:#555;
-
+.ruler-mark {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.ruler-label{
-
-    margin-top:4px;
-
-    font-size:12px;
-
-    color:#71695f;
-
-    white-space:nowrap;
-
+.ruler-tick {
+    width: 1px;
+    height: 12px;
+    background: #6d655c;
 }
 
-#timeline-ruler-content{
-
-    position:absolute;
-
-    left:0;
-
-    top:0;
-
-    height:100%;
-
-    will-change:transform;
-
-    transform:translateX(0);
-
+.ruler-tick.major {
+    height: 18px;
+    width: 2px;
+    background: #555;
 }
 
-.ruler-mark{
-
-    position:absolute;
-
-    top:0;
-
-    transform:translateX(-50%);
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-
-}
-
-#timeline-track{
-
-    position:relative;
-
-    width:100%;
-
-    height:46px;
-
+.ruler-label {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #71695f;
+    white-space: nowrap;
 }
