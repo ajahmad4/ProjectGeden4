@@ -1,105 +1,64 @@
-// =========================================================================
-// ATLAS SEJARAH KEBUDAYAAN ISLAM - TIME RULER ENGINE
-// File: js/timelineRuler.js
-// =========================================================================
+// js/timelineRuler.js
+/* ==========================================================
+   TIME RULER SYSTEM (ALL-IN-ONE)
+========================================================== */
 
-// =========================================================================
-// 1. FUNGSI UTILITAS MATEMATIKA / KONVERSI POSISI
-// =========================================================================
+// 1. FUNGSI PEMBANTU UTAMA (Diletakkan di paling atas)
+function clearRuler(){
+    const container = document.getElementById("timeline-ruler-content");
+    if(!container) return null;
+    container.innerHTML = "";
+    return container;
+}
 
-/**
- * Menghitung nilai translasi horizontal (X) agar tahun target berada tepat 
- * di tengah indikator penunjuk waktu aktif.
- */
 function translateFromYear(year) {
-    const viewport = DOM.viewport;
-    const indicator = DOM.indicator;
+    const viewport = document.getElementById("timeline-ruler");
+    const indicator = document.getElementById("timeline-current");
 
     if (!viewport || !indicator) return 0;
 
-    // Cari titik tengah dari elemen penunjuk (indicator) relatif terhadap viewport
-    const indicatorCenter = indicator.getBoundingClientRect().left + (indicator.offsetWidth / 2);
-    const viewportLeft = viewport.getBoundingClientRect().left;
-    const center = indicatorCenter - viewportLeft;
+    const indicatorCenter =
+        indicator.getBoundingClientRect().left +
+        (indicator.offsetWidth / 2);
 
-    // Hitung posisi pixel dari tahun yang dituju
-    const yearPosition = (year - timeline.minYear) * timeline.pixelPerYear;
+    const viewportLeft =
+        viewport.getBoundingClientRect().left;
 
-    // Kembalikan offset translasi agar tahun sejajar di tengah
+    const center =
+        indicatorCenter - viewportLeft;
+
+    const yearPosition =
+        (year - timeline.minYear) *
+        timeline.pixelPerYear;
+
     return center - yearPosition;
 }
 
-/**
- * Mengonversi nilai tahun menjadi posisi pixel relatif dari titik awal (tahun minimum).
- */
-function yearToPixel(year) {
-    return (year - timeline.minYear) * timeline.pixelPerYear;
+function yearToPixel(year){
+    return (
+        year - timeline.minYear
+    ) * timeline.pixelPerYear;
 }
 
-/**
- * Menghitung rentang tahun awal dan akhir yang saat ini terlihat di layar viewport.
- * Berguna untuk optimasi render jika diperlukan.
- */
-function getVisibleYears() {
-    const viewport = document.getElementById("timeline-ruler");
-    if (!viewport) return null;
-
-    const leftPixel = -timeline.currentTranslate;
-    const rightPixel = leftPixel + viewport.clientWidth;
-
-    const leftYear = timeline.minYear + (leftPixel / timeline.pixelPerYear);
-    const rightYear = timeline.minYear + (rightPixel / timeline.pixelPerYear);
-
-    // Dibulatkan ke kelipatan interval terdekat
-    const firstYear = Math.floor(leftYear / timeline.interval) * timeline.interval;
-    const lastYear = Math.ceil(rightYear / timeline.interval) * timeline.interval;
-
-    return { firstYear, lastYear };
-}
-
-/**
- * Debugging untuk mencetak rentang tahun yang terlihat ke konsol developer.
- */
-function debugVisibleYears() {
-    const range = getVisibleYears();
-    if (!range) return;
-    console.log("Visible:", range.firstYear, "-", range.lastYear);
-}
-
-// =========================================================================
-// 2. FUNGSI PEMBUATAN ELEMEN DOM (RULER GENERATOR)
-// =========================================================================
-
-/**
- * Membuat elemen garis horizontal utama penggaris.
- */
 function createLine(width) {
     const line = document.createElement("div");
     line.className = "ruler-line";
-    line.style.left = "0px";
     line.style.width = width + "px";
     return line;
 }
 
-/**
- * Membuat tanda garis vertikal (tick) beserta label tahun jika masuk skala major.
- */
 function createTick(year, x) {
     const mark = document.createElement("div");
     mark.className = "ruler-mark";
     mark.style.left = x + "px";
 
     const tick = document.createElement("div");
-    tick.className = "ruler-tick";
+    const isMajor = (year - timeline.minYear) % timeline.majorInterval === 0;
 
-    // Cek apakah tahun ini merupakan kelipatan interval besar (Major Interval)
-    if (year % timeline.majorInterval === 0) {
-        tick.classList.add("major");
-    }
+    tick.className = "ruler-tick" + (isMajor ? " major" : "");
     mark.appendChild(tick);
 
-    // Tambahkan teks label tahun jika berada di interval besar
-    if (year % timeline.majorInterval === 0) {
+    if (isMajor) {
         const label = document.createElement("div");
         label.className = "ruler-label";
         label.textContent = year;
@@ -109,50 +68,97 @@ function createTick(year, x) {
     return mark;
 }
 
-/**
- * Membersihkan seluruh isi elemen kontainer penggaris sebelum digambar ulang.
- */
-function clearRuler() {
-    const container = DOM.rulerContent;
-    if (!container) return null;
-    container.innerHTML = "";
-    return container;
+// =========================================================================
+// DATA ERA SEJARAH
+// =========================================================================
+// Data Era Konstan
+const ERAS_DATA = [
+    {
+        id: 'era-awal',
+        name: 'Era Awal / Teori Masuknya Islam',
+        start: 570,
+        end: 1200,
+        className: 'era-awal'
+    },
+    {
+        id: 'era-kesultanan',
+        name: 'Era Kesultanan & Kerajaan Islam',
+        start: 1200,
+        end: 1600, // atau sesuaikan batas atas era Anda
+        className: 'era-kesultanan'
+    }
+];
+
+function buildEraBackgrounds(container) {
+    // Hapus wrapper lama jika ada untuk mencegah duplikasi saat render ulang/zoom
+    const oldWrapper = container.querySelector('.eras-background-wrapper');
+    if (oldWrapper) oldWrapper.remove();
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'eras-background-wrapper';
+
+    ERAS_DATA.forEach(era => {
+        // Hitung posisi absolut berdasarkan fungsi konversi tahun ke piksel Anda
+        // Contoh asumsi: yearToPixel(year) mengembalikan posisi X dalam piksel
+        const leftX = yearToPixel(era.start);
+        const rightX = yearToPixel(era.end);
+        const width = rightX - leftX;
+
+        // Hanya gambar jika lebar era valid (berada dalam jangkauan timeline)
+        if (width > 0) {
+            const eraBlock = document.createElement('div');
+            eraBlock.className = `era-block ${era.className}`;
+            eraBlock.style.left = `${leftX}px`;
+            eraBlock.style.width = `${width}px`;
+
+            // Buat kontainer label sticky
+            const labelContainer = document.createElement('div');
+            labelContainer.className = 'era-label-container';
+
+            const badge = document.createElement('span');
+            badge.className = 'era-badge';
+            badge.innerText = era.name;
+
+            labelContainer.appendChild(badge);
+            eraBlock.appendChild(labelContainer);
+            wrapper.appendChild(eraBlock);
+        }
+    });
+
+    // Masukkan ke dalam container ruler sebelum elemen ticks (garis angka) digambar
+    container.insertBefore(wrapper, container.firstChild);
 }
 
 // =========================================================================
-// 3. FUNGSI KONTROL RENDERING & PERGESERAN (BUILD & MOVE)
+// LOGIKA UTAMA BUILD RULER
 // =========================================================================
 
-/**
- * Membangun ulang seluruh struktur fisik penggaris (garis, tick, dan label).
- * Dipanggil setiap kali inisialisasi awal atau saat terjadi perubahan tingkat zoom.
- */
 function buildRuler() {
     const container = clearRuler();
     if (!container) return;
 
-    // Set lebar total kontainer berdasarkan rentang tahun maksimal
     const totalWidth = yearToPixel(timeline.maxYear);
     container.style.width = totalWidth + "px";
 
-    // Render garis dasar horizontal
+    // 1. Gambar Era Terlebih Dahulu (Agar berada di belakang garis penggaris)
+    buildEraBackgrounds(container);
+
+    // 2. Gambar Garis utama penggaris
     container.appendChild(createLine(totalWidth));
 
-    // Render semua garis penanda (ticks) dari tahun minimal hingga maksimal
+    // 3. Gambar Tick + Label Tahun
     for (let year = timeline.minYear; year <= timeline.maxYear; year += timeline.interval) {
         const x = yearToPixel(year);
         container.appendChild(createTick(year, x));
     }
 }
 
-/**
- * Menggeser posisi fisik penggaris secara horizontal menggunakan GPU-Accelerated 3D Transform
- * agar sejajar dengan koordinat tahun aktif saat ini.
- */
 function moveRuler(year) {
-    const content = DOM.rulerContent;
+    const content = document.getElementById("timeline-ruler-content");
     if (!content) return;
 
     timeline.currentTranslate = translateFromYear(year);
     content.style.transform = `translate3d(${timeline.currentTranslate}px, 0, 0)`;
+    
+    // Sinkronisasi geseran otomatis ditangani browser karena era berada di dalam "content"
 }

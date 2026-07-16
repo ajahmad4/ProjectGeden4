@@ -339,22 +339,23 @@ header h1:hover {
     background: #bdb5aa; 
 }
 
-/* =========================================================================
-   6. TIMELINE FOOTER & TRACK AREA
-   ========================================================================= */
+/* ===========================================================
+   TIMELINE FOOTER & WRAPPER
+   =========================================================== */
 #timeline-footer {
     position: fixed;
     left: 0;
     bottom: 0;
     width: 100%;
-    height: 72px;
+    height: 75px; /* Tinggi sedikit dinaikkan agar proporsional */
     background: #faf8f5;
     border-top: 1px solid #e4dfd8;
     display: flex;
-    align-items: center;
+    align-items: flex-end; /* Penggaris diletakkan di bawah */
     justify-content: center;
-    padding: 0 28px;
+    padding-bottom: 12px;
     z-index: 90;
+    overflow: hidden; /* Memotong luapan warna era agar rapi */
 }
 
 .timeline-wrapper {
@@ -366,25 +367,26 @@ header h1:hover {
     align-items: center;
     user-select: none;
     -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
 }
 
 #timeline-track {
     position: relative;
     width: 100%;
-    height: 46px;
+    height: 40px; /* Fokus ruang untuk penggaris */
 }
 
-/* =========================================================================
-   7. TIMELINE INDICATOR & RULER
-   ========================================================================= */
-/* --- Year Input Indicator --- */
+/* ===========================================================
+   INDIKATOR TAHUN MENGAMBANG (DI ATAS FOOTER)
+   =========================================================== */
 #timeline-indicator {
-    position: relative;
-    width: 100%;
-    height: 26px;
-    margin-bottom: 8px;
+    position: fixed;
+    left: 50%;
+    bottom: 64px; /* Mengambang tepat di atas batas footer */
+    transform: translateX(-50%);
+    width: 80px;
+    height: 32px;
+    z-index: 110; /* Berada di atas segala elemen */
+    pointer-events: none; /* Klik tembus ke peta jika tidak sengaja */
 }
 
 #timeline-current {
@@ -392,67 +394,74 @@ header h1:hover {
     left: 50%;
     top: 0;
     transform: translateX(-50%);
-    width: 5ch;
-    padding: 0;
-    margin: 0;
-    border: 1px solid #d8d8d8;
-    border-radius: 3px;
+    width: 70px;
+    height: 30px;
+    border: 2px solid #c96a28; /* Border dipertegas */
+    border-radius: 8px; /* Lebih rounded modern */
     background: #fff;
-    font-size: 15px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 800;
     color: #c96a28;
-    cursor: text;
-    pointer-events: auto;
-    user-select: text;
-    z-index: 10;
     text-align: center;
+    box-shadow: 0 4px 12px rgba(201, 106, 40, 0.15);
+    cursor: text;
+    pointer-events: auto; /* Input tetap bisa diketik */
+    user-select: text;
 }
 
 #timeline-current:focus {
-    border-color: #c96a28;
-    box-shadow: 0 0 0 2px rgba(201, 106, 40, 0.15);
+    box-shadow: 0 0 0 3px rgba(201, 106, 40, 0.25);
 }
 
+/* SEGITIGA PENUNJUK DIPERBESAR */
 #timeline-pointer {
     position: absolute;
     left: 50%;
-    top: 22px;
+    top: 32px; /* Posisi pas di bawah kotak tahun */
     transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 8px solid #c96a28;
+    border-left: 10px solid transparent;  /* Ukuran diperbesar (sebelumnya 6px) */
+    border-right: 10px solid transparent; /* Ukuran diperbesar */
+    border-top: 14px solid #c96a28;       /* Ukuran diperbesar (sebelumnya 8px) */
     pointer-events: none;
 }
 
-/* --- Ruler Layout & Marks --- */
+/* ===========================================================
+   1. REGULASI UTAMA RULER & TIMELINE CONTAINER
+   =========================================================== */
 #timeline-ruler {
-    user-select: none;
-    -webkit-user-select: none;
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
+    position: relative;
+    width: 100%;
+    height: 70px; /* Ditambah sedikit agar ruang teks angka lebih lega */
+    overflow-x: hidden;
+    overflow-y: visible; /* Wajib: agar badge/label tidak terpotong ke atas */
+    background: #faf8f5;
+    border-bottom: 1px solid #e4dfd8;
+    box-sizing: border-box;
 }
 
 #timeline-ruler-content {
     position: absolute;
-    left: 0;
     top: 0;
     height: 100%;
     will-change: transform;
-    transform: translateX(0);
 }
 
+/* Garis horizontal utama penggaris */
 .ruler-line {
     position: absolute;
     left: 0;
-    top: 6px;
+    top: 25px; /* Diturunkan agar pas bersentuhan dengan ujung segitiga penunjuk */
+    width: 100%;
     height: 2px;
     background: #7b746b;
+    z-index: 15 !important;
 }
 
+/* ===========================================================
+   2. PENUNJUK ANGKA & SEGITIGA (POINTER) - DIPASING PERSIS
+   =========================================================== */
 .ruler-mark {
     position: absolute;
     top: 0;
@@ -460,23 +469,127 @@ header h1:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 20 !important; /* Di atas garis utama */
 }
 
+/* Kotak angka penunjuk yang melayang */
+.pointer-bubble {
+    background: #ffffff;
+    color: #d36b1e; /* Warna oranye kecokelatan sesuai gambar */
+    border: 1.5px solid #d36b1e;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Segitiga penunjuk kecil di bawah kotak */
+.pointer-arrow {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #d36b1e;
+    margin-top: -1px; /* Saling mengunci dengan border bubble */
+}
+
+/* ===========================================================
+   3. INDIKATOR TICKS & LABEL TAHUN BAWAH
+   =========================================================== */
 .ruler-tick {
+    position: absolute;
+    top: 25px; /* Mulai tepat dari posisi garis horizontal */
     width: 1px;
-    height: 12px;
-    background: #6d655c;
+    height: 8px;
+    background: #8e857b;
 }
 
 .ruler-tick.major {
-    height: 18px;
     width: 2px;
-    background: #555;
+    height: 14px;
+    background: #1f4b3a; /* Hijau tua penanda utama */
 }
 
 .ruler-label {
-    margin-top: 4px;
-    font-size: 12px;
-    color: #71695f;
+    position: absolute;
+    top: 43px; /* Diturunkan di bawah ticks agar tidak saling tabrakan */
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 600;
+    color: #7b746b;
+    font-family: inherit;
+}
+
+/* ===========================================================
+   4. SISTEM BACKGROUND ERA & BADGE MELAYANG (ANTI-TABRAKAN)
+   =========================================================== */
+/* Wrapper penampung background era */
+.eras-background-wrapper {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none; /* Supaya tidak menghalangi aksi drag/click mouse */
+    z-index: 1; /* Di paling belakang agar tidak menutupi ticks/teks angka */
+}
+
+/* Blok warna era */
+.era-block {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    display: flex;
+    align-items: flex-start; /* Sejajarkan kontainer badge di bagian atas */
+    padding-top: 4px; /* Memberi ruang di atas agar badge melayang cantik */
+    box-sizing: border-box;
+}
+
+/* Blok Warna Masing-masing Era */
+.era-block.era-awal {
+    background-color: rgba(46, 117, 89, 0.08); /* Hijau transparan super lembut */
+    border-right: 1.5px dashed rgba(46, 117, 89, 0.3);
+}
+
+.era-block.era-kesultanan {
+    background-color: rgba(211, 107, 30, 0.06); /* Oranye transparan super lembut */
+    border-right: 1.5px dashed rgba(211, 107, 30, 0.3);
+}
+
+/* Container agar badge era bersifat Sticky ketika di-zoom */
+.era-label-container {
+    position: sticky;
+    left: 12px;
+    right: 12px;
+    max-width: fit-content;
+    z-index: 10;
+}
+
+/* Badge Era (Sempurna & Melayang Indah) */
+.era-badge {
+    background: #faf8f5; /* Sesuai dengan warna dasar ruler agar menutup garis di belakangnya */
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: inline-block;
     white-space: nowrap;
+}
+
+/* Pewarnaan border & teks dinamis per era */
+.era-block.era-awal .era-badge {
+    color: #2e7559;
+    border: 1.5px solid rgba(46, 117, 89, 0.4);
+}
+
+.era-block.era-kesultanan .era-badge {
+    color: #d36b1e;
+    border: 1.5px solid rgba(211, 107, 30, 0.4);
 }
