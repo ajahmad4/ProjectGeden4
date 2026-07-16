@@ -168,6 +168,7 @@ function setTimelineYear(year) {
     notifyTimelineChanged();
     if (typeof renderJalurDanWilayah === 'function'){
         renderJalurDanWilayah(year);
+        updateEraHeader(year);
     }
 
 }

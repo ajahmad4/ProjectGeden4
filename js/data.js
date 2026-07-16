@@ -98,12 +98,12 @@ const dataWilayahKekuasaan = [
         warna: "#d36b1e",
         // Koordinat batas-batas wilayah kekuasaan (Polygon searah jarum jam)
         koordinat: [
-            [5.3500, 96.9500],
-            [5.4500, 97.2500],
-            [5.2000, 97.6000],
-            [4.8500, 97.7500],
-            [4.7500, 97.4000],
-            [5.1000, 97.0500]
+            [5.3500,96.9500],
+            [5.4500,97.2500],
+            [5.2000,97.6000],
+            [4.8500,97.7500],
+            [4.7500,97.4000],
+            [5.1000,97.0500]
         ],
         deskripsi: "Wilayah kedaulatan utama Kesultanan Samudera Pasai yang meliputi pesisir utara Aceh, bertindak sebagai pengontrol lalu lintas perdagangan Selat Malaka."
     },

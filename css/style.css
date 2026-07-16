@@ -593,3 +593,84 @@ header h1:hover {
     color: #d36b1e;
     border: 1.5px solid rgba(211, 107, 30, 0.4);
 }
+
+.popup-wilayah{
+    min-width:220px;
+}
+
+.popup-wilayah h4{
+    margin:0 0 6px;
+    font-size:16px;
+    color:#0b6b3a;
+}
+
+.popup-wilayah p{
+    margin:4px 0;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.popup-jalur{
+    min-width:220px;
+}
+
+.popup-jalur h4{
+    margin:0 0 6px;
+    font-size:16px;
+    color:#1565c0;
+}
+
+.popup-jalur p{
+    margin:4px 0;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.era-header{
+
+    background:#ffffff;
+    border-left:5px solid #1b5e20;
+
+    padding:14px 16px;
+    margin-bottom:14px;
+
+    border-radius:8px;
+
+}
+
+.era-header h3{
+
+    margin:0 0 10px;
+
+    font-size:14px;
+    color:#666;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+
+}
+
+.era-item{
+
+    margin-bottom:10px;
+
+}
+
+.era-item:last-child{
+
+    margin-bottom:0;
+
+}
+
+.era-item strong{
+
+    display:block;
+    font-size:16px;
+
+}
+
+.era-item span{
+
+    color:#777;
+    font-size:13px;
+
+}

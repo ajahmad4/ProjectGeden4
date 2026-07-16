@@ -306,6 +306,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     muatLokasiAplikasi();
 
+    updateEraHeader(570);
+
     const searchInput = document.getElementById("search-input");
 
     if (!searchInput) return;
@@ -389,8 +391,10 @@ searchInput.addEventListener("input", function () {
 
     }
 
-    if (typeof renderJalurDanWilayah === 'function' && typeof timeline !== 'undefined') {
-        renderJalurDanWilayah(timeline.currentYear);
+    if (typeof renderJalurDanWilayah === 'function') {
+        
+        const tahunAwal = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
+        renderJalurDanWilayah(tahunAwal);
     }
 
 });
@@ -411,20 +415,137 @@ if (timelineSlider && timelineCurrent) {
 });
 
 // =========================================================================
-// RENDER JALUR (POLYLINE) DAN WILAYAH KEKUASAAN (POLYGON) SECARA DINAMIS
+// RENDER JALUR (POLYLINE) DAN WILAYAH KEKUASAAN (POLYGON)
 // =========================================================================
 
-// Tempat menyimpan referensi objek Leaflet agar mudah dipantau jika dibutuhkan
 const activePolylines = {};
 const activePolygons = {};
 
-/**
- * Menggambar jalur pelayaran/dakwah dan wilayah kekuasaan kerajaan secara real-time
- * berdasarkan tahun aktif yang dipilih pada timeline.
- * @param {number|string} tahunAktif - Tahun saat ini dari sistem timeline
- */
 function renderJalurDanWilayah(tahunAktif) {
-    // 1. Bersihkan semua gambar lama di peta sebelum menggambar ulang
+
+    tahunAktif = Math.round(Number(tahunAktif));
+
+    // Bersihkan gambar lama
     layerJalurSitus.clearLayers();
     layerWilayahKekuasaan.clearLayers();
+
+    // Reset penyimpanan
+    Object.keys(activePolylines).forEach(key => delete activePolylines[key]);
+    Object.keys(activePolygons).forEach(key => delete activePolygons[key]);
+
+    // =====================================================
+    // POLYLINE
+    // =====================================================
+
+    dataJalurSejarah.forEach(jalur => {
+
+        if (
+            tahunAktif >= jalur.tahunMulai &&
+            tahunAktif <= jalur.tahunSelesai
+        ) {
+
+            const polyline = L.polyline(jalur.koordinat, {
+
+                color: jalur.warna,
+                weight: 5,
+                opacity: 0.9,
+                dashArray: "10 6",
+                smoothFactor: 1,
+                lineJoin: "round",
+                lineCap: "round"
+
+            });
+
+            polyline.bindPopup(`
+                <div class="popup-jalur">
+                    <h4>${jalur.nama}</h4>
+                    <p><strong>Periode:</strong> ${jalur.tahunMulai}–${jalur.tahunSelesai} M</p>
+                    <p>${jalur.deskripsi}</p>
+                </div>
+            `);
+
+            polyline.addTo(layerJalurSitus);
+
+            activePolylines[jalur.id] = polyline;
+
+        }
+
+    });
+
+    // =====================================================
+    // POLYGON
+    // =====================================================
+
+    dataWilayahKekuasaan.forEach(wilayah => {    
+        
+        if (
+            tahunAktif >= wilayah.tahunMulai &&
+            tahunAktif <= wilayah.tahunSelesai
+        ) {
+            
+            const polygon = L.polygon(wilayah.koordinat, {
+
+                color: wilayah.warna,
+                fillColor: wilayah.warna,
+                fillOpacity: 0.18,
+                weight: 2
+
+        });
+
+        polygon.bindPopup(`
+            <div class="popup-wilayah">
+                <h4>${wilayah.nama}</h4>
+                <p><strong>Periode:</strong> ${wilayah.tahunMulai}–${wilayah.tahunSelesai} M</p>
+                <p>${wilayah.deskripsi}</p>
+            </div>
+        `);
+
+            polygon.addTo(layerWilayahKekuasaan);
+
+            activePolygons[wilayah.id] = polygon;
+
+        }
+
+    });
+    
+}
+
+function updateEraHeader(tahunAktif){
+
+    const container = document.getElementById("era-header");
+
+    const eraAktif = dataWilayahKekuasaan.filter(wilayah=>
+
+        tahunAktif >= wilayah.tahunMulai &&
+        tahunAktif <= wilayah.tahunSelesai
+
+    );
+
+    if(eraAktif.length===0){
+
+        container.innerHTML=`
+            <h3>Era Aktif</h3>
+            <span>Tidak ada kerajaan aktif</span>
+        `;
+
+        return;
+
+    }
+
+    container.innerHTML=`
+        <h3>Era Aktif</h3>
+
+        ${eraAktif.map(wilayah=>`
+
+            <div class="era-item">
+
+                <strong>${wilayah.nama}</strong>
+
+                <span>${wilayah.tahunMulai}–${wilayah.tahunSelesai} M</span>
+
+            </div>
+
+        `).join("")}
+    `;
+
 }

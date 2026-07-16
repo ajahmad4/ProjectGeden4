@@ -9,12 +9,12 @@
 // ==========================================
 // Membagi data spasial menjadi beberapa klaster kelompok layer independen 
 // agar mempermudah fitur filter (menyala/mati) pada kontrol overlay peta.
-const layerMasjid = L.layerGroup();
-const layerKerajaan = L.layerGroup();
-const layerPelabuhan = L.layerGroup();
+var layerMasjid = L.layerGroup();
+var layerKerajaan = L.layerGroup();
+var layerPelabuhan = L.layerGroup();
 
-const layerJalurSitus = L.layerGroup();
-const layerWilayahKekuasaan = L.layerGroup();
+var layerJalurSitus = L.layerGroup();
+var layerWilayahKekuasaan = L.layerGroup();
 
 // ==========================================
 // 2. STABILISASI DAN PEMBUATAN MESIN PETA (L.map)
