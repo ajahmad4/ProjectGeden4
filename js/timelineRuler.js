@@ -71,47 +71,30 @@ function createTick(year, x) {
 // =========================================================================
 // DATA ERA SEJARAH
 // =========================================================================
-// Data Era Konstan
-const ERAS_DATA = [
-    {
-        id: 'era-awal',
-        name: 'Era Awal / Teori Masuknya Islam',
-        start: 570,
-        end: 1200,
-        className: 'era-awal'
-    },
-    {
-        id: 'era-kesultanan',
-        name: 'Era Kesultanan & Kerajaan Islam',
-        start: 1200,
-        end: 1600, // atau sesuaikan batas atas era Anda
-        className: 'era-kesultanan'
-    }
-];
 
 function buildEraBackgrounds(container) {
-    // Hapus wrapper lama jika ada untuk mencegah duplikasi saat render ulang/zoom
     const oldWrapper = container.querySelector('.eras-background-wrapper');
     if (oldWrapper) oldWrapper.remove();
 
     const wrapper = document.createElement('div');
     wrapper.className = 'eras-background-wrapper';
 
-    ERAS_DATA.forEach(era => {
-        // Hitung posisi absolut berdasarkan fungsi konversi tahun ke piksel Anda
-        // Contoh asumsi: yearToPixel(year) mengembalikan posisi X dalam piksel
+    // MEMBACA DARI: TIMELINE_ERAS yang berada di timeline-data.js
+    TIMELINE_ERAS.forEach(era => {
         const leftX = yearToPixel(era.start);
         const rightX = yearToPixel(era.end);
         const width = rightX - leftX;
 
-        // Hanya gambar jika lebar era valid (berada dalam jangkauan timeline)
         if (width > 0) {
             const eraBlock = document.createElement('div');
-            eraBlock.className = `era-block ${era.className}`;
+            // Menambahkan kelas dinamis era.id
+            eraBlock.className = `era-block ${era.id}`;
             eraBlock.style.left = `${leftX}px`;
             eraBlock.style.width = `${width}px`;
+            
+            // Mengirimkan variabel warna dinamis ke CSS
+            eraBlock.style.setProperty("--era-color-rgb", era.colorRgb);
 
-            // Buat kontainer label sticky
             const labelContainer = document.createElement('div');
             labelContainer.className = 'era-label-container';
 
@@ -125,7 +108,6 @@ function buildEraBackgrounds(container) {
         }
     });
 
-    // Masukkan ke dalam container ruler sebelum elemen ticks (garis angka) digambar
     container.insertBefore(wrapper, container.firstChild);
 }
 

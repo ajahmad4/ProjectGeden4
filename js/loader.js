@@ -389,6 +389,10 @@ searchInput.addEventListener("input", function () {
 
     }
 
+    if (typeof renderJalurDanWilayah === 'function' && typeof timeline !== 'undefined') {
+        renderJalurDanWilayah(timeline.currentYear);
+    }
+
 });
 
 const timelineSlider = document.getElementById("timeline-slider");
@@ -405,3 +409,22 @@ if (timelineSlider && timelineCurrent) {
 }
 
 });
+
+// =========================================================================
+// RENDER JALUR (POLYLINE) DAN WILAYAH KEKUASAAN (POLYGON) SECARA DINAMIS
+// =========================================================================
+
+// Tempat menyimpan referensi objek Leaflet agar mudah dipantau jika dibutuhkan
+const activePolylines = {};
+const activePolygons = {};
+
+/**
+ * Menggambar jalur pelayaran/dakwah dan wilayah kekuasaan kerajaan secara real-time
+ * berdasarkan tahun aktif yang dipilih pada timeline.
+ * @param {number|string} tahunAktif - Tahun saat ini dari sistem timeline
+ */
+function renderJalurDanWilayah(tahunAktif) {
+    // 1. Bersihkan semua gambar lama di peta sebelum menggambar ulang
+    layerJalurSitus.clearLayers();
+    layerWilayahKekuasaan.clearLayers();
+}

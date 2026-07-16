@@ -49,3 +49,77 @@ const dataSejarahNusantara = [
     foto: "assets/images/demak/demak-01.jpg"
     }
 ];
+
+// =========================================================================
+// DATABASE TAMBAHAN: JALUR (POLYLINE) & WILAYAH KEKUASAAN (POLYGON)
+// =========================================================================
+
+const dataJalurSejarah = [
+    {
+        id: "jalur-awal-arab",
+        nama: "Rute Pelayaran Saudagar Arab (Abad ke-7 M)",
+        tipe: "pelayaran",
+        tahunMulai: 570,
+        tahunSelesai: 1200,
+        warna: "#2e7559", // Hijau sesuai era-awal
+        // Koordinat rute pelayaran: dari Timur Tengah menuju Pantai Barat Sumatera (Barus)
+        koordinat: [
+            [12.1642, 45.0118],  // Aden (Yaman)
+            [11.8311, 51.1895],  // Tanjung Guardafui
+            [7.8731, 80.7718],   // Sri Lanka (Transit)
+            [5.5483, 95.3238],   // Ujung Sumatera (Banda Aceh)
+            [2.0031, 98.3908]    // Bandar Kuno Barus (Tujuan)
+        ],
+        deskripsi: "Rute perdagangan laut yang digunakan oleh para saudagar Arab langsung dari Teluk Aden melintasi Samudera Hindia menuju bandar penyedia kapur barus utama di Sumatera Utara."
+    },
+    {
+        id: "jalur-dakwah-samudera-pasai",
+        nama: "Rute Penyebaran Dakwah Samudera Pasai",
+        tipe: "dakwah",
+        tahunMulai: 1267,
+        tahunSelesai: 1500,
+        warna: "#d36b1e", // Oranye sesuai era kesultanan
+        koordinat: [
+            [5.1278, 97.2341],   // Samudera Pasai
+            [2.2064, 102.2501],  // Melaka
+            [-5.9750, 105.9221], // Selat Sunda
+            [-6.9006, 112.2152]  // Pantai Utara Jawa (Tuban/Gresik)
+        ],
+        deskripsi: "Jalur persebaran Islam dari pusat Kesultanan Samudera Pasai menuju Selat Malaka hingga menyisir pelabuhan-pelabuhan utama di Pantai Utara Jawa."
+    }
+];
+
+const dataWilayahKekuasaan = [
+    {
+        id: "wilayah-samudera-pasai",
+        nama: "Wilayah Inti Kesultanan Samudera Pasai",
+        tahunMulai: 1267,
+        tahunSelesai: 1521, // Runtuh setelah invasi Portugis
+        warna: "#d36b1e",
+        // Koordinat batas-batas wilayah kekuasaan (Polygon searah jarum jam)
+        koordinat: [
+            [5.3500, 96.9500],
+            [5.4500, 97.2500],
+            [5.2000, 97.6000],
+            [4.8500, 97.7500],
+            [4.7500, 97.4000],
+            [5.1000, 97.0500]
+        ],
+        deskripsi: "Wilayah kedaulatan utama Kesultanan Samudera Pasai yang meliputi pesisir utara Aceh, bertindak sebagai pengontrol lalu lintas perdagangan Selat Malaka."
+    },
+    {
+        id: "wilayah-kesultanan-demak",
+        nama: "Wilayah Pengaruh Kesultanan Demak",
+        tahunMulai: 1475,
+        tahunSelesai: 1554,
+        warna: "#8a6d3b",
+        koordinat: [
+            [-6.7000, 110.5000],
+            [-6.8500, 110.9000],
+            [-7.0500, 110.9500],
+            [-7.1000, 110.5000],
+            [-6.9000, 110.3000]
+        ],
+        deskripsi: "Wilayah pusat pemerintahan Kesultanan Demak di Jawa Tengah yang mengontrol jalur logistik pertanian pesisir utara Jawa."
+    }
+];

@@ -13,6 +13,9 @@ const layerMasjid = L.layerGroup();
 const layerKerajaan = L.layerGroup();
 const layerPelabuhan = L.layerGroup();
 
+const layerJalurSitus = L.layerGroup();
+const layerWilayahKekuasaan = L.layerGroup();
+
 // ==========================================
 // 2. STABILISASI DAN PEMBUATAN MESIN PETA (L.map)
 // ==========================================
@@ -21,7 +24,13 @@ const map = L.map('map', {
     center: [1.0, 115.0],              // Koordinat titik tengah (center) geografis wilayah Indonesia
     zoom: 5,                            // Skala zoom awal untuk menampilkan lanskap Nusantara secara utuh
     zoomControl: false,                 // Mematikan kontrol tombol zoom default agar bisa diatur posisinya secara kustom
-    layers: [layerMasjid, layerKerajaan, layerPelabuhan] // Seluruh klaster layer otomatis aktif di awal pemuatan
+    layers: [
+        layerMasjid, 
+        layerKerajaan, 
+        layerPelabuhan, 
+        layerJalurSitus, 
+        layerWilayahKekuasaan
+    ] // Seluruh klaster layer otomatis aktif di awal pemuatan
 });
 
 // Membatasi ruang navigasi skala interaksi peta (mencegah distorsi atau peta blank)
@@ -46,7 +55,9 @@ const baseLayers = {};
 const overlays = {
     "Situs Masjid": layerMasjid,
     "Pusat Kesultanan/Kerajaan": layerKerajaan,
-    "Pelabuhan/Bandar Transaksi": layerPelabuhan
+    "Pelabuhan/Bandar Transaksi": layerPelabuhan,
+    "Jalur Dakwah/Perdagangan": layerJalurSitus,
+    "Wilayah Kekuasaan Kesultanan":layerWilayahKekuasaan
 };
 
 // Menempatkan menu kontrol layer di pojok kanan atas agar estetik dan fungsional

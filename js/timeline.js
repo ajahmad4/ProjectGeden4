@@ -4,21 +4,22 @@
 // =========================================================================
 
 // =========================================================================
-// 1. KONFIGURASI & STATE UTAMA
+// 1. KONFIGURASI & STATE UTAMA (Disesuaikan dengan timeline-data.js)
 // =========================================================================
 const timeline = {
-    minYear: 570,               // Batas tahun minimum (kelahiran Nabi Muhammad SAW)
-    maxYear: 2000,              // Batas tahun maksimum
-    currentYear: 570,           // Tahun aktif saat ini
-    currentTranslate: 0,        // Translasi posisi pixel horizontal saat ini
-    pixelPerYear: 2,            // Skala zoom awal (pixel per 1 tahun)
-    zoomStep: 0.25,             // Tingkat perubahan zoom setiap kali dipicu
-    minPixelPerYear: 1.25,      // Batas zoom-out minimum
-    maxPixelPerYear: 20,        // Batas zoom-in maksimum
-    interval: 50,               // Garis skala kecil penggaris (dalam tahun)
-    majorInterval: 100,         // Garis skala besar penggaris (dalam tahun)
-    dragging: false,            // Status apakah pengguna sedang menyeret (drag) mouse
-    startX: 0                   // Posisi X awal mouse saat drag dimulai
+    // Membaca dinamis dari TIMELINE_CONFIG yang ada di timeline-data.js
+    minYear: TIMELINE_CONFIG.minYear,               
+    maxYear: TIMELINE_CONFIG.maxYear,              
+    currentYear: TIMELINE_CONFIG.minYear,           
+    currentTranslate: 0,        
+    pixelPerYear: 2,            
+    zoomStep: 0.25,             
+    minPixelPerYear: 1.25,      
+    maxPixelPerYear: 20,        
+    interval: 50,               
+    majorInterval: 100,         
+    dragging: false,            
+    startX: 0                   
 };
 
 const DOM = {
@@ -165,6 +166,10 @@ function setTimelineYear(year) {
     timeline.currentTranslate = translateFromYear(year); // Didefinisikan di file luar (e.g., timelineRuler.js)
 
     notifyTimelineChanged();
+    if (typeof renderJalurDanWilayah === 'function'){
+        renderJalurDanWilayah(year);
+    }
+
 }
 
 // Mengonversi pergeseran pixel horizontal menjadi selisih tahun
