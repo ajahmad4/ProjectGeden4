@@ -550,14 +550,54 @@ header h1:hover {
 }
 
 /* Blok Warna Masing-masing Era */
-.era-block.era-awal {
-    background-color: rgba(46, 117, 89, 0.08); /* Hijau transparan super lembut */
-    border-right: 1.5px dashed rgba(46, 117, 89, 0.3);
+.era-block.era-pra-islam {
+    background-color: rgba(105, 105, 105, 0.08);
+    border-right: 1.5px dashed rgba(105, 105, 105, 0.35);
+}
+
+.era-block.era-kenabian {
+    background-color: rgba(34, 139, 34, 0.09);
+    border-right: 1.5px dashed rgba(34, 139, 34, 0.35);
+}
+
+.era-block.era-rashidun {
+    background-color: rgba(0, 102, 204, 0.08);
+    border-right: 1.5px dashed rgba(0, 102, 204, 0.35);
+}
+
+.era-block.era-umayyah {
+    background-color: rgba(139, 0, 0, 0.08);
+    border-right: 1.5px dashed rgba(139, 0, 0, 0.35);
+}
+
+.era-block.era-abbasiyah {
+    background-color: rgba(255, 140, 0, 0.08);
+    border-right: 1.5px dashed rgba(255, 140, 0, 0.35);
+}
+
+.era-block.era-penyebaran-nusantara {
+    background-color: rgba(46, 139, 87, 0.09); /* Hijau Nusantara */
+    border-right: 1.5px dashed rgba(46, 139, 87, 0.35);
 }
 
 .era-block.era-kesultanan {
-    background-color: rgba(211, 107, 30, 0.06); /* Oranye transparan super lembut */
-    border-right: 1.5px dashed rgba(211, 107, 30, 0.3);
+    background-color: rgba(218, 165, 32, 0.09); /* Emas kejayaan kesultanan */
+    border-right: 1.5px dashed rgba(218, 165, 32, 0.35);
+}
+
+.era-block.era-imperium-dunia {
+    background-color: rgba(0, 128, 128, 0.08);
+    border-right: 1.5px dashed rgba(0, 128, 128, 0.35);
+}
+
+.era-block.era-kemunduran {
+    background-color: rgba(139, 69, 19, 0.08);
+    border-right: 1.5px dashed rgba(139, 69, 19, 0.35);
+}
+
+.era-block.era-modern {
+    background-color: rgba(70, 130, 180, 0.08);
+    border-right: 1.5px dashed rgba(70, 130, 180, 0.35);
 }
 
 /* Container agar badge era bersifat Sticky ketika di-zoom */

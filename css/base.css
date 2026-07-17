@@ -1,0 +1,80 @@
+/* =========================================================================
+   ATLAS SEJARAH KEBUDAYAAN ISLAM - BASE & TYPOGRAPHY
+   File: css/base.css
+   ========================================================================= */
+
+html, 
+body {
+    background: var(--bg-page);
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: var(--text);
+}
+
+h1, h2, h3 {
+    font-family: "EB Garamond", serif;
+    color: var(--title);
+}
+
+p {
+    line-height: 1.8;
+    color: #505050;
+}
+
+/* --- Header & Brand Title --- */
+header {
+    border-bottom: 1px solid rgba(210, 203, 194, 0.65);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.035);
+}
+
+header h1 {
+    font-size: 2.45rem;
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: #1f4b3a;
+    transition: opacity 0.2s ease;
+}
+
+header h1:hover {
+    opacity: 0.82;
+}
+
+.font-title {
+    font-family: "EB Garamond", serif !important;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #1f4b3a;
+}
+
+.text-caption {
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8b847a;
+}
+
+/* --- Utilities (Scrollbar) --- */
+.custom-scrollbar::-webkit-scrollbar { 
+    height: 6px; 
+    width: 4px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-track { 
+    background: rgba(0, 0, 0, 0.05); 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb { 
+    background: #d2cbc2; 
+    border-radius: 10px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { 
+    background: #bdb5aa; 
+}

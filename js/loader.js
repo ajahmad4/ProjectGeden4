@@ -79,8 +79,17 @@ function muatLokasiAplikasi() {
     // Sterilisasi kontainer list sebelum diisi data untuk menghindari penumpukan elemen
     locationList.innerHTML = ''; 
 
+    layerMasjid.clearLayers();
+    layerKerajaan.clearLayers();
+    layerPelabuhan.clearLayers();
+    layerKota.clearLayers();
+
     // Eksekusi perulangan otomatis untuk setiap entitas data sejarah kebudayaan Islam
-    dataSejarahNusantara.forEach(loc => {
+    const eraAktif = getCurrentEra(timeline.currentYear);
+    
+    dataSejarahNusantara
+    .filter(loc=>loc.era===eraAktif.id)
+    .forEach(loc=>{
         
         // A. PENANGANAN SPASIAL DAN MARKER PETA (KOLABORASI DENGAN MAP.JS)
         if (typeof map !== 'undefined') {
@@ -92,12 +101,13 @@ function muatLokasiAplikasi() {
             
             markerLokasi[loc.id] = marker; // Menyimpan referensi marker berdasarkan ID unik lokasi
 
-            // Menyisipkan tooltip/popup informatif saat marker berinteraksi dengan pengguna
-            marker.bindTooltip(`<b>${loc.nama}</b><br><small>Tahun Kontak: ${loc.tahun} M</small>`, {
-                direction: 'top',
-                offset: [0, -10]
-            });
-
+            switch (loc.kategori) {
+                case 'masjid' : marker.addTo(layerMasjid); break;
+                case 'kerajaan' : marker.addTo(layerKerajaan); break;
+                case 'pelabuhan' : marker.addto(layerPelabuhan); break;
+                case 'kota' : marker.addTo(layerKota); break;
+                default: marker.addTo(layerKota); break;
+            }
             // Sistem Event Klik pada Marker Peta: Mengarahkan kamera dan memicu panel detail
             marker.on("click", function () {
 
@@ -108,6 +118,12 @@ function muatLokasiAplikasi() {
 
                 showDetail(loc);
                 aktifkanCard(loc.id);
+
+                if (locationList) {
+                    sorotJalurDariCard(locationList);
+                } else {
+                    layerJalurSitus.clearLayers();
+                }
 
             });
 
@@ -121,6 +137,9 @@ function muatLokasiAplikasi() {
                     break;
                 case 'pelabuhan':
                     marker.addTo(layerPelabuhan);
+                    break;
+                case 'kota':
+                    marker.addTo(layerKota);
                     break;
                 default:
                     marker.addTo(map); // Layer cadangan jika kategori umum
@@ -514,38 +533,82 @@ function updateEraHeader(tahunAktif){
 
     const container = document.getElementById("era-header");
 
-    const eraAktif = dataWilayahKekuasaan.filter(wilayah=>
+    const eraAktif = TIMELINE_ERAS.find(era =>
 
-        tahunAktif >= wilayah.tahunMulai &&
-        tahunAktif <= wilayah.tahunSelesai
+        tahunAktif >= era.start &&
+        tahunAktif <= era.end
 
     );
 
-    if(eraAktif.length===0){
+    if(!eraAktif){
 
-        container.innerHTML=`
+        container.innerHTML = `
             <h3>Era Aktif</h3>
-            <span>Tidak ada kerajaan aktif</span>
+            <span>Tidak ada era</span>
         `;
 
         return;
 
     }
 
-    container.innerHTML=`
+    container.innerHTML = `
+
         <h3>Era Aktif</h3>
 
-        ${eraAktif.map(wilayah=>`
+        <div class="era-item">
 
-            <div class="era-item">
+            <strong>${eraAktif.name}</strong>
 
-                <strong>${wilayah.nama}</strong>
+            <span>${eraAktif.start}–${eraAktif.end} M</span>
 
-                <span>${wilayah.tahunMulai}–${wilayah.tahunSelesai} M</span>
+        </div>
 
-            </div>
-
-        `).join("")}
     `;
 
+}
+
+function getCurrentEra(tahunAktif){
+
+    return TIMELINE_ERAS.find(era =>
+
+        tahunAktif >= era.start &&
+        tahunAktif <= era.end
+
+    );
+
+}
+
+/**
+ * Menggambar dan menyoroti jalur pelayaran tertentu secara instan saat card diklik
+ */
+function sorotJalurDariCard(idJalur) {
+    if (!idJalur || typeof layerJalurSitus === 'undefined') return;
+
+    // 1. Bersihkan jalur yang sedang tampil agar tidak menumpuk banyak garis
+    layerJalurSitus.clearLayers();
+
+    // 2. Cari data rute yang cocok di dataJalurSejarah (dari data.js)
+    const ruteDitemukan = dataJalurSejarah.find(jalur => jalur.id === idJalur);
+
+    if (ruteDitemukan) {
+        // 3. Buat objek polyline Leaflet baru
+        const polylineSorot = L.polyline(ruteDitemukan.koordinat, {
+            color: ruteDitemukan.warna || '#2b74a5',
+            weight: 5,            // Garis dibuat sedikit tebal agar kontras
+            opacity: 0.85,
+            dashArray: '6, 6',     // Efek garis putus-putus khas peta sejarah
+            lineJoin: 'round'
+        });
+
+        // 4. Berikan popup info singkat jika garis tersebut diklik di peta
+        polylineSorot.bindPopup(`
+            <div class="popup-jalur">
+                <h4>${ruteDitemukan.nama}</h4>
+                <p>${ruteDitemukan.deskripsi}</p>
+            </div>
+        `);
+
+        // 5. Masukkan langsung ke dalam layerJalurSitus agar muncul di peta
+        polylineSorot.addTo(layerJalurSitus);
+    }
 }

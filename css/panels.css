@@ -1,0 +1,162 @@
+/* =========================================================================
+   ATLAS SEJARAH KEBUDAYAAN ISLAM - PANELS & LAYOUT
+   File: css/panels.css
+   ========================================================================= */
+
+/* Glassmorphism Effect */
+.glass-panel { 
+    background: var(--bg-panel); 
+    backdrop-filter: blur(14px); 
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+/* --- Left Side Panel (Location List) --- */
+#list-panel {
+    position: absolute !important;
+    left: 16px !important;
+    top: 60px !important;       
+    bottom: 70px !important;    
+    z-index: 1001 !important;
+    padding: 0;
+}
+
+#list-panel h1 {
+    font-size: 1.85rem;
+    line-height: 1;
+}
+
+#list-panel > div:first-child {
+    padding: 16px;
+}
+
+#location-list {
+    gap: 8px !important;
+}
+
+#location-list > div {
+    min-height: 60px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+#location-list > div:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Active State for Location Cards --- */
+.location-card-active {
+    background: #edf3ef !important;
+    border-color: #1f4b3a !important;
+    box-shadow: 0 8px 20px rgba(31, 75, 58, 0.12);
+}
+
+.location-card-active .material-symbols-outlined {
+    color: #1f4b3a;
+}
+
+/* --- Right Side Panel (Detail View) --- */
+#detail-panel {
+    position: absolute !important;
+    right: 16px !important;     
+    top: 60px !important;       
+    bottom: 70px !important;    
+    left: auto !important;      
+    width: 340px !important;    
+    z-index: 1002 !important;     
+    padding: 20px !important;
+}
+
+#detail-nama {
+    font-size: 1.95rem;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #1f4b3a;
+    margin: 10px 0 6px;
+}
+
+#detail-tahun {
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #8b847a;
+    margin-bottom: 22px;
+}
+
+#detail-panel hr {
+    border: none;
+    height: 1px;
+    background: #e7e1da;
+    margin-bottom: 26px;
+}
+
+#detail-deskripsi {
+    margin: 0;
+    padding-right: 6px;
+    font-size: 15px;
+    line-height: 2;
+    color: #505050;
+    text-align: justify;
+}
+
+#detail-panel button {
+    letter-spacing: 0.15em;
+}
+
+/* --- Detail Panel Media/Photo --- */
+#detail-foto-wrapper {
+    overflow: hidden;
+    border-radius: 18px;
+}
+
+#detail-foto {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    border: 1px solid #e7e1da;
+    transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+#detail-foto:hover {
+    transform: scale(1.03);
+    filter: brightness(1.03);
+}
+
+/* --- Info Banner per Era di Panel Info --- */
+.era-header {
+    background: #ffffff;
+    border-left: 5px solid #1b5e20;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    border-radius: 8px;
+}
+
+.era-header h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.era-item {
+    margin-bottom: 10px;
+}
+
+.era-item:last-child {
+    margin-bottom: 0;
+}
+
+.era-item strong {
+    display: block;
+    font-size: 16px;
+}
+
+.era-item span {
+    color: #777;
+    font-size: 13px;
+}

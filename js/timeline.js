@@ -169,6 +169,7 @@ function setTimelineYear(year) {
     if (typeof renderJalurDanWilayah === 'function'){
         renderJalurDanWilayah(year);
         updateEraHeader(year);
+        muatLokasiAplikasi();
     }
 
 }

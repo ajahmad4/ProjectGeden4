@@ -13,41 +13,70 @@
 
 const dataSejarahNusantara = [
 {
-    id: "barus",
-    nama: "Bandar Kuno Barus",
-    tahun: "674",
+    id: "tahun-gajah",
+    nama: "Tahun Gajah",
+    tahun: "570",
+    periode: "Abad ke-6 M",
+    kategori: "kota",
+    lokasi: "Mekkah",
+    wilayah: "Jazirah Arab",
+    koordinat: [21.4225, 39.8262],
+    deskripsi: "Pasukan Abrahah dari Kerajaan Yaman menyerang Ka'bah dengan pasukan bergajah. Allah mengirim burung ababil yang melempari mereka dengan batu dari tanah yang terbakar, sehingga serangan gagal. Peristiwa ini diabadikan dalam Al-Qur'an Surat Al-Fil.",
+    foto: "assets/images/pra-islam/tahun-gajah.jpg",
+    era: "era-pra-islam"
+  },
+  {
+    id: "kelahiran-nabi",
+    nama: "Kelahiran Nabi Muhammad SAW",
+    tahun: "570",
+    periode: "Abad ke-6 M",
+    kategori: "tokoh",
+    lokasi: "Mekkah",
+    wilayah: "Jazirah Arab",
+    koordinat: [21.4225, 39.8262],
+    deskripsi: "Nabi Muhammad SAW lahir di Mekkah pada bulan Rabiul Awal. Beliau lahir dalam keadaan yatim, ayahnya Abdullah telah wafat sebelum kelahirannya. Kelahiran beliau terjadi di tahun yang sama dengan peristiwa Tahun Gajah.",
+    foto: "assets/images/pra-islam/kelahiran-nabi.jpg",
+    era: "era-pra-islam"
+  },
+  {
+    id: "hilful-fudhul",
+    nama: "Hilf al-Fudhul",
+    tahun: "590",
+    periode: "Abad ke-6 M",
+    kategori: "perjanjian",
+    lokasi: "Mekkah",
+    wilayah: "Jazirah Arab",
+    koordinat: [21.4225, 39.8262],
+    deskripsi: "Perjanjian antar suku Quraisy untuk menegakkan keadilan dan membela orang yang dizalimi. Nabi Muhammad SAW turut serta dalam perjanjian ini dan setelah menjadi Nabi, beliau memuji perjanjian tersebut.",
+    foto: "assets/images/pra-islam/hilful-fudhul.jpg",
+    era: "era-pra-islam"
+  },
+  {
+    id: "pernikahan-khadijah",
+    nama: "Pernikahan dengan Khadijah RA",
+    tahun: "595",
+    periode: "Abad ke-6 M",
+    kategori: "tokoh",
+    lokasi: "Mekkah",
+    wilayah: "Jazirah Arab",
+    koordinat: [21.4225, 39.8262],
+    deskripsi: "Nabi Muhammad SAW menikah dengan Khadijah binti Khuwailid, seorang janda kaya dan saudagar sukses. Pernikahan ini menjadi pondasi dukungan moral dan finansial bagi dakwah Nabi di kemudian hari.",
+    foto: "assets/images/pra-islam/khadijah.jpg",
+    era: "era-pra-islam"
+  },
+  {
+    id: "rekonstruksi-kaabah",
+    nama: "Rekonstruksi Ka'bah dan Hajar Aswad",
+    tahun: "605",
     periode: "Abad ke-7 M",
-    kategori: "pelabuhan",
-    lokasi: "Barus, Tapanuli Tengah, Sumatera Utara",
-    wilayah: "Pantai Barat Sumatera",
-    koordinat: [2.0031, 98.3908],
-    deskripsi: "Barus merupakan salah satu bandar pelabuhan tertua di Nusantara. Berdasarkan dokumen kuno, pada abad ke-7 (sekitar tahun 674 M), sudah terdapat perkampungan pedagang Arab Muslim di pesisir barat Sumatera ini, menjadikannya salah satu titik awal kontak Islam di Nusantara.",
-    foto: "assets/images/barus/barus-01.jpg"
-    },
-    {
-    id: "pasai",
-    nama: "Kesultanan Samudera Pasai",
-    tahun: "1267",
-    periode: "Abad ke-13 M",
-    kategori: "kerajaan",
-    lokasi: "Aceh Utara, Aceh",
-    wilayah: "Pantai Utara Aceh",
-    koordinat: [5.1278, 97.2341],
-    deskripsi: "Kesultanan Samudera Pasai didirikan oleh Marah Silu (Sultan Malik as-Saleh) pada tahun 1267 M. Pasai menjadi kerajaan Islam pertama di Nusantara yang memegang peran kunci sebagai pusat perdagangan internasional dan pusat studi Islam di Asia Tenggara.",
-    foto: "assets/images/pasai/pasai-01.jpg"
-    },
-    {
-    id: "demak",
-    nama: "Kesultanan Demak",
-    tahun: "1475",
-    periode: "Abad ke-15 M",
     kategori: "masjid",
-    lokasi: "Demak, Jawa Tengah",
-    wilayah: "Pesisir Utara Jawa",
-    koordinat: [-6.8946, 110.6372],
-    deskripsi: "Pelopor kerajaan Islam di tanah Jawa yang didirikan oleh Raden Patah dengan dukungan dari Walisongo. Masjid Agung Demak menjadi simbol pusat penyiaran Islam dan koordinasi strategi dakwah Islamisasi di seluruh Nusantara.",
-    foto: "assets/images/demak/demak-01.jpg"
-    }
+    lokasi: "Mekkah",
+    wilayah: "Jazirah Arab",
+    koordinat: [21.4225, 39.8262],
+    deskripsi: "Ka'bah rusak akibat banjir. Saat suku Quraisy berselisih tentang siapa yang berhak meletakkan Hajar Aswad, Nabi Muhammad SAW menjadi penengah dengan solusi meletakkannya di atas kain yang diangkat bersama-sama.",
+    foto: "assets/images/pra-islam/kaabah.jpg",
+    era: "era-pra-islam"
+  }
 ];
 
 // =========================================================================
@@ -86,7 +115,28 @@ const dataJalurSejarah = [
             [-6.9006, 112.2152]  // Pantai Utara Jawa (Tuban/Gresik)
         ],
         deskripsi: "Jalur persebaran Islam dari pusat Kesultanan Samudera Pasai menuju Selat Malaka hingga menyisir pelabuhan-pelabuhan utama di Pantai Utara Jawa."
-    }
+    },
+    {
+    idJalur: "jalur-abrahah",
+    nama: "Jalur Pasukan Abrahah ke Ka'bah (Tahun Gajah)",
+    tipe: "militer",
+    tahunMulai: 570,
+    tahunSelesai: 570,
+    warna: "#8B0000", // Merah marun - nuansa militer & dramatis
+    // Koordinat rute darat: dari Sana'a (Yaman) menuju Mekkah
+    koordinat: [
+        [15.3520, 44.2075],   // Sana'a, Yaman (titik awal)
+        [16.8500, 44.2000],   // Menuju Najran
+        [17.5000, 44.1500],   // Najran
+        [18.7000, 43.3000],   // Wilayah Asir
+        [19.5000, 42.5000],   // Tathlith / Al-Qahr
+        [20.0000, 41.5000],   // Daerah Baha
+        [20.8000, 40.8000],   // Menuju Taif
+        [21.2700, 40.4200],   // Taif
+        [21.4225, 39.8262]    // Mekkah / Ka'bah (titik akhir)
+    ],
+    deskripsi: "Pasukan Abrahah al-Ashram berangkat dari Sana'a, Yaman dengan pasukan besar termasuk gajah perang untuk menghancurkan Ka'bah di Mekkah. Rute yang ditempuh melewati Najran, pegunungan Asir, Baha, dan Taif. Perjalanan ini berakhir dengan kehancuran pasukan oleh burung ababil sesuai kisah dalam Al-Qur'an Surat Al-Fil."
+}
 ];
 
 const dataWilayahKekuasaan = [

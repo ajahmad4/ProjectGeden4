@@ -12,6 +12,7 @@
 var layerMasjid = L.layerGroup();
 var layerKerajaan = L.layerGroup();
 var layerPelabuhan = L.layerGroup();
+var layerKota = L.layerGroup();
 
 var layerJalurSitus = L.layerGroup();
 var layerWilayahKekuasaan = L.layerGroup();
@@ -28,7 +29,8 @@ const map = L.map('map', {
         layerMasjid, 
         layerKerajaan, 
         layerPelabuhan, 
-        layerJalurSitus, 
+        layerJalurSitus,
+        layerKota, 
         layerWilayahKekuasaan
     ] // Seluruh klaster layer otomatis aktif di awal pemuatan
 });
@@ -57,7 +59,8 @@ const overlays = {
     "Pusat Kesultanan/Kerajaan": layerKerajaan,
     "Pelabuhan/Bandar Transaksi": layerPelabuhan,
     "Jalur Dakwah/Perdagangan": layerJalurSitus,
-    "Wilayah Kekuasaan Kesultanan":layerWilayahKekuasaan
+    "Wilayah Kekuasaan Kesultanan":layerWilayahKekuasaan,
+    "kota" : layerKota
 };
 
 // Menempatkan menu kontrol layer di pojok kanan atas agar estetik dan fungsional

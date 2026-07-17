@@ -1,0 +1,229 @@
+/* =========================================================================
+   ATLAS SEJARAH KEBUDAYAAN ISLAM - TIMELINE FOOTER & RULER SYSTEM
+   File: css/timeline.css
+   ========================================================================= */
+
+#timeline-footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 75px; 
+    background: #faf8f5;
+    border-top: 1px solid #e4dfd8;
+    display: flex;
+    align-items: flex-end; 
+    justify-content: center;
+    padding-bottom: 12px;
+    z-index: 90;
+    overflow: hidden; 
+}
+
+.timeline-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#timeline-track {
+    position: relative;
+    width: 100%;
+    height: 40px; 
+}
+
+/* --- INDIKATOR TAHUN MENGAMBANG (Jarum Oranye) --- */
+#timeline-indicator {
+    position: fixed;
+    left: 50%;
+    bottom: 64px; 
+    transform: translateX(-50%);
+    width: 80px;
+    height: 32px;
+    z-index: 110; 
+    pointer-events: none; 
+}
+
+#timeline-current {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 30px;
+    border: 2px solid #c96a28; 
+    border-radius: 8px; 
+    background: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    color: #c96a28;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(201, 106, 40, 0.15);
+    cursor: text;
+    pointer-events: auto; 
+    user-select: text;
+}
+
+#timeline-current:focus {
+    box-shadow: 0 0 0 3px rgba(201, 106, 40, 0.25);
+}
+
+#timeline-pointer {
+    position: absolute;
+    left: 50%;
+    top: 32px; 
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;  
+    border-right: 10px solid transparent; 
+    border-top: 14px solid #c96a28;       
+    pointer-events: none;
+}
+
+/* --- REGULASI UTAMA RULER CONTAINER --- */
+#timeline-ruler {
+    position: relative;
+    width: 100%;
+    height: 70px; 
+    overflow-x: hidden;
+    overflow-y: visible; 
+    background: #faf8f5;
+    border-bottom: 1px solid #e4dfd8;
+    box-sizing: border-box;
+}
+
+#timeline-ruler-content {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    will-change: transform;
+}
+
+.ruler-line {
+    position: absolute;
+    left: 0;
+    top: 25px; 
+    width: 100%;
+    height: 2px;
+    background: #7b746b;
+    z-index: 15 !important;
+}
+
+.ruler-mark {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 20 !important; 
+}
+
+.pointer-bubble {
+    background: #ffffff;
+    color: #d36b1e; 
+    border: 1.5px solid #d36b1e;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.pointer-arrow {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #d36b1e;
+    margin-top: -1px; 
+}
+
+/* --- INDIKATOR TICKS & LABEL ANGKA TAHUN --- */
+.ruler-tick {
+    position: absolute;
+    top: 25px; 
+    width: 1px;
+    height: 8px;
+    background: #8e857b;
+}
+
+.ruler-tick.major {
+    width: 2px;
+    height: 14px;
+    background: #1f4b3a; 
+}
+
+.ruler-label {
+    position: absolute;
+    top: 43px; 
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 600;
+    color: #7b746b;
+    font-family: inherit;
+}
+
+/* --- SISTEM BACKGROUND ERA BANNER --- */
+.eras-background-wrapper {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none; 
+    z-index: 1; 
+}
+
+.era-block {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    display: flex;
+    align-items: flex-start; 
+    padding-top: 4px; 
+    box-sizing: border-box;
+}
+
+.era-block.era-pra-islam { background-color: rgba(105, 105, 105, 0.08); border-right: 1.5px dashed rgba(105, 105, 105, 0.35); }
+.era-block.era-kenabian { background-color: rgba(34, 139, 34, 0.09); border-right: 1.5px dashed rgba(34, 139, 34, 0.35); }
+.era-block.era-rashidun { background-color: rgba(0, 102, 204, 0.08); border-right: 1.5px dashed rgba(0, 102, 204, 0.35); }
+.era-block.era-umayyah { background-color: rgba(139, 0, 0, 0.08); border-right: 1.5px dashed rgba(139, 0, 0, 0.35); }
+.era-block.era-abbasiyah { background-color: rgba(255, 140, 0, 0.08); border-right: 1.5px dashed rgba(255, 140, 0, 0.35); }
+.era-block.era-penyebaran-nusantara { background-color: rgba(46, 139, 87, 0.09); border-right: 1.5px dashed rgba(46, 139, 87, 0.35); }
+.era-block.era-kesultanan { background-color: rgba(218, 165, 32, 0.09); border-right: 1.5px dashed rgba(218, 165, 32, 0.35); }
+.era-block.era-imperium-dunia { background-color: rgba(0, 128, 128, 0.08); border-right: 1.5px dashed rgba(0, 128, 128, 0.35); }
+.era-block.era-kemunduran { background-color: rgba(139, 69, 19, 0.08); border-right: 1.5px dashed rgba(139, 69, 19, 0.35); }
+.era-block.era-modern { background-color: rgba(70, 130, 180, 0.08); border-right: 1.5px dashed rgba(70, 130, 180, 0.35); }
+
+.era-label-container {
+    position: sticky;
+    left: 12px;
+    right: 12px;
+    max-width: fit-content;
+    z-index: 10;
+}
+
+.era-badge {
+    background: #faf8f5; 
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.era-block.era-awal .era-badge { color: #2e7559; border: 1.5px solid rgba(46, 117, 89, 0.4); }
+.era-block.era-kesultanan .era-badge { color: #d36b1e; border: 1.5px solid rgba(211, 107, 30, 0.4); }
