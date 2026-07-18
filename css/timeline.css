@@ -8,21 +8,21 @@
     left: 0;
     bottom: 0;
     width: 100%;
-    height: 75px; 
-    background: #faf8f5;
-    border-top: 1px solid #e4dfd8;
+    height: 75px;
+    background: var(--bg-page);
+    border-top: 1px solid var(--border-light);
     display: flex;
-    align-items: flex-end; 
+    align-items: stretch;
     justify-content: center;
-    padding-bottom: 12px;
+    padding-bottom: 0;
     z-index: 90;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .timeline-wrapper {
     position: relative;
     width: 100%;
-    max-width: 1200px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -33,19 +33,19 @@
 #timeline-track {
     position: relative;
     width: 100%;
-    height: 40px; 
+    height: 100%;
 }
 
 /* --- INDIKATOR TAHUN MENGAMBANG (Jarum Oranye) --- */
 #timeline-indicator {
     position: fixed;
     left: 50%;
-    bottom: 64px; 
+    bottom: 64px;
     transform: translateX(-50%);
     width: 80px;
     height: 32px;
-    z-index: 110; 
-    pointer-events: none; 
+    z-index: 110;
+    pointer-events: none;
 }
 
 #timeline-current {
@@ -55,33 +55,33 @@
     transform: translateX(-50%);
     width: 70px;
     height: 30px;
-    border: 2px solid #c96a28; 
-    border-radius: 8px; 
-    background: #fff;
+    border: 2px solid var(--accent-orange);
+    border-radius: 8px;
+    background: var(--bg-panel-solid);
     font-size: 16px;
     font-weight: 800;
-    color: #c96a28;
+    color: var(--accent-orange);
     text-align: center;
-    box-shadow: 0 4px 12px rgba(201, 106, 40, 0.15);
+    box-shadow: 0 4px 12px rgba(var(--accent-orange-rgb), 0.15);
     cursor: text;
-    pointer-events: auto; 
+    pointer-events: auto;
     user-select: text;
 }
 
 #timeline-current:focus {
-    box-shadow: 0 0 0 3px rgba(201, 106, 40, 0.25);
+    box-shadow: 0 0 0 3px rgba(var(--accent-orange-rgb), 0.25);
 }
 
 #timeline-pointer {
     position: absolute;
     left: 50%;
-    top: 32px; 
+    top: 32px;
     transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 10px solid transparent;  
-    border-right: 10px solid transparent; 
-    border-top: 14px solid #c96a28;       
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 14px solid var(--accent-orange);
     pointer-events: none;
 }
 
@@ -89,11 +89,11 @@
 #timeline-ruler {
     position: relative;
     width: 100%;
-    height: 70px; 
+    height: 100%;
     overflow-x: hidden;
-    overflow-y: visible; 
-    background: #faf8f5;
-    border-bottom: 1px solid #e4dfd8;
+    overflow-y: visible;
+    background: var(--bg-page);
+    border-bottom: 1px solid var(--border-light);
     box-sizing: border-box;
 }
 
@@ -107,10 +107,10 @@
 .ruler-line {
     position: absolute;
     left: 0;
-    top: 25px; 
+    top: 25px;
     width: 100%;
     height: 2px;
-    background: #7b746b;
+    background: var(--timeline-line);
     z-index: 15 !important;
 }
 
@@ -121,18 +121,18 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-index: 20 !important; 
+    z-index: 20 !important;
 }
 
 .pointer-bubble {
-    background: #ffffff;
-    color: #d36b1e; 
-    border: 1.5px solid #d36b1e;
+    background: var(--bg-panel-solid);
+    color: var(--accent-orange-hover);
+    border: 1.5px solid var(--accent-orange-hover);
     border-radius: 4px;
     padding: 2px 8px;
     font-size: 11px;
     font-weight: 700;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     line-height: 1;
     white-space: nowrap;
 }
@@ -142,32 +142,32 @@
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 5px solid #d36b1e;
-    margin-top: -1px; 
+    border-top: 5px solid var(--accent-orange-hover);
+    margin-top: -1px;
 }
 
 /* --- INDIKATOR TICKS & LABEL ANGKA TAHUN --- */
 .ruler-tick {
     position: absolute;
-    top: 25px; 
+    top: 25px;
     width: 1px;
     height: 8px;
-    background: #8e857b;
+    background: var(--timeline-tick);
 }
 
 .ruler-tick.major {
     width: 2px;
     height: 14px;
-    background: #1f4b3a; 
+    background: var(--accent-primary);
 }
 
 .ruler-label {
     position: absolute;
-    top: 43px; 
+    top: 43px;
     transform: translateX(-50%);
     font-size: 10px;
     font-weight: 600;
-    color: #7b746b;
+    color: var(--timeline-line);
     font-family: inherit;
 }
 
@@ -178,8 +178,8 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    pointer-events: none; 
-    z-index: 1; 
+    pointer-events: none;
+    z-index: 1;
 }
 
 .era-block {
@@ -188,21 +188,65 @@
     bottom: 0;
     height: 100%;
     display: flex;
-    align-items: flex-start; 
-    padding-top: 4px; 
+    align-items: flex-start;
+    padding-top: 0px;
     box-sizing: border-box;
 }
 
-.era-block.era-pra-islam { background-color: rgba(105, 105, 105, 0.08); border-right: 1.5px dashed rgba(105, 105, 105, 0.35); }
-.era-block.era-kenabian { background-color: rgba(34, 139, 34, 0.09); border-right: 1.5px dashed rgba(34, 139, 34, 0.35); }
-.era-block.era-rashidun { background-color: rgba(0, 102, 204, 0.08); border-right: 1.5px dashed rgba(0, 102, 204, 0.35); }
-.era-block.era-umayyah { background-color: rgba(139, 0, 0, 0.08); border-right: 1.5px dashed rgba(139, 0, 0, 0.35); }
-.era-block.era-abbasiyah { background-color: rgba(255, 140, 0, 0.08); border-right: 1.5px dashed rgba(255, 140, 0, 0.35); }
-.era-block.era-penyebaran-nusantara { background-color: rgba(46, 139, 87, 0.09); border-right: 1.5px dashed rgba(46, 139, 87, 0.35); }
-.era-block.era-kesultanan { background-color: rgba(218, 165, 32, 0.09); border-right: 1.5px dashed rgba(218, 165, 32, 0.35); }
-.era-block.era-imperium-dunia { background-color: rgba(0, 128, 128, 0.08); border-right: 1.5px dashed rgba(0, 128, 128, 0.35); }
-.era-block.era-kemunduran { background-color: rgba(139, 69, 19, 0.08); border-right: 1.5px dashed rgba(139, 69, 19, 0.35); }
-.era-block.era-modern { background-color: rgba(70, 130, 180, 0.08); border-right: 1.5px dashed rgba(70, 130, 180, 0.35); }
+.era-block.era-pra-islam {
+    background-color: rgba(105, 105, 105, 0.08);
+    border-right: 1.5px dashed rgba(105, 105, 105, 0.35);
+}
+
+.era-block.era-kenabian {
+    background-color: rgba(34, 139, 34, 0.09);
+    border-right: 1.5px dashed rgba(34, 139, 34, 0.35);
+}
+
+.era-block.era-rashidun {
+    background-color: rgba(0, 102, 204, 0.08);
+    border-right: 1.5px dashed rgba(0, 102, 204, 0.35);
+}
+
+.era-block.era-umayyah {
+    background-color: rgba(139, 0, 0, 0.08);
+    border-right: 1.5px dashed rgba(139, 0, 0, 0.35);
+}
+
+.era-block.era-abbasiyah {
+    background-color: rgba(255, 140, 0, 0.08);
+    border-right: 1.5px dashed rgba(255, 140, 0, 0.35);
+}
+
+.era-block.era-pasca-abbasiyah {
+    background-color: rgba(100, 160, 100, 0.09);
+    border-right: 1.5px dashed rgba(100, 160, 100, 0.35);
+}
+
+.era-block.era-penyebaran-nusantara {
+    background-color: rgba(46, 139, 87, 0.09);
+    border-right: 1.5px dashed rgba(46, 139, 87, 0.35);
+}
+
+.era-block.era-kesultanan {
+    background-color: rgba(218, 165, 32, 0.09);
+    border-right: 1.5px dashed rgba(218, 165, 32, 0.35);
+}
+
+.era-block.era-imperium-dunia {
+    background-color: rgba(0, 128, 128, 0.08);
+    border-right: 1.5px dashed rgba(0, 128, 128, 0.35);
+}
+
+.era-block.era-kemunduran {
+    background-color: rgba(139, 69, 19, 0.08);
+    border-right: 1.5px dashed rgba(139, 69, 19, 0.35);
+}
+
+.era-block.era-modern {
+    background-color: rgba(70, 130, 180, 0.08);
+    border-right: 1.5px dashed rgba(70, 130, 180, 0.35);
+}
 
 .era-label-container {
     position: sticky;
@@ -213,7 +257,7 @@
 }
 
 .era-badge {
-    background: #faf8f5; 
+    background: var(--bg-page);
     padding: 3px 10px;
     border-radius: 20px;
     font-size: 9px;
@@ -223,7 +267,90 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: inline-block;
     white-space: nowrap;
+    color: rgb(var(--era-color-rgb, 80, 80, 80));
+    border: 1.5px solid rgba(var(--era-color-rgb, 80, 80, 80), 0.4);
 }
 
-.era-block.era-awal .era-badge { color: #2e7559; border: 1.5px solid rgba(46, 117, 89, 0.4); }
-.era-block.era-kesultanan .era-badge { color: #d36b1e; border: 1.5px solid rgba(211, 107, 30, 0.4); }
+/* --- ERA SHORTCUT LEGEND (Poin-Poin Navigasi Cepat) --- */
+#timeline-legend {
+    position: fixed;
+    bottom: 78px;
+    /* Di atas timeline footer */
+    right: 360px;
+    /* Digeser agak ke tengah agar tidak tertutup panel detail (320px + 16px) */
+    z-index: 200;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 5px 8px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.legend-dot {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    background-color: rgb(var(--dot-color));
+    flex-shrink: 0;
+}
+
+.legend-dot:hover {
+    transform: scale(1.45);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+}
+
+/* Tooltip yang muncul saat hover */
+.legend-dot::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-tooltip);
+    color: var(--text-tooltip);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 8px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    max-width: 200px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    letter-spacing: 0;
+    text-transform: none;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Ekor panah tooltip */
+.legend-dot::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 3px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--bg-tooltip);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.legend-dot:hover::after,
+.legend-dot:hover::before {
+    opacity: 1;
+}

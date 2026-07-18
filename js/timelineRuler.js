@@ -133,6 +133,40 @@ function buildRuler() {
         const x = yearToPixel(year);
         container.appendChild(createTick(year, x));
     }
+
+    // 4. Bangun Legend Shortcut
+    buildLegend();
+}
+
+// =========================================================================
+// ERA SHORTCUT LEGEND
+// =========================================================================
+
+function buildLegend() {
+    const container = document.getElementById("timeline-legend");
+    if (!container) return;
+
+    container.innerHTML = ""; // Bersihkan dulu sebelum rebuild
+
+    TIMELINE_ERAS.forEach(era => {
+        const dot = document.createElement("button");
+        dot.className = "legend-dot";
+        dot.setAttribute("data-tooltip", era.name);
+        dot.setAttribute("aria-label", "Pergi ke " + era.name);
+        dot.title = era.name; // fallback tooltip untuk non-CSS
+
+        // Warna titik diambil langsung dari colorRgb era
+        dot.style.setProperty("--dot-color", era.colorRgb);
+
+        // Klik: Geser timeline ke tahun awal era dengan animasi halus
+        dot.addEventListener("click", () => {
+            if (typeof animateTimelineYear === "function") {
+                animateTimelineYear(era.start);
+            }
+        });
+
+        container.appendChild(dot);
+    });
 }
 
 function moveRuler(year) {

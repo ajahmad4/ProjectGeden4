@@ -44,10 +44,25 @@ map.setMaxZoom(15);                     // Batas maksimal zoom in (skala mikro s
 // ==========================================
 // Menggunakan ubin peta (tile layer) CartoDB Light Minimalist agar fokus visual siswa
 // tetap tertuju pada kontras warna marker situs sejarah kebudayaan Islam.
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { 
-    maxZoom: 18,
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-}).addTo(map);
+let currentBasemap = null;
+
+function setBasemap(theme) {
+    if (currentBasemap) {
+        map.removeLayer(currentBasemap);
+    }
+    const tileUrl = theme === 'dark' 
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+        
+    currentBasemap = L.tileLayer(tileUrl, { 
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    }).addTo(map);
+}
+
+// Initial basemap load
+const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
+setBasemap(initialTheme);
 
 // ==========================================
 // 4. MANAJEMEN KONTROL LAYER & NAVIGASI UI
@@ -76,7 +91,11 @@ L.control.zoom({ position: 'topright' }).addTo(map);
 // 5. IMPLEMENTASI PLUGIN LEAFLET-MINIMAP
 // ==========================================
 // Membuat layer independen sekunder khusus untuk peta kecil penunjuk orientasi regional
-var layerMini = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+const initialMiniTile = initialTheme === 'dark' 
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+
+var layerMini = L.tileLayer(initialMiniTile, {
     minZoom: 0,
     maxZoom: 13,
     attribution: false 
@@ -105,6 +124,22 @@ map.on('moveend zoomend', function () {
     }
 });
 
+// Listener dari js/theme.js
+window.updateMapTheme = function(theme) {
+    setBasemap(theme);
+    
+    if (miniMap) {
+        const tileUrl = theme === 'dark' 
+            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+            
+        var newLayerMini = L.tileLayer(tileUrl, {
+            minZoom: 0, maxZoom: 13, attribution: false 
+        });
+        miniMap.changeLayer(newLayerMini);
+    }
+};
+
 // ==========================================
 // 6. ADAPTASI RENDER PENANDA KUSTOM (CUSTOM MARKER)
 // ==========================================
@@ -117,30 +152,42 @@ map.on('moveend zoomend', function () {
 function buatIkonSejarah(kategori) {
     // Menarik data nama string ikon resmi dari pustaka fungsi di js/utils.js
     const namaIkon = getMaterialIcon(kategori);
-    
-    // Alokasi palet warna fungsional sebagai diferensiasi visual pengelompokan jenis objek sejarah
-    let warnaLatar = "#1f4b3a";  
-    if (kategori === "pelabuhan") warnaLatar = "#547792";   
-    if (kategori === "kerajaan") warnaLatar = "#8a6d3b"; 
-    if (kategori === "kota") warnaLatar = "#687076";     
-    // Komposisi struktur kode DOM HTML dan spesifikasi jangkar (anchor) ukuran penanda kustom
+
+    // Palet warna diferensiasi visual per kategori historis
+    // Menggunakan switch untuk scalability (menggantikan if-else berantai)
+    let warnaLatar;
+    switch (kategori) {
+        case "masjid":      warnaLatar = "#1f4b3a"; break; // Hijau tua  — pusat ibadah
+        case "kerajaan":    warnaLatar = "#8a6d3b"; break; // Emas-coklat — pusat kekuasaan
+        case "pelabuhan":   warnaLatar = "#547792"; break; // Biru-abu   — jalur maritim
+        case "kota":        warnaLatar = "#687076"; break; // Abu netral — pusat kota
+        case "tokoh":       warnaLatar = "#5c4a8a"; break; // Ungu       — figur historis
+        case "kenabian":    warnaLatar = "#2e7d32"; break; // Hijau cerah — peristiwa kenabian
+        case "dakwah":      warnaLatar = "#00695c"; break; // Teal       — penyebaran ajaran
+        case "mukjizat":    warnaLatar = "#6a1b9a"; break; // Ungu tua   — peristiwa mukjizat
+        case "politik":     warnaLatar = "#1565c0"; break; // Biru tua   — peristiwa politik
+        case "militer":     warnaLatar = "#b71c1c"; break; // Merah tua  — peristiwa militer
+        case "perjanjian":  warnaLatar = "#e65100"; break; // Oranye     — perjanjian/pakta
+        default:            warnaLatar = "#5d6d7e"; break; // Abu-biru   — kategori umum
+    }
+
+    // Komposisi DOM HTML marker kustom dengan ikon & warna dinamis
     return L.divIcon({
         html: `
         <div
             class="atlas-marker"
             style="background:${warnaLatar}; opacity:1;">
-
             <span class="material-symbols-outlined">
                 ${namaIkon}
             </span>
-
         </div>
         `,
-        className: 'bg-transparent', // Menghapus lapisan kotak bawaan native CSS Leaflet
-        iconSize: [42, 42],          // Dimensi fisik total pembungkus ikon kustom
-        iconAnchor: [21, 21]         // Titik sentral penempatan koordinat sumbu X dan Y pada peta
+        className: 'bg-transparent', // Hapus kotak bawaan native CSS Leaflet
+        iconSize: [42, 42],          // Dimensi pembungkus ikon
+        iconAnchor: [21, 21]         // Titik anchor pada koordinat peta
     });
 }
+
 
 // ======================================================
 // BATAS VERTIKAL PETA

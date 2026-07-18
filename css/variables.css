@@ -4,23 +4,48 @@
    ========================================================================= */
 
 :root {
-    /* Background & Panels */
-    --bg-page: #f7f5f2;
-    --bg-panel: rgba(252, 248, 245, 0.94);
+    /* --- Backgrounds --- */
+    --bg-page: #faf8f5;        /* Latar utama */
+    --bg-panel: rgba(252, 248, 245, 0.94); /* Panel glassmorphism */
+    --bg-panel-solid: #fdfcfb; /* Latar solid list panel */
+    --bg-input: #fcfbf9;       /* Latar input form */
+    --bg-badge: #f7f4ef;       /* Latar badge dan tombol */
+    --bg-active: #edf3ef;      /* Item card aktif */
+    --bg-tooltip: #2d2925;     /* Tooltip legend */
+    --bg-era-header: #fafaf9;  /* Era header background */
 
-    /* Borders & Outlines */
-    --border: #e3ddd5;
+    /* --- Typography (Texts) --- */
+    --text-title: #1f4b3a;     /* Teks judul hijau tua */
+    --text-primary: #444444;   /* Teks utama default */
+    --text-secondary: #505050; /* Teks deskripsi panjang */
+    --text-muted: #8b847a;     /* Teks bantuan/keterangan */
+    --text-muted-alt: #8d867d; /* Variasi mute (optional) */
+    --text-icon: #9a9388;      /* Teks ikon search */
+    --text-tooltip: #f5f2ee;   /* Teks dalam tooltip hitam */
+    --text-button: #6d6a63;    /* Teks tombol tutup panel */
 
-    /* Typography Colors */
-    --title: #1f4b3a;
-    --subtitle: #8d867d;
-    --text: #4d4d4d;
+    /* --- Borders & Outlines --- */
+    --border-light: #e4dfd8;   /* Garis pemisah standar */
+    --border-input: #e3ddd5;   /* Garis luar input search */
+    --border-panel: #e7e1da;   /* Garis border foto detail */
+    --border-active: #1f4b3a;  /* Garis card aktif */
 
-    /* Brand Accent Colors */
-    --accent: #1f4b3a;
-    --accent-soft: #edf3ef;
+    /* --- Accents & Specifics --- */
+    --accent-primary: #1f4b3a; /* Hijau utama Atlas */
+    --accent-orange: #c96a28;  /* Penunjuk (pointer) timeline */
+    --accent-orange-rgb: 201, 106, 40;
+    --accent-orange-hover: #d36b1e; /* Efek hover pointer (bila ada) */
+    
+    /* --- Timeline System --- */
+    --timeline-line: #7b746b;  /* Garis penggaris utama */
+    --timeline-tick: #8e857b;  /* Garis kecil tahun */
+    --handle-color: #d1cbc1;   /* Drag handle panel di mobile */
 
-    /* Shadows & Spacing */
+    /* --- Scrollbar --- */
+    --scroll-thumb: #d2c6b8;   /* Warna thumb scrollbar */
+    --scroll-hover: #b59b7a;   /* Warna thumb scrollbar saat hover */
+
+    /* --- UI Shadows & Spacing (Dipertahankan) --- */
     --shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
     --space-1: 4px;
     --space-2: 8px;
@@ -28,4 +53,50 @@
     --space-4: 16px;
     --space-5: 24px;
     --space-6: 32px;
+}
+
+/* =========================================================================
+   DARK MODE PALETTE
+   ========================================================================= */
+[data-theme="dark"] {
+    /* --- Backgrounds --- */
+    --bg-page: #121212;        
+    --bg-panel: rgba(30, 30, 30, 0.94); 
+    --bg-panel-solid: #1e1e1e; 
+    --bg-input: #2a2a2a;       
+    --bg-badge: #2c2c2c;       
+    --bg-active: #1e3a2c;      
+    --bg-tooltip: #e0e0e0;     
+    --bg-era-header: #1c1c1c;  
+
+    /* --- Typography (Texts) --- */
+    --text-title: #7dc4a5;     
+    --text-primary: #e0e0e0;   
+    --text-secondary: #b3b3b3; 
+    --text-muted: #888888;     
+    --text-muted-alt: #777777; 
+    --text-icon: #aaaaaa;      
+    --text-tooltip: #121212;   
+    --text-button: #999999;    
+
+    /* --- Borders & Outlines --- */
+    --border-light: #333333;   
+    --border-input: #444444;   
+    --border-panel: #333333;   
+    --border-active: #7dc4a5;  
+
+    /* --- Accents & Specifics --- */
+    --accent-primary: #7dc4a5; 
+    --accent-orange: #d1824a;  
+    --accent-orange-rgb: 209, 130, 74;
+    --accent-orange-hover: #e0935b; 
+    
+    /* --- Timeline System --- */
+    --timeline-line: #4a4a4a;  
+    --timeline-tick: #666666;  
+    --handle-color: #555555;   
+
+    /* --- Scrollbar --- */
+    --scroll-thumb: #444444;   
+    --scroll-hover: #555555;   
 }

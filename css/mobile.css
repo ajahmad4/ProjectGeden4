@@ -1,0 +1,85 @@
+/* 
+ * MOBILE UX STYLES
+ * Menimpa layout desktop khusus untuk perangkat dengan lebar maksimal 768px 
+ */
+
+@media (max-width: 768px) {
+    /* 1. MAP MENJADI FOKUS UTAMA */
+    /* Pastikan Leaflet zoom controls tidak tertutup oleh panel di mobile */
+    .leaflet-control-zoom {
+        display: none; /* Sembunyikan zoom control di mobile untuk hemat space, user bisa pinch-to-zoom */
+    }
+
+    /* 2. PANEL KIRI (NAVIGASI) -> DROPDOWN */
+    #list-panel {
+        left: 10px;
+        right: 10px;
+        top: 10px; /* 10px di bawah header (karena .pt-14 ada di parent) */
+        width: auto !important; /* Timpa w-[340px] dari Tailwind */
+        bottom: auto !important; /* Timpa bottom-4 */
+        max-height: 50vh;
+        z-index: 1000;
+        transform-origin: top;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
+        border-radius: 16px;
+    }
+
+    #list-panel.mobile-closed {
+        transform: scaleY(0);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* 3. PANEL KANAN (DETAIL) -> BOTTOM SHEET */
+    #detail-panel {
+        left: 0 !important; /* Timpa right-4 */
+        right: 0 !important;
+        top: auto !important; /* Timpa top-4 */
+        bottom: 0 !important; /* Menempel di dasar layar */
+        width: 100% !important; /* Timpa w-[360px] */
+        height: 90vh; /* Tinggi maksimum saat ditarik penuh */
+        border-radius: 24px 24px 0 0 !important;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+        z-index: 1005; /* Di atas segalanya saat terbuka */
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+        
+        /* Animasi default saat kelas di-toggle via JS */
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        transform: translateY(100%); /* Keadaan tertutup */
+        
+        /* Nonaktifkan Tailwind hidden agar bisa dimanipulasi via transform */
+        display: flex !important; 
+    }
+
+    #detail-panel.hidden {
+        /* Kita tetap gunakan class hidden untuk state tertutup, tapi timpa perilakunya */
+        transform: translateY(100%);
+        pointer-events: none;
+    }
+
+    /* Snap States dikontrol via JS classes */
+    #detail-panel:not(.hidden).snap-peek {
+        /* Mengintip di atas timeline (timeline tinggi ~80px) */
+        transform: translateY(calc(100% - 30vh - 80px)); 
+    }
+
+    #detail-panel:not(.hidden).snap-half {
+        transform: translateY(50%);
+    }
+
+    #detail-panel:not(.hidden).snap-full {
+        transform: translateY(0%); /* Penuh 90vh */
+    }
+
+    /* Modifikasi UI agar sesuai Bottom Sheet */
+    #detail-foto-wrapper {
+        margin-top: 10px;
+    }
+    
+    #detail-foto {
+        height: 180px; /* Lebar foto sedikit direndahkan di mobile */
+    }
+}
