@@ -101,13 +101,6 @@ function muatLokasiAplikasi() {
             
             markerLokasi[loc.id] = marker; // Menyimpan referensi marker berdasarkan ID unik lokasi
 
-            switch (loc.kategori) {
-                case 'masjid' : marker.addTo(layerMasjid); break;
-                case 'kerajaan' : marker.addTo(layerKerajaan); break;
-                case 'pelabuhan' : marker.addto(layerPelabuhan); break;
-                case 'kota' : marker.addTo(layerKota); break;
-                default: marker.addTo(layerKota); break;
-            }
             // Sistem Event Klik pada Marker Peta: Mengarahkan kamera dan memicu panel detail
             marker.on("click", function () {
 
@@ -119,11 +112,8 @@ function muatLokasiAplikasi() {
                 showDetail(loc);
                 aktifkanCard(loc.id);
 
-                if (locationList) {
-                    sorotJalurDariCard(locationList);
-                } else {
-                    layerJalurSitus.clearLayers();
-                }
+                // Bug #4 FIX: kirim ID lokasi (string), bukan elemen DOM
+                sorotJalurDariCard(loc.id);
 
             });
 
@@ -198,15 +188,72 @@ function aktifkanCard(id) {
         card.classList.remove("location-card-active");
     });
 
+    // Reset semua marker
+    Object.values(markerLokasi).forEach(marker => {
+        marker.setZIndexOffset(0);
+        const el = marker.getElement();
+
+        if (el) {
+            el.style.opacity = "0.3";
+        }
+    });
+
+    Object.values(activePolylines).forEach(polyline => {
+
+        polyline.setStyle({
+            opacity: 0.15
+        });
+    });
+
+    Object.values(activePolygons).forEach(polygon => {
+
+        polygon.setStyle({
+            fillOpacity: 0.05,
+            opacity: 0.15
+        });
+
+    });
+
     const cardAktif = document.getElementById(`card-${id}`);
 
     if (cardAktif) {
+
         cardAktif.classList.add("location-card-active");
+
+        // Marker aktif paling depan
+        if (markerLokasi[id]) {
+            markerLokasi[id].setZIndexOffset(1000);
+
+            const el = markerLokasi[id].getElement();
+            if (el) {
+                el.style.opacity = "1"
+            }
+        }
 
         cardAktif.scrollIntoView({
             behavior: "smooth",
             block: "nearest"
         });
+
+        if (activePolylines[id]) {
+
+            activePolylines[id].setStyle({
+                opacity: 0.9
+            });
+            activePolylines[id].bringToFront();
+        }
+
+        if (activePolygons[id]) {
+
+            activePolygons[id].setStyle({
+                fillOpacity: 0.18,
+                opacity: 1
+            });
+
+            activePolygons[id].bringToFront();
+
+        }
+
     }
 
 }
@@ -269,7 +316,8 @@ function showDetail(lokasi) {
 
     if (lokasi.foto && lokasi.foto.length > 0) {
 
-        foto.src = lokasi.foto[0];
+        // Bug #3 FIX: lokasi.foto adalah string, bukan array — hapus [0]
+        foto.src = lokasi.foto;
         foto.alt = lokasi.nama;
         foto.onerror = function () {
             this.src = "assets/images/placeholder.jpg"; // Gambar cadangan jika URL foto tidak valid

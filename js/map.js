@@ -128,7 +128,7 @@ function buatIkonSejarah(kategori) {
         html: `
         <div
             class="atlas-marker"
-            style="background:${warnaLatar};">
+            style="background:${warnaLatar}; opacity:1;">
 
             <span class="material-symbols-outlined">
                 ${namaIkon}

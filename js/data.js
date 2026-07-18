@@ -221,7 +221,7 @@ const dataJalurSejarah = [
         deskripsi: "Jalur persebaran Islam dari pusat Kesultanan Samudera Pasai menuju Selat Malaka hingga menyisir pelabuhan-pelabuhan utama di Pantai Utara Jawa."
     },
     {
-    idJalur: "jalur-abrahah",
+    id: "jalur-abrahah",
     nama: "Jalur Pasukan Abrahah ke Ka'bah (Tahun Gajah)",
     tipe: "militer",
     tahunMulai: 570,
