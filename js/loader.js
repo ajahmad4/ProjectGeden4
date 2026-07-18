@@ -212,21 +212,34 @@ function aktifkanCard(id) {
 }
 
 function eksekusiNavigasiLokal(targetId) {
-    // Membaca baris array untuk menemukan kecocokan ID objek
-    const lokasiTerpilih = dataSejarahNusantara.find(loc => loc.id === targetId);
-    
-    if (lokasiTerpilih && typeof map !== 'undefined') {
-        // Meluncurkan animasi kamera peta ke titik koordinat sejarah secara anggun
-        map.flyTo(lokasiTerpilih.koordinat, 12, {
-            animate: true,
-            duration: 1.5,
-            easeLinearity: 0.25
-        });
-        
-        // Membuka panel narasi edukasi
-        showDetail(lokasiTerpilih);
-        aktifkanCard(targetId);
-    }
+
+    const lokasiTerpilih =
+        dataSejarahNusantara.find(loc => loc.id === targetId);
+
+    if (!lokasiTerpilih) return;
+
+    animateTimelineYear(
+        Number(lokasiTerpilih.tahun),
+
+        () => {
+
+            if (typeof map !== "undefined") {
+
+                map.flyTo(lokasiTerpilih.koordinat, 12, {
+                    animate: true,
+                    duration: 1.5,
+                    easeLinearity: 0.25
+                });
+
+            }
+
+            showDetail(lokasiTerpilih);
+            aktifkanCard(targetId);
+
+        }
+
+    );
+
 }
 
 /**

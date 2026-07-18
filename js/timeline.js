@@ -158,7 +158,7 @@ function updateTimelineIndicator() {
 // =========================================================================
 
 // Menetapkan tahun aktif secara instan dengan batasan min/max tahun
-function setTimelineYear(year) {
+function setTimelineYear(year, reloadList = true) {
     year = Math.round(year);
     year = Math.max(timeline.minYear, Math.min(timeline.maxYear, year));
 
@@ -169,7 +169,10 @@ function setTimelineYear(year) {
     if (typeof renderJalurDanWilayah === 'function'){
         renderJalurDanWilayah(year);
         updateEraHeader(year);
-        muatLokasiAplikasi();
+
+        if (reloadList){
+            muatLokasiAplikasi();
+        }
     }
 
 }
@@ -190,7 +193,7 @@ function dragTimeline(deltaX) {
 // =========================================================================
 
 // Menggerakkan timeline ke tahun tujuan secara halus dengan efek easing cubic-out
-function animateTimelineYear(targetYear) {
+function animateTimelineYear(targetYear, callback = null) {
     targetYear = Math.round(targetYear);
     targetYear = Math.max(timeline.minYear, Math.min(timeline.maxYear, targetYear));
 
@@ -203,10 +206,13 @@ function animateTimelineYear(targetYear) {
         const progress = 1 - Math.pow(1 - t, 3); // Rumus Easing Out Cubic
         const year = startYear + (targetYear - startYear) * progress;
 
-        setTimelineYear(year);
+        setTimelineYear(year, false);
 
         if (t < 1) {
             requestAnimationFrame(frame);
+        } else {
+            muatLokasiAplikasi();
+            if (callback) callback();
         }
     }
     requestAnimationFrame(frame);

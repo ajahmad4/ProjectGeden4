@@ -15,63 +15,63 @@ const TIMELINE_ERAS = [
     name: "Masa Pra-Islam / Jahiliyah di Arab",
     colorRgb: "105, 105, 105",
     start: 570,
-    end: 610
+    end: 609.9
   },
   {
     id: "era-kenabian",
     name: "Era Kenabian Muhammad SAW",
     colorRgb: "34, 139, 34",
     start: 610,
-    end: 632
+    end: 631.9
   },
   {
     id: "era-rashidun",
     name: "Khulafaur Rasyidin",
     colorRgb: "0, 102, 204",
     start: 632,
-    end: 661
+    end: 660.9
   },
   {
     id: "era-umayyah",
     name: "Dinasti Umayyah",
     colorRgb: "139, 0, 0",
     start: 661,
-    end: 750
+    end: 749.9
   },
   {
     id: "era-abbasiyah",
     name: "Dinasti Abbasiyah",
     colorRgb: "255, 140, 0",
     start: 750,
-    end: 1258
+    end: 1257.9
   },
   {
     id: "era-penyebaran-nusantara",
     name: "Masuknya Islam ke Nusantara & Wali Songo",
     colorRgb: "46, 139, 87",
     start: 1200,
-    end: 1600
+    end: 1599.9
   },
   {
     id: "era-kesultanan",
     name: "Kerajaan / Kesultanan Islam di Indonesia",
     colorRgb: "218, 165, 32",
     start: 1292,
-    end: 1800
+    end: 1799.9
   },
   {
     id: "era-imperium-dunia",
     name: "Imperium Islam Dunia (Utsmaniyah, Mughal, Safawi)",
     colorRgb: "0, 128, 128",
     start: 1500,
-    end: 1800
+    end: 1799.9
   },
   {
     id: "era-kemunduran",
     name: "Kemunduran Umat Islam & Penjajahan Barat",
     colorRgb: "139, 69, 19",
     start: 1800,
-    end: 1945
+    end: 1944.9
   },
   {
     id: "era-modern",

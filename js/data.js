@@ -76,6 +76,110 @@ const dataSejarahNusantara = [
     deskripsi: "Ka'bah rusak akibat banjir. Saat suku Quraisy berselisih tentang siapa yang berhak meletakkan Hajar Aswad, Nabi Muhammad SAW menjadi penengah dengan solusi meletakkannya di atas kain yang diangkat bersama-sama.",
     foto: "assets/images/pra-islam/kaabah.jpg",
     era: "era-pra-islam"
+  },
+{
+    id: "wahyu-pertama",
+    nama: "Turunnya Wahyu Pertama",
+    tahun: "610",
+    periode: "Abad ke-7 M",
+    kategori: "kenabian",
+    lokasi: "Gua Hira",
+    wilayah: "Jabal Nur, Mekkah",
+    koordinat: [21.4578, 39.8592],
+    deskripsi: "Nabi Muhammad SAW menerima wahyu pertama melalui Malaikat Jibril di Gua Hira. Lima ayat awal Surah Al-Alaq (Iqra') diturunkan. Ini menandai awal kerasulan dan dakwah Islam.",
+    foto: "assets/images/kenabian/wahyu-pertama.jpg",
+    era: "era-kenabian"
+  },
+  {
+    id: "dakwah-sembunyi",
+    nama: "Dakwah Secara Sembunyi-sembunyi",
+    tahun: "610",
+    periode: "Abad ke-7 M",
+    kategori: "dakwah",
+    lokasi: "Mekkah",
+    wilayah: "Jazirah Arab",
+    koordinat: [21.4225, 39.8262],
+    deskripsi: "Nabi SAW berdakwah secara rahasia kepada kerabat dan sahabat terdekat. Islam mulai diterima oleh Khadijah, Ali bin Abi Thalib, Zaid bin Haritsah, dan Abu Bakar Ash-Shiddiq.",
+    foto: "assets/images/kenabian/dakwah-sembunyi.jpg",
+    era: "era-kenabian"
+  },
+  {
+    id: "dakwah-terbuka",
+    nama: "Pengumuman Dakwah Secara Terbuka",
+    tahun: "613",
+    periode: "Abad ke-7 M",
+    kategori: "dakwah",
+    lokasi: "Mekkah",
+    wilayah: "Jazirah Arab",
+    koordinat: [21.4225, 39.8262],
+    deskripsi: "Nabi SAW diperintahkan turun Surah Al-Hijr ayat 94 untuk menyampaikan dakwah secara terbuka kepada seluruh kaum Quraisy. Ini memicu penolakan dan permusuhan dari pemimpin Quraisy.",
+    foto: "assets/images/kenabian/dakwah-terbuka.jpg",
+    era: "era-kenabian"
+  },
+  {
+    id: "isra-miraj",
+    nama: "Isra Mi'raj",
+    tahun: "621",
+    periode: "Abad ke-7 M",
+    kategori: "mukjizat",
+    lokasi: "Mekkah",
+    wilayah: "Jazirah Arab",
+    koordinat: [21.4225, 39.8262],
+    deskripsi: "Nabi Muhammad SAW diisra'kan dari Masjidil Haram ke Masjidil Aqsa, kemudian mi'raj ke Sidratul Muntaha. Peristiwa ini menjadi dasar pensyariatan shalat lima waktu.",
+    foto: "assets/images/kenabian/isra-miraj.jpg",
+    era: "era-kenabian"
+  },
+  {
+    id: "baiat-aqabah-1",
+    nama: "Bai'at Aqabah Pertama",
+    tahun: "621",
+    periode: "Abad ke-7 M",
+    kategori: "politik",
+    lokasi: "Aqabah",
+    wilayah: "Madinah",
+    koordinat: [24.4667, 39.6167],
+    deskripsi: "12 orang dari suku Khazraj dan Aus berbai'at untuk mendukung dakwah Nabi SAW. Ini menjadi titik awal hubungan Nabi dengan penduduk Yatsrib (Madinah).",
+    foto: "assets/images/kenabian/baiat-aqabah.jpg",
+    era: "era-kenabian"
+  },
+  {
+    id: "baiat-aqabah-2",
+    nama: "Bai'at Aqabah Kedua",
+    tahun: "622",
+    periode: "Abad ke-7 M",
+    kategori: "politik",
+    lokasi: "Aqabah",
+    wilayah: "Madinah",
+    koordinat: [24.4667, 39.6167],
+    deskripsi: "73 orang laki-laki dan 2 perempuan dari Madinah berbai'at memberikan perlindungan penuh kepada Nabi SAW dan umat Islam. Bai'at ini membuka jalan terjadinya Hijrah.",
+    foto: "assets/images/kenabian/baiat-aqabah2.jpg",
+    era: "era-kenabian"
+  },
+  {
+    id: "hijrah-madinah",
+    nama: "Hijrah ke Madinah",
+    tahun: "622",
+    periode: "Abad ke-7 M",
+    kategori: "politik",
+    lokasi: "Madinah",
+    wilayah: "Jazirah Arab",
+    koordinat: [24.4667, 39.6167],
+    deskripsi: "Nabi SAW dan para sahabat hijrah dari Mekkah ke Madinah karena tekanan Quraisy semakin berat. Hijrah ini menandai awal penanggalan Hijriah dan berdirinya negara Islam pertama.",
+    foto: "assets/images/kenabian/hijrah.jpg",
+    era: "era-kenabian"
+  },
+  {
+    id: "fathu-makkah",
+    nama: "Fathu Makkah (Penaklukan Mekkah)",
+    tahun: "630",
+    periode: "Abad ke-7 M",
+    kategori: "militer",
+    lokasi: "Mekkah",
+    wilayah: "Jazirah Arab",
+    koordinat: [21.4225, 39.8262],
+    deskripsi: "Nabi SAW memimpin 10.000 pasukan menaklukkan Mekkah tanpa pertumpahan darah besar. Berhala-berhala di Ka'bah dihancurkan dan penduduk Mekkah banyak yang masuk Islam.",
+    foto: "assets/images/kenabian/fathu-makkah.jpg",
+    era: "era-kenabian"
   }
 ];
 
@@ -136,9 +240,26 @@ const dataJalurSejarah = [
         [21.4225, 39.8262]    // Mekkah / Ka'bah (titik akhir)
     ],
     deskripsi: "Pasukan Abrahah al-Ashram berangkat dari Sana'a, Yaman dengan pasukan besar termasuk gajah perang untuk menghancurkan Ka'bah di Mekkah. Rute yang ditempuh melewati Najran, pegunungan Asir, Baha, dan Taif. Perjalanan ini berakhir dengan kehancuran pasukan oleh burung ababil sesuai kisah dalam Al-Qur'an Surat Al-Fil."
-}
+    },
+    {
+    id: "jalur-isra-miraj",
+    nama: "Jalur Isra' Mi'raj Nabi Muhammad SAW",
+    tipe: "mukjizat",
+    tahunMulai: 621,
+    tahunSelesai: 621,
+    warna: "#4B0082", // Ungu keemasan (nuansa spiritual & mukjizat)
+    // Koordinat rute Isra' Mi'raj
+    koordinat: [
+        [21.4225, 39.8262],   // Masjidil Haram, Mekkah (titik awal Isra')
+        [31.7765, 35.2362],   // Masjidil Aqsa, Yerusalem (titik Isra')
+        [21.4225, 39.8262]    // Kembali ke Masjidil Haram, Mekkah
+    ],
+    deskripsi: "Nabi Muhammad SAW diisra'kan (diperjalankan) pada malam hari dari Masjidil Haram di Mekkah ke Masjidil Aqsa di Yerusalem. Kemudian beliau di-mi'raj (diangkat) ke langit hingga Sidratul Muntaha. Peristiwa ini terjadi sekitar tahun 621 M dan menjadi dasar pensyariatan shalat lima waktu."
+    }
 ];
-
+// =========================================================================
+// DATABASE TAMBAHAN: WILAYAH KEKUASAAN (POLYGON)
+// =========================================================================
 const dataWilayahKekuasaan = [
     {
         id: "wilayah-samudera-pasai",
