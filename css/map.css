@@ -13,13 +13,13 @@
 .leaflet-top.leaflet-right {
     top: 60px !important;
     right: auto !important;
-    left: 352px !important;     
+    left: 368px !important;     
 }
 
 .leaflet-bottom.leaflet-right {
     bottom: 78px !important;
     right: auto !important;
-    left: 352px !important;
+    left: 368px !important;
 }
 
 .leaflet-right .leaflet-control {
@@ -137,4 +137,9 @@
     outline: none !important;
     box-shadow: none !important;
     -webkit-tap-highlight-color: transparent !important;
+}
+/* Otomatis membalik warna peta Leaflet saat mode gelap aktif */
+[data-theme="dark"] .leaflet-tile-container img {
+    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
+    transition: filter 0.3s ease;
 }

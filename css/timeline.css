@@ -194,58 +194,58 @@
 }
 
 .era-block.era-pra-islam {
-    background-color: rgba(105, 105, 105, 0.08);
-    border-right: 1.5px dashed rgba(105, 105, 105, 0.35);
+    background-color: rgba(160, 160, 160, 0.22);
+    border-right: 1.5px dashed rgba(180, 180, 180, 0.5);
 }
 
 .era-block.era-kenabian {
-    background-color: rgba(34, 139, 34, 0.09);
-    border-right: 1.5px dashed rgba(34, 139, 34, 0.35);
+    background-color: rgba(46, 184, 46, 0.25);
+    border-right: 1.5px dashed rgba(72, 209, 72, 0.5);
 }
 
 .era-block.era-rashidun {
-    background-color: rgba(0, 102, 204, 0.08);
-    border-right: 1.5px dashed rgba(0, 102, 204, 0.35);
+    background-color: rgba(30, 144, 255, 0.22);
+    border-right: 1.5px dashed rgba(65, 105, 225, 0.5);
 }
 
 .era-block.era-umayyah {
-    background-color: rgba(139, 0, 0, 0.08);
-    border-right: 1.5px dashed rgba(139, 0, 0, 0.35);
+    background-color: rgba(220, 53, 69, 0.25);
+    border-right: 1.5px dashed rgba(240, 80, 95, 0.5);
 }
 
 .era-block.era-abbasiyah {
-    background-color: rgba(255, 140, 0, 0.08);
-    border-right: 1.5px dashed rgba(255, 140, 0, 0.35);
+    background-color: rgba(255, 152, 0, 0.25);
+    border-right: 1.5px dashed rgba(255, 164, 38, 0.5);
 }
 
 .era-block.era-pasca-abbasiyah {
-    background-color: rgba(100, 160, 100, 0.09);
-    border-right: 1.5px dashed rgba(100, 160, 100, 0.35);
+    background-color: rgba(120, 200, 120, 0.22);
+    border-right: 1.5px dashed rgba(140, 210, 140, 0.5);
 }
 
 .era-block.era-penyebaran-nusantara {
-    background-color: rgba(46, 139, 87, 0.09);
-    border-right: 1.5px dashed rgba(46, 139, 87, 0.35);
+    background-color: rgba(60, 179, 113, 0.25);
+    border-right: 1.5px dashed rgba(80, 200, 130, 0.5);
 }
 
 .era-block.era-kesultanan {
-    background-color: rgba(218, 165, 32, 0.09);
-    border-right: 1.5px dashed rgba(218, 165, 32, 0.35);
+    background-color: rgba(230, 180, 50, 0.25);
+    border-right: 1.5px dashed rgba(240, 195, 75, 0.5);
 }
 
 .era-block.era-imperium-dunia {
-    background-color: rgba(0, 128, 128, 0.08);
-    border-right: 1.5px dashed rgba(0, 128, 128, 0.35);
+    background-color: rgba(32, 178, 170, 0.22);
+    border-right: 1.5px dashed rgba(40, 200, 190, 0.5);
 }
 
 .era-block.era-kemunduran {
-    background-color: rgba(139, 69, 19, 0.08);
-    border-right: 1.5px dashed rgba(139, 69, 19, 0.35);
+    background-color: rgba(185, 105, 45, 0.22);
+    border-right: 1.5px dashed rgba(200, 120, 60, 0.5);
 }
 
 .era-block.era-modern {
-    background-color: rgba(70, 130, 180, 0.08);
-    border-right: 1.5px dashed rgba(70, 130, 180, 0.35);
+    background-color: rgba(90, 160, 220, 0.22);
+    border-right: 1.5px dashed rgba(110, 180, 240, 0.5);
 }
 
 .era-label-container {
@@ -264,7 +264,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     display: inline-block;
     white-space: nowrap;
     color: rgb(var(--era-color-rgb, 80, 80, 80));
