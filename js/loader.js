@@ -291,25 +291,46 @@ function eksekusiNavigasiLokal(idObjekAtlas) {
 
 function showDetail(objek) {
     const detailPanel = document.getElementById("detail-panel");
+    const detailContent = document.getElementById("detail-content");
     if (!detailPanel) return;
 
-    detailPanel.classList.remove("hidden");
-    
-    // Mobile Bottom Sheet Reset ke posisi Peek
-    if (window.innerWidth <= 768) {
-        detailPanel.classList.remove("snap-half", "snap-full");
-        detailPanel.classList.add("snap-peek");
+    // Jika panel masih tertutup, tampilkan dulu tanpa animasi
+    if (detailPanel.classList.contains("hidden")) {
+        detailPanel.classList.remove("hidden");
+
+        if (window.innerWidth <= 768) {
+            detailPanel.classList.remove("snap-half", "snap-full");
+            detailPanel.classList.add("snap-peek");
+        }
+
+        isiDetailPanel(objek);
+        return;
     }
 
+    // Jika panel sudah terbuka, lakukan transisi fade
+    detailContent.classList.add("fading");
+
+    setTimeout(() => {
+
+        isiDetailPanel(objek);
+
+        detailContent.classList.remove("fading");
+
+    }, 180);
+}
+
+function isiDetailPanel(objek) {
+
     const fields = {
-        "detail-nama":      objek.nama,
-        "detail-tahun":     objek.periode,
-        "detail-waktu":     objek.tahun ? `${objek.tahun} M` : '-',
-        "detail-lokasi":    objek.lokasi,
-        "detail-kategori":  objek.kategori.charAt(0).toUpperCase() + objek.kategori.slice(1),
-        "detail-wilayah":   objek.wilayah,
+        "detail-nama": objek.nama,
+        "detail-tahun": objek.periode,
+        "detail-waktu": objek.tahun ? `${objek.tahun} M` : "-",
+        "detail-lokasi": objek.lokasi,
+        "detail-kategori": objek.kategori.charAt(0).toUpperCase() + objek.kategori.slice(1),
+        "detail-wilayah": objek.wilayah,
         "detail-deskripsi": objek.deskripsi,
     };
+
     Object.entries(fields).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if (el) el.textContent = val;
@@ -329,26 +350,38 @@ function showDetail(objek) {
         fotoWrapper.classList.add("hidden");
     }
 }
-
 function tutupDetailPanel() {
     const detailPanel = document.getElementById('detail-panel');
+
     if (detailPanel) {
         detailPanel.classList.add('hidden');
         detailPanel.classList.remove('snap-peek', 'snap-half', 'snap-full');
     }
-    if (map) setTimeout(() => { map.invalidateSize(); }, 300);
+
+    if (map) {
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 300);
+    }
 }
 
 function resetTampilanDefault() {
     const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) detailPanel.classList.add('hidden');
+
+    if (detailPanel) {
+        detailPanel.classList.add('hidden');
+    }
 
     document.querySelectorAll('.leaflet-right').forEach(el => {
         el.classList.remove('geser-kiri');
     });
 
     if (map) {
-        map.flyTo([1.0, 115.0], 5, { animate: true, duration: 1.5, easeLinearity: 0.25 });
+        map.flyTo([1.0, 115.0], 5, {
+            animate: true,
+            duration: 1.5,
+            easeLinearity: 0.25
+        });
     }
 }
 
