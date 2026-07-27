@@ -42,16 +42,21 @@
     left: 50%;
     bottom: 64px;
     transform: translateX(-50%);
-    width: 80px;
+    width: 70px;
     height: 32px;
     z-index: 110;
     pointer-events: none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    overflow:visible;
 }
 
 #timeline-current {
-    position: absolute;
+    position: relative;
     left: 50%;
-    top: 0;
+    top: -12px;
     transform: translateX(-50%);
     width: 70px;
     height: 30px;
@@ -353,4 +358,47 @@
 .legend-dot:hover::after,
 .legend-dot:hover::before {
     opacity: 1;
+}
+
+.timeline-year-btn{
+    position: relative;
+    top: -12px;
+    
+    width:30px;
+    height:30px;
+
+    border:none;
+    border-radius:50%;
+
+    background:var(--bg-panel-solid);
+    border:2px solid var(--accent-orange);
+
+    color:var(--accent-orange);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    transition:.2s;
+    pointer-events:auto;
+}
+
+.timeline-year-btn:hover{
+    background:var(--accent-orange);
+    color:white;
+    transform:scale(1.05);
+}
+
+.timeline-year-btn:active{
+    transform:scale(.95);
+}
+
+#year-prev{
+    right:15px;
+}
+
+#year-next{
+    left: 15px;
 }

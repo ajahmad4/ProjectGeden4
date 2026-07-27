@@ -40,7 +40,7 @@ const dataWilayah = [
   {
     id: "Wilayah-khulafaur-rasyidin",
     nama: "Wilayah Khulafaur Rasyidin",
-    tahunMulai: 631,
+    tahunMulai: 633,
     tahunSelesai: 634,
     warna: "#8a6d3b",
     koordinat: [

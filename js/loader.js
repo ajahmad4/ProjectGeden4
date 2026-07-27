@@ -304,6 +304,7 @@ function showDetail(objek) {
     const fields = {
         "detail-nama":      objek.nama,
         "detail-tahun":     objek.periode,
+        "detail-waktu":     objek.tahun ? `${objek.tahun} M` : '-',
         "detail-lokasi":    objek.lokasi,
         "detail-kategori":  objek.kategori.charAt(0).toUpperCase() + objek.kategori.slice(1),
         "detail-wilayah":   objek.wilayah,
@@ -422,7 +423,7 @@ function renderJalurDanWilayah(tahunAktif) {
 
     if (typeof dataJalur !== 'undefined') {
         dataJalur.forEach(jalur => {
-            if (tahunAktif >= jalur.tahunMulai && tahunAktif <= jalur.tahunSelesai) {
+            if (tahunAktif >= jalur.tahunMulai && tahunAktif < jalur.tahunSelesai) {
                 const polyline = L.polyline(jalur.koordinat, {
                     color:       jalur.warna,
                     weight:      5,
@@ -506,9 +507,7 @@ function updateEraHeader(tahunAktif) {
     const container = document.getElementById("era-header");
     if (!container) return;
 
-    const eraAktif = TIMELINE_ERAS.find(era =>
-        tahunAktif >= era.start && tahunAktif <= era.end
-    );
+    const eraAktif = getCurrentEra(tahunAktif);
 
     container.className = "era-header";
 
@@ -530,7 +529,18 @@ function updateEraHeader(tahunAktif) {
 }
 
 function getCurrentEra(tahunAktif) {
-    return TIMELINE_ERAS.find(era =>
-        tahunAktif >= era.start && tahunAktif <= era.end
-    );
+    return TIMELINE_ERAS.find((era, index) => {
+        if (index === TIMELINE_ERAS.length - 1) {
+            return tahunAktif >= era.start && tahunAktif <= era.end;
+        }
+        return tahunAktif >= era.start && tahunAktif < era.end;
+    });
+}
+
+/**
+ * Mengubah tahun aktif sebesar delta (-1 atau +1)
+ * @param {number} delta - Selisih tahun (-1 untuk mundur, 1 untuk maju)
+ */
+function ubahTahunAktif(delta) {
+    animateTimelineYear(timeline.currentYear + delta);
 }
