@@ -110,6 +110,14 @@
                         <input id="search-input" type="text" spellcheck="false" placeholder="Cari lokasi..." class="w-full pl-10 pr-3.5 py-2 rounded-xl border border-border-input bg-input text-[13px] text-primary placeholder:text-muted focus:outline-none focus:border-border-active focus:ring-2 focus:ring-accent/10 transition">
                     </div>
                 </div>
+                <div class="mt-3 flex items-center justify-between px-1">
+                    <label for="filter-mode" class="text-[11px] font-semibold text-muted uppercase tracking-wider">Mode Tampilan:</label>
+                    <select id="filter-mode" onchange="ubahFilterMode(this.value)" class="px-2.5 py-1.5 rounded-xl border border-border-input bg-input text-[12px] font-medium text-primary focus:outline-none focus:border-border-active transition cursor-pointer">
+                        <option value="default">Sistem Default (Fokus Card)</option>
+                        <option value="era_aktif">Era Aktif (Tampil Semua)</option>
+                        <option value="keseluruhan">Keseluruhan Era</option>
+                    </select>
+                </div>
                 <div class="flex-1 overflow-y-auto custom-scrollbar mt-3">
                     <div id="era-header"></div>
                     <div id="location-list" class="flex flex-col gap-2.5 mt-2.5"></div>
