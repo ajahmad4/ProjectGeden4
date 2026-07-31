@@ -95,105 +95,142 @@
     
         <div id="map" class="absolute inset-0 w-full h-full z-10"></div>
 
-        <aside id="list-panel" class="absolute left-4 top-4 bottom-4 w-[340px] z-40 flex flex-col glass-panel border border-gray-200/80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
+        <aside id="list-panel" class="absolute left-4 top-4 bottom-4 w-[300px] z-40 flex flex-col glass-panel border border-gray-200/80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
             <div class="flex flex-col h-full px-4 pt-4 pb-3 bg-panel-solid select-none">
                 <div class="hidden md:block">
-                    <h1 class="text-[30px] font-bold tracking-tight text-title">Atlas Sejarah</h1>
-                    <p class="mt-1 text-[11px] uppercase tracking-[0.18em] text-muted-alt">Jelajah Titik Masuknya Islam di Nusantara</p>
+                    <h1 class="text-[26px] font-bold tracking-tight text-title">Atlas Sejarah</h1>
+                    <p class="mt-0.5 text-[10px] uppercase tracking-[0.18em] text-muted-alt">Jelajah Titik Masuknya Islam di Nusantara</p>
                 </div>
                 
-                <div class="mt-0 md:mt-5">
+                <div class="mt-0 md:mt-4">
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-icon text-[20px]">
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-icon text-[18px]">
                             search
                         </span>
-                        <input id="search-input" type="text" spellcheck="false" placeholder="Cari lokasi..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-border-input bg-input text-[14px] text-primary placeholder:text-muted focus:outline-none focus:border-border-active focus:ring-2 focus:ring-accent/10 transition">
+                        <input id="search-input" type="text" spellcheck="false" placeholder="Cari lokasi..." class="w-full pl-10 pr-3.5 py-2 rounded-xl border border-border-input bg-input text-[13px] text-primary placeholder:text-muted focus:outline-none focus:border-border-active focus:ring-2 focus:ring-accent/10 transition">
                     </div>
                 </div>
-                <div class="flex-1 overflow-y-auto custom-scrollbar mt-4">
-
+                <div class="mt-3 flex items-center justify-between px-1">
+                    <label for="filter-mode" class="text-[11px] font-semibold text-muted uppercase tracking-wider">Mode Tampilan:</label>
+                    <select id="filter-mode" onchange="ubahFilterMode(this.value)" class="px-2.5 py-1.5 rounded-xl border border-border-input bg-input text-[12px] font-medium text-primary focus:outline-none focus:border-border-active transition cursor-pointer">
+                        <option value="default">Sistem Default (Fokus Card)</option>
+                        <option value="era_aktif">Era Aktif (Tampil Semua)</option>
+                        <option value="keseluruhan">Keseluruhan Era</option>
+                    </select>
+                </div>
+                <div class="flex-1 overflow-y-auto custom-scrollbar mt-3">
                     <div id="era-header"></div>
-
-                    <div id="location-list" class="flex flex-col gap-3 mt-3">
-                    </div>
-
+                    <div id="location-list" class="flex flex-col gap-2.5 mt-2.5"></div>
                 </div>
+            </div>
         </aside>
 
-        <aside id="detail-panel" class="hidden absolute right-4 top-4 bottom-4 w-[360px] z-40 flex flex-col glass-panel rounded-2xl p-6 overflow-hidden transition-all duration-300">            
+        <aside id="detail-panel" class="hidden absolute right-4 top-4 bottom-4 w-[320px] z-40 flex flex-col glass-panel rounded-2xl p-4 overflow-hidden transition-all duration-300">            
             
             <!-- Handle bar untuk drag di mobile -->
-            <div id="bottom-sheet-handle" class="w-full flex justify-center pb-4 pt-1 cursor-grab active:cursor-grabbing md:hidden">
-                <div class="w-12 h-1.5 bg-handle rounded-full"></div>
+            <div id="bottom-sheet-handle" class="w-full flex justify-center pb-2 pt-0.5 cursor-grab active:cursor-grabbing md:hidden">
+                <div class="w-10 h-1 bg-handle rounded-full"></div>
             </div>
 
-            <button onclick="tutupDetailPanel()" class="hidden md:flex items-center gap-2 text-button hover:text-title font-medium mb-5 group text-left cursor-pointer text-[12px] uppercase tracking-[0.15em] transition-colors">
-                <span class="material-symbols-outlined text-sm transition-transform group-hover:translate-x-0.5">close</span>
+            <!-- Tombol Tutup Kompak -->
+            <button onclick="tutupDetailPanel()" class="hidden md:flex items-center gap-1.5 text-button hover:text-title font-medium mb-2 group text-left cursor-pointer text-[10px] uppercase tracking-[0.15em] transition-colors">
+                <span class="material-symbols-outlined text-xs transition-transform group-hover:translate-x-0.5">close</span>
                 Tutup Detail
             </button>
+
+            <div id="detail-content">
             
-            <h2 id="detail-nama" class="font-title text-[34px] leading-none"></h2>
-            <p id="detail-tahun" class="mt-2 text-[12px] uppercase tracking-[0.18em] text-muted"></p>
+            <!-- Judul & Subtitle -->
+            <h2 id="detail-nama" class="font-title text-[22px] leading-snug text-title"></h2>
+            <p id="detail-tahun" class="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-muted font-medium"></p>
 
-            <div id="detail-foto-wrapper" class="mb-2 hidden">
-                <img id="detail-foto" src="" alt="" class="w-full h-48 object-cover rounded-2xl border border-border-panel shadow-sm">
+            <!-- Ringkas Gambar (Tinggi Maksimal h-28 agar hemat tempat) -->
+            <div id="detail-foto-wrapper" class="my-2 hidden">
+                <img id="detail-foto" src="" alt="" class="w-full h-28 object-contain rounded-xl border border-border-panel/60 bg-badge/30 shadow-sm p-1">
             </div>
 
-            <hr class="mt-2 mb-.5 border-border-light">
+            <hr class="my-2 border-border-light">
 
-            <div id="detail-metadata" class="mt-0 mb-2 space-y-1">
-                <div class="flex items-start gap-3 py-1">
-                    <span class="material-symbols-outlined text-[18px] text-muted">
-                        location_on
-                    </span>
-                    
-                    <div>
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-muted">
-                        Lokasi</p>
-                        <p id="detail-lokasi" class="text-[13px] font-medium text-primary"></p>
+            <!-- METADATA HORIZONTAL-INLINE (VARIABEL CSS) -->
+            <div id="detail-metadata" class="my-1.5 space-y-1.5 text-left">
+                <!-- WAKTU -->
+                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all"
+                    style="background-color: rgba(var(--accent-orange-rgb), 0.08); border-color: rgba(var(--accent-orange-rgb), 0.25);">
+                    <span class="material-symbols-outlined text-[15px] shrink-0" style="color: var(--accent-orange);">schedule</span>
+                    <div class="min-w-0 flex-1 flex justify-between items-center gap-2">
+                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0" style="color: var(--accent-orange);">Waktu</span>
+                        <span id="detail-waktu" class="text-[11px] font-bold truncate" style="color: var(--text-primary);"></span>
                     </div>
                 </div>
 
-                <div class="flex items-start gap-3 py-1">
-                    <span class="material-symbols-outlined text-[18px] text-muted">
-                        account_balance
-                    </span>
-                <div>
-                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted">
-                        Kategori</p>
-                    <p id="detail-kategori" class="text-[14px] text-primary"></p>
+                <!-- KATEGORI -->
+                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all"
+                    style="background-color: var(--bg-active); border-color: rgba(31, 75, 58, 0.2);">
+                    <span class="material-symbols-outlined text-[15px] shrink-0" style="color: var(--accent-primary);">category</span>
+                    <div class="min-w-0 flex-1 flex justify-between items-center gap-2">
+                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0" style="color: var(--text-title);">Kategori</span>
+                        <span id="detail-kategori" class="text-[11px] font-bold truncate" style="color: var(--text-primary);"></span>
+                    </div>
                 </div>
-            </div>
-                <div class="flex items-start gap-3 py-1">
-                    <span class="material-symbols-outlined text-[18px] text-muted">
-                        public</span>
-                    <div>
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-muted">
-                        Wilayah</p>
-                        <p id="detail-wilayah" class="text-[14px] text-primary"></p>
+
+                <!-- WILAYAH -->
+                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all"
+                    style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                    <span class="material-symbols-outlined text-[15px] shrink-0" style="color: var(--text-muted);">map</span>
+                    <div class="min-w-0 flex-1 flex justify-between items-center gap-2">
+                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0" style="color: var(--text-muted);">Wilayah</span>
+                        <span id="detail-wilayah" class="text-[11px] font-bold truncate" style="color: var(--text-primary);"></span>
+                    </div>
+                </div>
+
+                <!-- LOKASI -->
+                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all"
+                    style="background-color: var(--bg-badge); border-color: var(--border-input);">
+                    <span class="material-symbols-outlined text-[15px] shrink-0" style="color: var(--accent-primary);">location_on</span>
+                    <div class="min-w-0 flex-1 flex justify-between items-center gap-2">
+                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0" style="color: var(--text-title);">Lokasi</span>
+                        <span id="detail-lokasi" class="text-[11px] font-bold truncate" style="color: var(--text-primary);"></span>
                     </div>
                 </div>
             </div>
 
-            <hr class="mb-6 border-border-light">
+            <hr class="my-2 border-border-light">
 
+            <!-- Area Deskripsi (Mendapatkan Ruang Vertikal Lebih Lega) -->
             <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
-                <p id="detail-deskripsi" class="text-[15px] leading-8 text-secondary text-justify"></p>
+                <p id="detail-deskripsi" class="text-[13px] leading-relaxed text-secondary text-justify"></p>
+            </div>
+
             </div>
         </aside>
-
     </main>
 
     <!-- Era Shortcut Legend (Poin Navigasi Cepat) -->
     <div id="timeline-legend"></div>
 
     <div id="timeline-indicator">
+
+        <button
+            id="year-prev"
+            class="timeline-year-btn"
+            onclick="ubahTahunAktif(-1)">
+            <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+
         <input
             id="timeline-current"
             type="text"
             value="570"
             spellcheck="false">
-        <div id="timeline-pointer"></div>
+
+        <button
+            id="year-next"
+            class="timeline-year-btn"
+            onclick="ubahTahunAktif(1)">
+            <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+            <div id="timeline-pointer"></div>
+
     </div>
 
     <footer id="timeline-footer">

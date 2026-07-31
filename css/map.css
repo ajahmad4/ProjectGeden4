@@ -13,13 +13,13 @@
 .leaflet-top.leaflet-right {
     top: 60px !important;
     right: auto !important;
-    left: 368px !important;     
+    left: 320px !important;     
 }
 
 .leaflet-bottom.leaflet-right {
     bottom: 78px !important;
     right: auto !important;
-    left: 368px !important;
+    left: 320px !important;
 }
 
 .leaflet-right .leaflet-control {
