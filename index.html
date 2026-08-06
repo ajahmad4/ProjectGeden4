@@ -97,31 +97,31 @@
 
         <aside id="list-panel" class="absolute left-4 top-4 bottom-4 w-[300px] z-40 flex flex-col glass-panel border border-gray-200/80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
             <div class="flex flex-col h-full px-4 pt-4 pb-3 bg-panel-solid select-none">
+                
+                <!-- Header Judul -->
                 <div class="hidden md:block">
                     <h1 class="text-[26px] font-bold tracking-tight text-title">Atlas Sejarah</h1>
                     <p class="mt-0.5 text-[10px] uppercase tracking-[0.18em] text-muted-alt">Jelajah Titik Masuknya Islam di Nusantara</p>
                 </div>
                 
+                <!-- Form Search -->
                 <div class="mt-0 md:mt-4">
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-icon text-[18px]">
                             search
                         </span>
-                        <input id="search-input" type="text" spellcheck="false" placeholder="Cari lokasi..." class="w-full pl-10 pr-3.5 py-2 rounded-xl border border-border-input bg-input text-[13px] text-primary placeholder:text-muted focus:outline-none focus:border-border-active focus:ring-2 focus:ring-accent/10 transition">
+                        <input id="search-input" type="text" spellcheck="false" placeholder="Cari lokasi (semua era)..." class="w-full pl-10 pr-3.5 py-2 rounded-xl border border-border-input bg-input text-[13px] text-primary placeholder:text-muted focus:outline-none focus:border-border-active focus:ring-2 focus:ring-accent/10 transition">
                     </div>
                 </div>
-                <div class="mt-3 flex items-center justify-between px-1">
-                    <label for="filter-mode" class="text-[11px] font-semibold text-muted uppercase tracking-wider">Mode Tampilan:</label>
-                    <select id="filter-mode" onchange="ubahFilterMode(this.value)" class="px-2.5 py-1.5 rounded-xl border border-border-input bg-input text-[12px] font-medium text-primary focus:outline-none focus:border-border-active transition cursor-pointer">
-                        <option value="default">Sistem Default (Fokus Card)</option>
-                        <option value="era_aktif">Era Aktif (Tampil Semua)</option>
-                        <option value="keseluruhan">Keseluruhan Era</option>
-                    </select>
+
+                <!-- PERBAIKAN 1: DIPINDAHKAN KE SINI (Dikeluarkan dari area scroll) -->
+                <div id="era-header" class="mt-3 shrink-0"></div>
+
+                <!-- Area Scroll Khusus Untuk Card List -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar mt-2">
+                    <div id="location-list" class="flex flex-col gap-2.5"></div>
                 </div>
-                <div class="flex-1 overflow-y-auto custom-scrollbar mt-3">
-                    <div id="era-header"></div>
-                    <div id="location-list" class="flex flex-col gap-2.5 mt-2.5"></div>
-                </div>
+
             </div>
         </aside>
 

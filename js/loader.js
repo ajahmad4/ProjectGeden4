@@ -18,7 +18,7 @@ const activePolylines = {};
 const activePolygons = {};
 
 // State mode filter aktif: 'default' | 'era_aktif' | 'keseluruhan'
-let currentFilterMode = 'default';
+// let currentFilterMode = 'default';
 
 // ==========================================
 // 2. INISIALISASI & BUILDER CARD
@@ -36,6 +36,9 @@ inisialisasiData();
 
 function buatCardHTML(objek) {
     const iconName = getMaterialIcon(objek.kategori);
+    const eraObjek = TIMELINE_ERAS.find(e => e.id === objek.era);
+    const namaEra = eraObjek ? eraObjek.name : '';
+
     return `
         <div
             id="card-${objek.id}"
@@ -50,9 +53,14 @@ function buatCardHTML(objek) {
                 <p class="font-medium text-[13px] text-primary truncate group-hover:text-title transition-colors">
                     ${objek.nama}
                 </p>
-                <p class="text-[10px] text-muted mt-0.5">
-                    Tahun: ${objek.tahun} M
-                </p>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="text-[10px] text-muted">
+                        ${objek.tahun} M
+                    </span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-badge text-muted-alt border border-border-light truncate max-w-[110px]">
+                        ${namaEra}
+                    </span>
+                </div>
             </div>
 
             <span class="material-symbols-outlined text-muted-alt text-[16px] transition-transform duration-200 group-hover:translate-x-1">
@@ -83,41 +91,42 @@ function muatLokasiAplikasi() {
 
     for (const key in activeMarkers) delete activeMarkers[key];
 
-    const eraAktif = getCurrentEra(timeline.currentYear);
-    
-    // 2. Tentukan dataset objek yang difilter sesuai mode
-    let dataSumber = [];
-
-    if (currentFilterMode === 'keseluruhan') {
-        // Semua objek atlas tanpa batasan era
-        dataSumber = [...dataObjekAtlas];
-    } else {
-        // Mode 'default' & 'era_aktif': Tampilkan seluruh objek di era tersebut
-        if (eraAktif) {
-            dataSumber = dataObjekAtlas.filter(objek => objek.era === eraAktif.id);
-        }
-    }
+    const currentYear = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
+    const eraAktif = getCurrentEra(currentYear);
+    if (!eraAktif) return;    
 
     const cardFragments = [];
     const processedMarkers = new Set();
 
-    dataSumber.forEach(objek => {
-        // Render Marker
+    dataObjekAtlas
+        .filter(objek => objek.era === eraAktif.id)
+        .forEach(objek => {
+
         if (map && objek.relasi && objek.relasi.markers) {
             objek.relasi.markers.forEach(markerId => {
                 if (processedMarkers.has(markerId)) return;
                 processedMarkers.add(markerId);
 
                 const dataTitik = markerMap[markerId];
-                if (!dataTitik) return;
+                if (!dataTitik) {
+                    console.warn(`[Data Error] Marker ID '${markerId}' tidak ditemukan di dataMarker.js (Dirujuk oleh ${objek.id})`);
+                    return;
+                }
 
                 const marker = L.marker(dataTitik.koordinat, { icon: buatIkonSejarah(objek.kategori) });
                 activeMarkers[markerId] = marker;
 
                 marker.on("click", function () {
                     map.flyTo(dataTitik.koordinat, 12, { animate: true, duration: 1.5 });
-                    showDetail(objek);
-                    aktifkanCard(objek.id);
+                    const objekTerkait = dataObjekAtlas.find(oa => 
+                        oa.era === eraAktif.id && 
+                        oa.relasi.markers.includes(markerId)
+                    );
+                    
+                    if (objekTerkait) {
+                        showDetail(objekTerkait);
+                        aktifkanCard(objekTerkait.id);
+                    }
                 });
 
                 switch (objek.kategori) {
@@ -133,17 +142,26 @@ function muatLokasiAplikasi() {
         cardFragments.push(buatCardHTML(objek));
     });
 
+    // Masukkan fragment ke DOM
     if (cardFragments.length === 0) {
         locationList.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-10 text-center">
-                <span class="material-symbols-outlined text-[36px] text-muted-alt">location_off</span>
-                <p class="mt-2 text-[13px] font-medium text-secondary">Tidak ada data untuk era ini.</p>
+            <div class="flex flex-col items-center justify-center py-8 text-center">
+                <span class="material-symbols-outlined text-[36px] text-muted-alt">explore_off</span>
+                <p class="mt-2 text-[13px] font-semibold text-secondary">Tidak ada objek sejarah</p>
+                <p class="mt-0.5 text-[11px] text-muted">Pada era ini belum ada data tercatat.</p>
             </div>`;
     } else {
         locationList.innerHTML = cardFragments.join('');
     }
-}
 
+    // =========================================================
+    // PERBAIKAN JALUR: Eksekusi render jalur & wilayah setiap kali
+    // aplikasi memuat lokasi era yang aktif
+    // =========================================================
+    if (typeof renderJalurDanWilayah === 'function') {
+        renderJalurDanWilayah(currentYear);
+    }
+}
 // ==========================================
 // 4. MANAJEMEN INTERAKSI & TRANSISI UI
 // ==========================================
@@ -152,28 +170,13 @@ function muatLokasiAplikasi() {
  * Mengaktifkan card dan fokus pada layer terkait.
  * Pada Mode Default: Elemen terpilih menyala, elemen lain diredupkan.
  * Pada Mode Era Aktif / Keseluruhan: Semua elemen tetap terang (100%).
+ * @param {string} idObjekAtlas - ID Objek Atlas
  */
 function aktifkanCard(idObjekAtlas) {
-    // 1. Reset visual aktif pada daftar card
+    // 1. Reset visual semua card
     document.querySelectorAll("#location-list > div").forEach(card => {
         card.classList.remove("location-card-active");
     });
-
-    const cardAktif = document.getElementById(`card-${idObjekAtlas}`);
-    if (cardAktif) {
-        cardAktif.classList.add("location-card-active");
-        cardAktif.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-
-    // Jika mode 'era_aktif' atau 'keseluruhan', tampilkan SEMUA elemen 100% tanpa transparansi
-    if (currentFilterMode === 'era_aktif' || currentFilterMode === 'keseluruhan') {
-        resetTransparansiLayer();
-        return; 
-    }
-
-    // =========================================================
-    // MODE DEFAULT: Fokuskan item terpilih & redupkan yang lain
-    // =========================================================
 
     // Redupkan semua layer spasial
     Object.values(activeMarkers).forEach(marker => {
@@ -194,6 +197,12 @@ function aktifkanCard(idObjekAtlas) {
     const objek = dataObjekAtlas.find(oa => oa.id === idObjekAtlas);
     if (!objek) return;
 
+    const cardAktif = document.getElementById(`card-${idObjekAtlas}`);
+    if (cardAktif) {
+        cardAktif.classList.add("location-card-active");
+        cardAktif.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
     // Aktifkan Marker terkait (Opacity 100%)
     if (objek.relasi && objek.relasi.markers) {
         objek.relasi.markers.forEach(markerId => {
@@ -207,13 +216,22 @@ function aktifkanCard(idObjekAtlas) {
     }
 
     // Aktifkan Jalur terkait (Opacity 100%)
+    let jalurDitemukan = false;
     if (objek.relasi && objek.relasi.jalur) {
         objek.relasi.jalur.forEach(jalurId => {
             const polyline = activePolylines[jalurId];
             if (polyline) {
                 polyline.setStyle({ opacity: 0.9 });
                 polyline.bringToFront();
+                jalurDitemukan = true;
             }
+        });
+    }
+
+    // Jika tidak ada jalur spesifik milik objek ini, normalkan opacity semua jalur era aktif
+    if (!jalurDitemukan) {
+        Object.values(activePolylines).forEach(poly => {
+            poly.setStyle({ opacity: 0.9 });
         });
     }
 
@@ -386,19 +404,37 @@ function resetTampilanDefault() {
 // 5. INITIALIZER (DOMContentLoaded)
 // ==========================================
 document.addEventListener("DOMContentLoaded", function () {
-    muatLokasiAplikasi();
-    updateEraHeader(timeline.currentYear || 570);
+    const tahunAwal = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
 
+    // 1. Muat Lokasi (Otomatis merender Marker, Cards, Jalur & Wilayah)
+    muatLokasiAplikasi();
+    
+    // 2. Perbarui Header Era
+    updateEraHeader(tahunAwal);
+
+    // Event Listener Pencarian
     const searchInput = document.getElementById("search-input");
     if (searchInput) {
         searchInput.addEventListener("input", function () {
             const keyword = this.value.toLowerCase().trim();
             const locationList = document.getElementById("location-list");
 
-            const eraAktif = getCurrentEra(timeline.currentYear);
-            const dataSumber = (currentFilterMode === 'keseluruhan')
-                ? dataObjekAtlas
-                : (eraAktif ? dataObjekAtlas.filter(oa => oa.era === eraAktif.id) : dataObjekAtlas);
+            // PERBAIKAN 2: Jika mengetik pencarian, gunakan SELURUH dataObjekAtlas (Global Search).
+            // Jika kolom pencarian kosong, kembalikan hanya objek di ERA AKTIF.
+            const currentYear = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
+            const eraAktif = getCurrentEra(currentYear);
+
+            let dataSumber = [];
+
+            if (keyword !== "") {
+                // Cari di seluruh era
+                dataSumber = dataObjekAtlas;
+            } else {
+                // Kembali ke era aktif saja
+                dataSumber = eraAktif
+                    ? dataObjekAtlas.filter(oa => oa.era === eraAktif.id)
+                    : dataObjekAtlas;
+            }
 
             const hasilFragments = [];
 
@@ -414,17 +450,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (hasilFragments.length === 0) {
                 locationList.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-14 text-center">
-                        <span class="material-symbols-outlined text-[42px] text-muted-alt">search_off</span>
-                        <p class="mt-3 text-[15px] font-semibold text-secondary">Lokasi tidak ditemukan</p>
-                        <p class="mt-1 text-[13px] text-muted">Coba gunakan kata kunci lain.</p>
+                    <div class="flex flex-col items-center justify-center py-10 text-center">
+                        <span class="material-symbols-outlined text-[38px] text-muted-alt">search_off</span>
+                        <p class="mt-2 text-[14px] font-semibold text-secondary">Lokasi tidak ditemukan</p>
+                        <p class="mt-0.5 text-[12px] text-muted">Tidak ada hasil untuk "${keyword}" di semua era.</p>
                     </div>`;
             } else {
                 locationList.innerHTML = hasilFragments.join('');
-            }
-
-            if (typeof renderJalurDanWilayah === 'function') {
-                renderJalurDanWilayah(timeline?.currentYear ?? 570);
             }
         });
     }
@@ -451,68 +483,57 @@ function renderJalurDanWilayah(tahunAktif) {
     for (const key in activePolylines) delete activePolylines[key];
     for (const key in activePolygons)  delete activePolygons[key];
 
-    const eraAktif = getCurrentEra(tahunAktif);
-
     // ==================== 1. RENDER JALUR ====================
-    if (typeof dataJalur !== 'undefined') {
-        dataJalur.forEach(jalur => {
-            let tampilkan = false;
+// ==================== 1. RENDER JALUR ====================
+if (typeof dataJalur !== 'undefined') {
+    dataJalur.forEach(jalur => {
+        // PERBAIKAN LOGIKA RENTANG TAHUN JALUR:
+        // Jika tahunMulai == tahunSelesai (misal 570-570), cek batas <= agar tetap muncul pada tahun tersebut.
+        const isAktif = (jalur.tahunMulai === jalur.tahunSelesai)
+            ? (tahunAktif >= jalur.tahunMulai && tahunAktif <= jalur.tahunSelesai)
+            : (tahunAktif >= jalur.tahunMulai && tahunAktif < jalur.tahunSelesai);
 
-            if (currentFilterMode === 'keseluruhan') {
-                tampilkan = true;
-            } else if (eraAktif) { // Mode 'default' & 'era_aktif'
-                tampilkan = (jalur.tahunMulai <= eraAktif.end && jalur.tahunSelesai >= eraAktif.start);
-            }
+        if (isAktif) {
+            const polyline = L.polyline(jalur.koordinat, {
+                color:       jalur.warna,
+                weight:      5,
+                opacity:     0.9,
+                dashArray:   "10 6",
+                smoothFactor: 1,
+                lineJoin:    "round",
+                lineCap:     "round"
+            });
 
-            if (tampilkan) {
-                const polyline = L.polyline(jalur.koordinat, {
-                    color:       jalur.warna,
-                    weight:      5,
-                    opacity:     0.9,
-                    dashArray:   "10 6",
-                    smoothFactor: 1,
-                    lineJoin:    "round",
-                    lineCap:     "round"
-                });
+            polyline.bindPopup(`
+                <div class="popup-jalur">
+                    <h4>${jalur.nama}</h4>
+                    <p><strong>Periode:</strong> ${jalur.tahunMulai}${jalur.tahunMulai === jalur.tahunSelesai ? '' : '–' + jalur.tahunSelesai} M</p>
+                    <p>${jalur.deskripsi}</p>
+                </div>`);
 
-                polyline.bindPopup(`
-                    <div class="popup-jalur">
-                        <h4>${jalur.nama}</h4>
-                        <p><strong>Periode:</strong> ${jalur.tahunMulai}–${jalur.tahunSelesai} M</p>
-                        <p>${jalur.deskripsi}</p>
-                    </div>`);
+            polyline.addTo(layerJalurSitus);
+            activePolylines[jalur.id] = polyline;
 
-                polyline.addTo(layerJalurSitus);
-                activePolylines[jalur.id] = polyline;
-
-                polyline.on('click', function() {
-                    const eraAktifLocal = getCurrentEra(tahunAktif);
-                    if (!eraAktifLocal) return;
-                    const objekTerkait = dataObjekAtlas.find(oa => 
-                        oa.era === eraAktifLocal.id && 
-                        oa.relasi.jalur && oa.relasi.jalur.includes(jalur.id)
-                    );
-                    if (objekTerkait) {
-                        showDetail(objekTerkait);
-                        aktifkanCard(objekTerkait.id);
-                    }
-                });
-            }
-        });
-    }
-
+            polyline.on('click', function() {
+                const eraAktif = getCurrentEra(tahunAktif);
+                if (!eraAktif) return;
+                const objekTerkait = dataObjekAtlas.find(oa => 
+                    oa.era === eraAktif.id && 
+                    oa.relasi.jalur && oa.relasi.jalur.includes(jalur.id)
+                );
+                if (objekTerkait) {
+                    showDetail(objekTerkait);
+                    aktifkanCard(objekTerkait.id);
+                }
+            });
+        }
+    });
+}
     // ==================== 2. RENDER WILAYAH ====================
     if (typeof dataWilayah !== 'undefined') {
         dataWilayah.forEach(wilayah => {
-            let tampilkan = false;
+            if (tahunAktif >= wilayah.tahunMulai && tahunAktif <= wilayah.tahunSelesai) {
 
-            if (currentFilterMode === 'keseluruhan') {
-                tampilkan = true;
-            } else if (eraAktif) { // Mode 'default' & 'era_aktif'
-                tampilkan = (wilayah.tahunMulai <= eraAktif.end && wilayah.tahunSelesai >= eraAktif.start);
-            }
-
-            if (tampilkan) {
                 const polygon = L.polygon(wilayah.koordinat, {
                     color:       wilayah.warna,
                     fillColor:   wilayah.warna,
@@ -531,10 +552,10 @@ function renderJalurDanWilayah(tahunAktif) {
                 activePolygons[wilayah.id] = polygon;
 
                 polygon.on('click', function() {
-                    const eraAktifLocal = getCurrentEra(tahunAktif);
-                    if (!eraAktifLocal) return;
+                    const eraAktif = getCurrentEra(tahunAktif);
+                    if (!eraAktif) return;
                     const objekTerkait = dataObjekAtlas.find(oa => 
-                        oa.era === eraAktifLocal.id && 
+                        oa.era === eraAktif.id && 
                         oa.relasi.wilayah && oa.relasi.wilayah.includes(wilayah.id)
                     );
                     if (objekTerkait) {
@@ -587,47 +608,8 @@ function getCurrentEra(tahunAktif) {
 
 /**
  * Mengubah tahun aktif sebesar delta (-1 atau +1)
+ * @param {number} delta - Selisih tahun (-1 untuk mundur, 1 untuk maju)
  */
 function ubahTahunAktif(delta) {
     animateTimelineYear(timeline.currentYear + delta);
-}
-
-/**
- * Mengubah mode filter spasial & merender ulang elemen terkait
- * @param {string} mode - 'default' | 'era_aktif' | 'keseluruhan'
- */
-function ubahFilterMode(mode) {
-    currentFilterMode = mode;
-    
-    // Muat ulang marker & list
-    muatLokasiAplikasi();
-    
-    // Render ulang jalur & wilayah
-    if (typeof renderJalurDanWilayah === 'function') {
-        renderJalurDanWilayah(timeline?.currentYear ?? 570);
-    }
-
-    // Jika beralih ke mode Era Aktif atau Keseluruhan, normalkan opacity seluruh layer
-    if (currentFilterMode === 'era_aktif' || currentFilterMode === 'keseluruhan') {
-        resetTransparansiLayer();
-    }
-}
-
-/**
- * Mengembalikan transparansi seluruh layer ke kondisi utuh (100%)
- */
-function resetTransparansiLayer() {
-    Object.values(activeMarkers).forEach(marker => {
-        marker.setZIndexOffset(0);
-        const el = marker.getElement();
-        if (el) el.style.opacity = "1";
-    });
-
-    Object.values(activePolylines).forEach(polyline => {
-        polyline.setStyle({ opacity: 0.9 });
-    });
-
-    Object.values(activePolygons).forEach(polygon => {
-        polygon.setStyle({ fillOpacity: 0.18, opacity: 1 });
-    });
 }
