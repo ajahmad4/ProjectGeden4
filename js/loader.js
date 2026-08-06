@@ -181,8 +181,9 @@ function aktifkanCard(idObjekAtlas) {
     // Redupkan semua layer spasial
     Object.values(activeMarkers).forEach(marker => {
         marker.setZIndexOffset(0);
-        const el = marker.getElement();
-        if (el) el.style.opacity = "0.25"; // Sedikit transparan
+        if (typeof marker.setOpacity === 'function') {
+            marker.setOpacity(0.25);
+        }
     });
 
     Object.values(activePolylines).forEach(polyline => {
@@ -404,12 +405,14 @@ function resetTampilanDefault() {
 // 5. INITIALIZER (DOMContentLoaded)
 // ==========================================
 document.addEventListener("DOMContentLoaded", function () {
+
+    if (typeof switchAppMode === 'function') {
+        switchAppMode('WELCOME');
+    }
+
     const tahunAwal = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
 
-    // 1. Muat Lokasi (Otomatis merender Marker, Cards, Jalur & Wilayah)
     muatLokasiAplikasi();
-    
-    // 2. Perbarui Header Era
     updateEraHeader(tahunAwal);
 
     // Event Listener Pencarian
@@ -611,5 +614,79 @@ function getCurrentEra(tahunAktif) {
  * @param {number} delta - Selisih tahun (-1 untuk mundur, 1 untuk maju)
  */
 function ubahTahunAktif(delta) {
-    animateTimelineYear(timeline.currentYear + delta);
+    const elInput = document.getElementById("timeline-current");
+    const current = (typeof timeline !== 'undefined' && timeline.currentYear) 
+        ? timeline.currentYear 
+        : parseInt(elInput?.value || "570", 10);
+
+    if (typeof animateTimelineYear === 'function') {
+        animateTimelineYear(current + delta);
+    }
+}
+
+function resetMapViewState() {
+    // 1. Sembunyikan panel detail kanan jika sedang terbuka
+    const detailPanel = document.getElementById('detail-panel');
+    if (detailPanel) {
+        detailPanel.classList.add('hidden');
+    }
+
+    // 2. Unselect/reset semua status kartu yang terpilih di panel kiri
+    const allCards = document.querySelectorAll('#location-list > div, .location-card-item');
+    allCards.forEach(card => {
+        card.classList.remove('active', 'bg-active', 'border-accent');
+    });
+
+    // 3. Zoom out peta tanpa mengubah titik koordinat pusat saat ini
+    if (typeof map !== 'undefined' && map) {
+        map.flyTo(map.getCenter(), 5, {
+            animate: true,
+            duration: 2.5
+        });
+    }
+}
+
+// Fungsi mengubah mode utama dari Header atau Modal Welcome
+function switchAppMode(mode) {
+    const welcomePanel = document.getElementById('welcome-panel');
+    const listPanel = document.getElementById('list-panel');
+    const detailPanel = document.getElementById('detail-panel');
+    const timelineLegend = document.getElementById('timeline-legend');
+    const timelineIndicator = document.getElementById('timeline-indicator');
+    const timelineFooter = document.getElementById('timeline-footer');
+    const modeSelect = document.getElementById('mode-select');
+    const badgeMode = document.getElementById('badge-mode-aktif');
+
+    // Selaraskan nilai dropdown di header
+    if (modeSelect) modeSelect.value = mode;
+
+    if (mode === 'WELCOME') {
+        // 1. Tampilkan Welcome Overlay Modal
+        if (welcomePanel) welcomePanel.classList.remove('hidden');
+
+        // 2. Sembunyikan SEMUA panel UI & Timeline agar tidak mengganggu modal
+        if (listPanel) listPanel.classList.add('hidden');
+        if (detailPanel) detailPanel.classList.add('hidden');
+        if (timelineLegend) timelineLegend.classList.add('hidden');
+        if (timelineIndicator) timelineIndicator.classList.add('hidden');
+        if (timelineFooter) timelineFooter.classList.add('hidden');
+
+    } else if (mode === 'EXPLORE' || mode === 'CURRICULUM') {
+        // 1. Sembunyikan Welcome Overlay Modal
+        if (welcomePanel) welcomePanel.classList.add('hidden');
+
+        // 2. Tampilkan Panel Kiri dan Timeline
+        if (listPanel) listPanel.classList.remove('hidden');
+        if (timelineLegend) timelineLegend.classList.remove('hidden');
+        if (timelineIndicator) timelineIndicator.classList.remove('hidden');
+        if (timelineFooter) timelineFooter.classList.remove('hidden');
+
+        // Panel detail tetap tersembunyi sampai ada marker/card yang diklik
+        if (detailPanel) detailPanel.classList.add('hidden');
+
+        // Update badge mode jika panel detail dibuka
+        if (badgeMode) {
+            badgeMode.textContent = mode === 'EXPLORE' ? 'MODE: EKSPLORASI' : 'MODE: KURIKULUM';
+        }
+    }
 }
