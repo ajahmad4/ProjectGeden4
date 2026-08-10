@@ -3,7 +3,7 @@
    File: css/panels.css
    ========================================================================= */
 
-/* Glassmorphism Effect */
+/* --- Glassmorphism Base --- */
 .glass-panel {
     background: var(--bg-panel);
     backdrop-filter: blur(14px);
@@ -12,14 +12,19 @@
     box-shadow: var(--shadow);
 }
 
-/* --- Left Side Panel (Location List) --- */
+/* =========================================================================
+   1. LEFT SIDE PANEL (Location List & Filter)
+   ========================================================================= */
 #list-panel {
     position: absolute !important;
     left: 16px !important;
     top: 60px !important;
-    bottom: 80px !important;
-    z-index: 1001 !important;
+    bottom: 85px !important; /* Ruang aman untuk timeline di bottom */
+    z-index: 600 !important; /* Di atas Peta (Leaflet max ~400), Di bawah Modal (1000+) */
+    display: flex;
+    flex-direction: column;
     padding: 0;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
 #list-panel h1 {
@@ -27,65 +32,101 @@
     line-height: 1;
 }
 
-#list-panel>div:first-child {
+#list-panel > div:first-child {
     padding: 16px;
+}
+
+/* Scrollbar Area untuk List Card */
+#list-panel .custom-scrollbar {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+}
+
+#list-panel .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#list-panel .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#list-panel .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb, rgba(255, 255, 255, 0.2));
+    border-radius: 20px;
+}
+
+#list-panel .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-hover, rgba(255, 255, 255, 0.4));
 }
 
 #location-list {
     gap: 8px !important;
 }
 
-#location-list>div {
+#location-list > div {
     min-height: 60px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
-#location-list>div:hover {
+#location-list > div:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
 }
 
-/* --- Active State for Location Cards --- */
+/* Active State Card (Dipicu oleh aktifkanCard() di loader.js) */
 .location-card-active {
     background: var(--bg-active) !important;
     border-color: var(--border-active) !important;
-    box-shadow: 0 8px 20px rgba(31, 75, 58, 0.12);
+    box-shadow: 0 8px 20px rgba(31, 75, 58, 0.12) !important;
 }
 
 .location-card-active .material-symbols-outlined {
-    color: var(--accent-primary);
+    color: var(--accent-primary, #10b981);
 }
 
-/* --- Right Side Panel (Detail View) --- */
+/* =========================================================================
+   2. RIGHT SIDE PANEL (Detail View)
+   ========================================================================= */
 #detail-panel {
     position: absolute !important;
     right: 16px !important;
     top: 60px !important;
-    bottom: 80px !important;
+    bottom: 85px !important;
     left: auto !important;
     width: 320px !important;
-    z-index: 1002 !important;
+    z-index: 650 !important;
     padding: 16px !important;
-    transition: opacity .2s ease;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#detail-panel.fading{
+/* Transisi Fade Content (Dipicu saat ganti konten detail) */
+#detail-panel.fading {
     opacity: 0;
 }
 
-#detail-content{
-    opacity:1;
-    transition:opacity .18s ease;
+#detail-content {
+    opacity: 1;
+    transition: opacity 0.18s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-#detail-content.fading{
-    opacity:0;
+#detail-content.fading {
+    opacity: 0;
 }
 
+/* Tipografi & Elemen Detail */
 #detail-nama {
-    font-size: 1.95rem;
-    line-height: 1.05;
+    font-size: 1.8rem;
+    line-height: 1.1;
     font-weight: 600;
     letter-spacing: -0.02em;
     color: var(--text-title);
@@ -97,7 +138,7 @@
     text-transform: uppercase;
     color: var(--text-muted);
     margin-bottom: 8px;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
 #detail-panel hr {
@@ -110,7 +151,7 @@
 #detail-deskripsi {
     margin: 0;
     padding-right: 6px;
-    font-size: 11px;
+    font-size: 11.5px;
     line-height: 1.5;
     color: var(--text-secondary);
     text-align: justify;
@@ -120,16 +161,17 @@
     letter-spacing: 0.15em;
 }
 
-/* --- Detail Panel Media/Photo --- */
+/* Foto Media Detail */
 #detail-foto-wrapper {
     margin-bottom: 10px;
     border-radius: 10px;
+    overflow: hidden;
 }
 
 #detail-foto {
     width: 100%;
-    height: 150px;
-    border-radius: 14px;
+    height: 140px;
+    border-radius: 10px;
     object-fit: cover;
     display: block;
     border: 1px solid var(--border-panel);
@@ -141,20 +183,20 @@
     filter: brightness(1.03);
 }
 
-/* --- Info Banner per Era di Panel Info --- */
+/* =========================================================================
+   3. INFO BANNER PER ERA (Diupload Dinamis oleh updateEraHeader())
+   ========================================================================= */
 .era-header {
     background: var(--bg-era-header);
     border-left: 5px solid var(--accent-primary);
-    /* Warna default; di-override dinamis oleh updateEraHeader() */
-    padding: 12px 14px;
-    margin-bottom: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
     border-radius: 0 8px 8px 0;
     transition: border-left-color 0.4s ease;
-    /* Animasi smooth saat era berganti */
 }
 
 .era-header h3 {
-    margin: 0 0 6px;
+    margin: 0 0 4px;
     font-size: 9px;
     color: var(--text-muted-alt);
     text-transform: uppercase;
@@ -164,10 +206,6 @@
 }
 
 .era-item {
-    margin-bottom: 0;
-}
-
-.era-item:last-child {
     margin-bottom: 0;
 }
 
@@ -184,44 +222,21 @@
     font-size: 11px;
 }
 
-/* =======================================================
-   Scroll daftar lokasi
-======================================================= */
-
-#list-panel {
-    display: flex;
-    flex-direction: column;
+#list-panel.hidden,
+#detail-panel.hidden,
+#welcome-panel.hidden,
+#timeline-container.hidden,
+#modal-layer.hidden {
+    display: none !important;
 }
 
-#list-panel .custom-scrollbar {
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-right: 4px;
-}
-
-#list-panel .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-}
-
-#list-panel .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-#list-panel .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--scroll-thumb);
-    border-radius: 20px;
-}
-
-#list-panel .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--scroll-hover);
-}
-
-/* Memastikan right-panel melayang di bawah header */
-#right-panel {
-    position: absolute !important;
-    top: 1rem !important;
-    right: 1rem !important;
-    bottom: 1rem !important;
-    height: calc(100% - 2rem) !important;
+/* =========================================================================
+   SEMBUNYIKAN KONTROL PETA & MINIMAP SAAT MODE WELCOME
+   ========================================================================= */
+body.mode-welcome .leaflet-control-container,
+body.mode-welcome .leaflet-bottom,
+body.mode-welcome .leaflet-top,
+body.mode-welcome .leaflet-control-minimap,
+body.mode-welcome #minimap {
+    display: none !important;
 }

@@ -259,3 +259,61 @@ function updateTimelineInterval() {
         timeline.majorInterval = 10;
     }
 }
+
+function syncTimelineUI(year) {
+    const minYear = 570;  // Tahun minimal aplikasi Anda
+    const maxYear = 1500; // Tahun maksimal aplikasi Anda (sesuaikan jika beda)
+
+    const indicator = document.getElementById('timeline-indicator'); // elemen segitiga oranye
+    const timelineRuler = document.getElementById('timeline-ruler');
+    const scrollContainer = document.getElementById('timeline-scroll-container') || (timelineRuler ? timelineRuler.parentElement : null);
+
+    if (!indicator || !timelineRuler) return;
+
+    // 1. Hitung persentase posisi (0% - 100%)
+    const clampedYear = Math.max(minYear, Math.min(maxYear, year));
+    const percentage = ((clampedYear - minYear) / (maxYear - minYear)) * 100;
+
+    // 2. Set posisi horizontal segitiga indikator
+    indicator.style.left = `${percentage}%`;
+
+    // 3. Gulung (scroll) container agar titik tahun aktif pas berada di tengah
+    if (scrollContainer) {
+        const totalWidth = scrollContainer.scrollWidth;
+        const visibleWidth = scrollContainer.clientWidth;
+        const targetScroll = (totalWidth * (percentage / 100)) - (visibleWidth / 2);
+        
+        scrollContainer.scrollTo({
+            left: Math.max(0, targetScroll),
+            behavior: 'smooth'
+        });
+    }
+}
+
+(function setupTimelineObserver() {
+    const timelineContainer = document.getElementById('timeline-container');
+    if (!timelineContainer) return;
+
+    let isFirstRender = true;
+
+    const observer = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+            // Jalankan kalkulasi hanya saat kontainer benar-benar sudah punya lebar (terlihat di layar)
+            if (entry.contentRect.width > 0) {
+                // Ambil tahun aktif saat ini dari input atau variabel global
+                const currentYear = parseInt(document.getElementById('year-input')?.value || 570);
+
+                // Panggil fungsi pembaruan posisi timeline milikmu
+                if (typeof updateTimelineUI === 'function') {
+                    updateTimelineUI(currentYear);
+                } else if (typeof setTimelineYear === 'function') {
+                    setTimelineYear(currentYear);
+                } else if (typeof syncTimelineUI === 'function') {
+                    syncTimelineUI(currentYear);
+                }
+            }
+        }
+    });
+
+    observer.observe(timelineContainer);
+})();

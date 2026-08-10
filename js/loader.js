@@ -17,9 +17,6 @@ const activeMarkers = {};
 const activePolylines = {};
 const activePolygons = {};
 
-// State mode filter aktif: 'default' | 'era_aktif' | 'keseluruhan'
-// let currentFilterMode = 'default';
-
 // ==========================================
 // 2. INISIALISASI & BUILDER CARD
 // ==========================================
@@ -83,7 +80,7 @@ function muatLokasiAplikasi() {
 
     locationList.innerHTML = '';
 
-    // 1. Bersihkan semua layer marker dari peta
+    // Bersihkan semua layer marker dari peta
     if (typeof layerMasjid !== 'undefined') layerMasjid.clearLayers();
     if (typeof layerKerajaan !== 'undefined') layerKerajaan.clearLayers();
     if (typeof layerPelabuhan !== 'undefined') layerPelabuhan.clearLayers();
@@ -154,31 +151,21 @@ function muatLokasiAplikasi() {
         locationList.innerHTML = cardFragments.join('');
     }
 
-    // =========================================================
-    // PERBAIKAN JALUR: Eksekusi render jalur & wilayah setiap kali
-    // aplikasi memuat lokasi era yang aktif
-    // =========================================================
+    // Eksekusi render jalur & wilayah
     if (typeof renderJalurDanWilayah === 'function') {
         renderJalurDanWilayah(currentYear);
     }
 }
+
 // ==========================================
 // 4. MANAJEMEN INTERAKSI & TRANSISI UI
 // ==========================================
 
-/**
- * Mengaktifkan card dan fokus pada layer terkait.
- * Pada Mode Default: Elemen terpilih menyala, elemen lain diredupkan.
- * Pada Mode Era Aktif / Keseluruhan: Semua elemen tetap terang (100%).
- * @param {string} idObjekAtlas - ID Objek Atlas
- */
 function aktifkanCard(idObjekAtlas) {
-    // 1. Reset visual semua card
     document.querySelectorAll("#location-list > div").forEach(card => {
         card.classList.remove("location-card-active");
     });
 
-    // Redupkan semua layer spasial
     Object.values(activeMarkers).forEach(marker => {
         marker.setZIndexOffset(0);
         if (typeof marker.setOpacity === 'function') {
@@ -187,14 +174,13 @@ function aktifkanCard(idObjekAtlas) {
     });
 
     Object.values(activePolylines).forEach(polyline => {
-        polyline.setStyle({ opacity: 0.15 }); // Sedikit transparan
+        polyline.setStyle({ opacity: 0.15 });
     });
 
     Object.values(activePolygons).forEach(polygon => {
-        polygon.setStyle({ fillOpacity: 0.05, opacity: 0.15 }); // Sedikit transparan
+        polygon.setStyle({ fillOpacity: 0.05, opacity: 0.15 });
     });
 
-    // Ambil data Objek Atlas dan fokuskan layer miliknya
     const objek = dataObjekAtlas.find(oa => oa.id === idObjekAtlas);
     if (!objek) return;
 
@@ -204,7 +190,6 @@ function aktifkanCard(idObjekAtlas) {
         cardAktif.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
-    // Aktifkan Marker terkait (Opacity 100%)
     if (objek.relasi && objek.relasi.markers) {
         objek.relasi.markers.forEach(markerId => {
             const marker = activeMarkers[markerId];
@@ -216,7 +201,6 @@ function aktifkanCard(idObjekAtlas) {
         });
     }
 
-    // Aktifkan Jalur terkait (Opacity 100%)
     let jalurDitemukan = false;
     if (objek.relasi && objek.relasi.jalur) {
         objek.relasi.jalur.forEach(jalurId => {
@@ -229,14 +213,12 @@ function aktifkanCard(idObjekAtlas) {
         });
     }
 
-    // Jika tidak ada jalur spesifik milik objek ini, normalkan opacity semua jalur era aktif
     if (!jalurDitemukan) {
         Object.values(activePolylines).forEach(poly => {
             poly.setStyle({ opacity: 0.9 });
         });
     }
 
-    // Aktifkan Wilayah terkait (Opacity 100%)
     if (objek.relasi && objek.relasi.wilayah) {
         objek.relasi.wilayah.forEach(wilayahId => {
             const polygon = activePolygons[wilayahId];
@@ -252,7 +234,6 @@ function eksekusiNavigasiLokal(idObjekAtlas) {
     const objek = dataObjekAtlas.find(oa => oa.id === idObjekAtlas);
     if (!objek) return;
 
-    // Mobile: Auto-close dropdown panel saat item dipilih
     const listPanel = document.getElementById("list-panel");
     if (window.innerWidth <= 768 && listPanel) {
         listPanel.classList.add("mobile-closed");
@@ -374,10 +355,31 @@ function tutupDetailPanel() {
         detailPanel.classList.remove('snap-peek', 'snap-half', 'snap-full');
     }
 
-    if (map) {
+    // Reset sorotan card di panel kiri
+    document.querySelectorAll("#location-list > div").forEach(card => {
+        card.classList.remove("location-card-active");
+    });
+
+    // Kembalikan transparansi marker & jalur di peta ke normal
+    Object.values(activeMarkers).forEach(marker => {
+        marker.setZIndexOffset(0);
+        if (typeof marker.setOpacity === 'function') {
+            marker.setOpacity(1);
+        }
+    });
+
+    Object.values(activePolylines).forEach(polyline => {
+        polyline.setStyle({ opacity: 0.9 });
+    });
+
+    Object.values(activePolygons).forEach(polygon => {
+        polygon.setStyle({ fillOpacity: 0.18, opacity: 1 });
+    });
+
+    if (typeof map !== 'undefined' && map) {
         setTimeout(() => {
             map.invalidateSize();
-        }, 300);
+        }, 200);
     }
 }
 
@@ -402,10 +404,60 @@ function resetTampilanDefault() {
 }
 
 // ==========================================
-// 5. INITIALIZER (DOMContentLoaded)
+// 5. PENYESUAIAN SWITCH APP MODE & INITIALIZER
 // ==========================================
+
+/**
+ * Mengubah mode utama antarmuka
+ * @param {string} mode - 'WELCOME' | 'EXPLORE' | 'CURRICULUM'
+ */
+function switchAppMode(mode) {
+    const modalLayer = document.getElementById('modal-layer');
+    const welcomePanel = document.getElementById('welcome-panel');
+    const listPanel = document.getElementById('list-panel');
+    const detailPanel = document.getElementById('detail-panel');
+    const timelineContainer = document.getElementById('timeline-container');
+    const modeSelect = document.getElementById('mode-select');
+    const badgeMode = document.getElementById('badge-mode-aktif');
+
+    if (modeSelect) modeSelect.value = mode;
+
+    if (mode === 'WELCOME') {
+        // Tambahkan kelas mode-welcome pada body
+        document.body.classList.add('mode-welcome');
+
+        if (modalLayer) modalLayer.classList.remove('hidden');
+        if (welcomePanel) welcomePanel.classList.remove('hidden');
+        if (listPanel) listPanel.classList.add('hidden');
+        if (detailPanel) detailPanel.classList.add('hidden');
+        if (timelineContainer) timelineContainer.classList.add('hidden');
+
+    } else if (mode === 'EXPLORE' || mode === 'CURRICULUM') {
+        // Hapus kelas mode-welcome dari body
+        document.body.classList.remove('mode-welcome');
+
+        if (modalLayer) modalLayer.classList.add('hidden');
+        if (welcomePanel) welcomePanel.classList.add('hidden');
+        if (listPanel) listPanel.classList.remove('hidden');
+        if (timelineContainer) timelineContainer.classList.remove('hidden');
+        if (detailPanel) detailPanel.classList.add('hidden');
+
+        if (badgeMode) {
+            badgeMode.textContent = mode === 'EXPLORE' ? 'MODE: EKSPLORASI' : 'MODE: KURIKULUM';
+            badgeMode.className = mode === 'CURRICULUM' 
+                ? "text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono"
+                : "text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono";
+        }
+
+        if (typeof map !== 'undefined' && map) {
+            setTimeout(() => map.invalidateSize(), 200);
+        }
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
+    // Set tampilan awal ke WELCOME
     if (typeof switchAppMode === 'function') {
         switchAppMode('WELCOME');
     }
@@ -422,18 +474,14 @@ document.addEventListener("DOMContentLoaded", function () {
             const keyword = this.value.toLowerCase().trim();
             const locationList = document.getElementById("location-list");
 
-            // PERBAIKAN 2: Jika mengetik pencarian, gunakan SELURUH dataObjekAtlas (Global Search).
-            // Jika kolom pencarian kosong, kembalikan hanya objek di ERA AKTIF.
             const currentYear = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
             const eraAktif = getCurrentEra(currentYear);
 
             let dataSumber = [];
 
             if (keyword !== "") {
-                // Cari di seluruh era
                 dataSumber = dataObjekAtlas;
             } else {
-                // Kembali ke era aktif saja
                 dataSumber = eraAktif
                     ? dataObjekAtlas.filter(oa => oa.era === eraAktif.id)
                     : dataObjekAtlas;
@@ -463,18 +511,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
-    const timelineSlider = document.getElementById("timeline-slider");
-    const timelineCurrent = document.getElementById("timeline-current");
-    if (timelineSlider && timelineCurrent) {
-        timelineSlider.addEventListener("input", function () {
-            timelineCurrent.textContent = `${this.value} M`;
-        });
-    }
 });
 
 // =========================================================================
-// 6. RENDER JALUR (POLYLINE) DAN WILAYAH KEKUASAAN (POLYGON)
+// 6. RENDER JALUR & WILAYAH KEKUASAAN
 // =========================================================================
 
 function renderJalurDanWilayah(tahunAktif) {
@@ -486,53 +526,51 @@ function renderJalurDanWilayah(tahunAktif) {
     for (const key in activePolylines) delete activePolylines[key];
     for (const key in activePolygons)  delete activePolygons[key];
 
-    // ==================== 1. RENDER JALUR ====================
-// ==================== 1. RENDER JALUR ====================
-if (typeof dataJalur !== 'undefined') {
-    dataJalur.forEach(jalur => {
-        // PERBAIKAN LOGIKA RENTANG TAHUN JALUR:
-        // Jika tahunMulai == tahunSelesai (misal 570-570), cek batas <= agar tetap muncul pada tahun tersebut.
-        const isAktif = (jalur.tahunMulai === jalur.tahunSelesai)
-            ? (tahunAktif >= jalur.tahunMulai && tahunAktif <= jalur.tahunSelesai)
-            : (tahunAktif >= jalur.tahunMulai && tahunAktif < jalur.tahunSelesai);
+    // 1. RENDER JALUR
+    if (typeof dataJalur !== 'undefined') {
+        dataJalur.forEach(jalur => {
+            const isAktif = (jalur.tahunMulai === jalur.tahunSelesai)
+                ? (tahunAktif >= jalur.tahunMulai && tahunAktif <= jalur.tahunSelesai)
+                : (tahunAktif >= jalur.tahunMulai && tahunAktif < jalur.tahunSelesai);
 
-        if (isAktif) {
-            const polyline = L.polyline(jalur.koordinat, {
-                color:       jalur.warna,
-                weight:      5,
-                opacity:     0.9,
-                dashArray:   "10 6",
-                smoothFactor: 1,
-                lineJoin:    "round",
-                lineCap:     "round"
-            });
+            if (isAktif) {
+                const polyline = L.polyline(jalur.koordinat, {
+                    color:        jalur.warna,
+                    weight:       5,
+                    opacity:      0.9,
+                    dashArray:    "10 6",
+                    smoothFactor: 1,
+                    lineJoin:     "round",
+                    lineCap:      "round"
+                });
 
-            polyline.bindPopup(`
-                <div class="popup-jalur">
-                    <h4>${jalur.nama}</h4>
-                    <p><strong>Periode:</strong> ${jalur.tahunMulai}${jalur.tahunMulai === jalur.tahunSelesai ? '' : '–' + jalur.tahunSelesai} M</p>
-                    <p>${jalur.deskripsi}</p>
-                </div>`);
+                polyline.bindPopup(`
+                    <div class="popup-jalur">
+                        <h4>${jalur.nama}</h4>
+                        <p><strong>Periode:</strong> ${jalur.tahunMulai}${jalur.tahunMulai === jalur.tahunSelesai ? '' : '–' + jalur.tahunSelesai} M</p>
+                        <p>${jalur.deskripsi}</p>
+                    </div>`);
 
-            polyline.addTo(layerJalurSitus);
-            activePolylines[jalur.id] = polyline;
+                polyline.addTo(layerJalurSitus);
+                activePolylines[jalur.id] = polyline;
 
-            polyline.on('click', function() {
-                const eraAktif = getCurrentEra(tahunAktif);
-                if (!eraAktif) return;
-                const objekTerkait = dataObjekAtlas.find(oa => 
-                    oa.era === eraAktif.id && 
-                    oa.relasi.jalur && oa.relasi.jalur.includes(jalur.id)
-                );
-                if (objekTerkait) {
-                    showDetail(objekTerkait);
-                    aktifkanCard(objekTerkait.id);
-                }
-            });
-        }
-    });
-}
-    // ==================== 2. RENDER WILAYAH ====================
+                polyline.on('click', function() {
+                    const eraAktif = getCurrentEra(tahunAktif);
+                    if (!eraAktif) return;
+                    const objekTerkait = dataObjekAtlas.find(oa => 
+                        oa.era === eraAktif.id && 
+                        oa.relasi.jalur && oa.relasi.jalur.includes(jalur.id)
+                    );
+                    if (objekTerkait) {
+                        showDetail(objekTerkait);
+                        aktifkanCard(objekTerkait.id);
+                    }
+                });
+            }
+        });
+    }
+
+    // 2. RENDER WILAYAH
     if (typeof dataWilayah !== 'undefined') {
         dataWilayah.forEach(wilayah => {
             if (tahunAktif >= wilayah.tahunMulai && tahunAktif <= wilayah.tahunSelesai) {
@@ -572,7 +610,7 @@ if (typeof dataJalur !== 'undefined') {
 }
 
 // =========================================================================
-// 7. UTILITAS ERA & FILTER MODE
+// 7. UTILITAS ERA & NAVIGATION CONTROL
 // =========================================================================
 
 function updateEraHeader(tahunAktif) {
@@ -609,10 +647,6 @@ function getCurrentEra(tahunAktif) {
     });
 }
 
-/**
- * Mengubah tahun aktif sebesar delta (-1 atau +1)
- * @param {number} delta - Selisih tahun (-1 untuk mundur, 1 untuk maju)
- */
 function ubahTahunAktif(delta) {
     const elInput = document.getElementById("timeline-current");
     const current = (typeof timeline !== 'undefined' && timeline.currentYear) 
@@ -625,68 +659,20 @@ function ubahTahunAktif(delta) {
 }
 
 function resetMapViewState() {
-    // 1. Sembunyikan panel detail kanan jika sedang terbuka
     const detailPanel = document.getElementById('detail-panel');
     if (detailPanel) {
         detailPanel.classList.add('hidden');
     }
 
-    // 2. Unselect/reset semua status kartu yang terpilih di panel kiri
     const allCards = document.querySelectorAll('#location-list > div, .location-card-item');
     allCards.forEach(card => {
         card.classList.remove('active', 'bg-active', 'border-accent');
     });
 
-    // 3. Zoom out peta tanpa mengubah titik koordinat pusat saat ini
     if (typeof map !== 'undefined' && map) {
         map.flyTo(map.getCenter(), 5, {
             animate: true,
             duration: 2.5
         });
-    }
-}
-
-// Fungsi mengubah mode utama dari Header atau Modal Welcome
-function switchAppMode(mode) {
-    const welcomePanel = document.getElementById('welcome-panel');
-    const listPanel = document.getElementById('list-panel');
-    const detailPanel = document.getElementById('detail-panel');
-    const timelineLegend = document.getElementById('timeline-legend');
-    const timelineIndicator = document.getElementById('timeline-indicator');
-    const timelineFooter = document.getElementById('timeline-footer');
-    const modeSelect = document.getElementById('mode-select');
-    const badgeMode = document.getElementById('badge-mode-aktif');
-
-    // Selaraskan nilai dropdown di header
-    if (modeSelect) modeSelect.value = mode;
-
-    if (mode === 'WELCOME') {
-        // 1. Tampilkan Welcome Overlay Modal
-        if (welcomePanel) welcomePanel.classList.remove('hidden');
-
-        // 2. Sembunyikan SEMUA panel UI & Timeline agar tidak mengganggu modal
-        if (listPanel) listPanel.classList.add('hidden');
-        if (detailPanel) detailPanel.classList.add('hidden');
-        if (timelineLegend) timelineLegend.classList.add('hidden');
-        if (timelineIndicator) timelineIndicator.classList.add('hidden');
-        if (timelineFooter) timelineFooter.classList.add('hidden');
-
-    } else if (mode === 'EXPLORE' || mode === 'CURRICULUM') {
-        // 1. Sembunyikan Welcome Overlay Modal
-        if (welcomePanel) welcomePanel.classList.add('hidden');
-
-        // 2. Tampilkan Panel Kiri dan Timeline
-        if (listPanel) listPanel.classList.remove('hidden');
-        if (timelineLegend) timelineLegend.classList.remove('hidden');
-        if (timelineIndicator) timelineIndicator.classList.remove('hidden');
-        if (timelineFooter) timelineFooter.classList.remove('hidden');
-
-        // Panel detail tetap tersembunyi sampai ada marker/card yang diklik
-        if (detailPanel) detailPanel.classList.add('hidden');
-
-        // Update badge mode jika panel detail dibuka
-        if (badgeMode) {
-            badgeMode.textContent = mode === 'EXPLORE' ? 'MODE: EKSPLORASI' : 'MODE: KURIKULUM';
-        }
     }
 }
