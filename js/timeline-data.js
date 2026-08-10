@@ -13,6 +13,13 @@
  * - Era-imperium-dunia & era-kemunduran/modern tidak lagi tumpang tindih.
  */
 
+// Contoh generate dropdown dinamis
+const selectEl = document.getElementById('era-select-dropdown');
+if (selectEl && typeof TIMELINE_ERAS !== 'undefined') {
+    selectEl.innerHTML = `<option value="ALL">Semua Era Sejarah</option>` + 
+        TIMELINE_ERAS.map(era => `<option value="${era.id}">${era.name} (${era.start}-${era.end} M)</option>`).join('');
+}
+
 const TIMELINE_CONFIG = {
     minYear: 570,    // Tahun kelahiran Nabi Muhammad SAW & Tahun Gajah
     maxYear: 2000,   // Batas atas tahun timeline

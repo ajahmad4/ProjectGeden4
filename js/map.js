@@ -215,3 +215,21 @@ map.on("moveend", function () {
     }
 
 });
+
+// Variable global untuk map narasi
+let narrativeMap = null;
+
+function initNarrativeMap() {
+    if (narrativeMap) return; // Mencegah inisialisasi ulang jika sudah ada
+
+    // Inisialisasi Leaflet di div #narrative-map
+    narrativeMap = L.map('narrative-map', {
+        zoomControl: false, // Boleh di-false agar tampilan UI bersih
+        attributionControl: false
+    }).setView([-2.548926, 118.014863], 5); // Default Indonesia
+
+    // Tambahkan Basemap Tile Layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19
+    }).addTo(narrativeMap);
+}

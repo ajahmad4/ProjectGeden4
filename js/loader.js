@@ -419,6 +419,9 @@ function switchAppMode(mode) {
     const timelineContainer = document.getElementById('timeline-container');
     const modeSelect = document.getElementById('mode-select');
     const badgeMode = document.getElementById('badge-mode-aktif');
+    
+    // Elemen baru untuk Mode Narrative (Split Screen 50:50)
+    const narrativeContainer = document.getElementById('narrative-mode-container');
 
     if (modeSelect) modeSelect.value = mode;
 
@@ -431,26 +434,59 @@ function switchAppMode(mode) {
         if (listPanel) listPanel.classList.add('hidden');
         if (detailPanel) detailPanel.classList.add('hidden');
         if (timelineContainer) timelineContainer.classList.add('hidden');
+        
+        // Sembunyikan mode narasi
+        if (narrativeContainer) narrativeContainer.classList.add('hidden');
 
-    } else if (mode === 'EXPLORE' || mode === 'CURRICULUM') {
+    } else if (mode === 'EXPLORE') {
         // Hapus kelas mode-welcome dari body
         document.body.classList.remove('mode-welcome');
 
+        // Tampilkan UI Mode Eksplorasi Peta Utama
         if (modalLayer) modalLayer.classList.add('hidden');
         if (welcomePanel) welcomePanel.classList.add('hidden');
         if (listPanel) listPanel.classList.remove('hidden');
         if (timelineContainer) timelineContainer.classList.remove('hidden');
         if (detailPanel) detailPanel.classList.add('hidden');
 
+        // Sembunyikan mode narasi
+        if (narrativeContainer) narrativeContainer.classList.add('hidden');
+
         if (badgeMode) {
-            badgeMode.textContent = mode === 'EXPLORE' ? 'MODE: EKSPLORASI' : 'MODE: KURIKULUM';
-            badgeMode.className = mode === 'CURRICULUM' 
-                ? "text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono"
-                : "text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono";
+            badgeMode.textContent = 'MODE: EKSPLORASI';
+            badgeMode.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono";
         }
 
+        // Refresh render peta utama
         if (typeof map !== 'undefined' && map) {
             setTimeout(() => map.invalidateSize(), 200);
+        }
+
+    } else if (mode === 'CURRICULUM') {
+        // Hapus kelas mode-welcome dari body
+        document.body.classList.remove('mode-welcome');
+
+        // Sembunyikan semua UI Mode Eksplorasi & Modal
+        if (modalLayer) modalLayer.classList.add('hidden');
+        if (welcomePanel) welcomePanel.classList.add('hidden');
+        if (listPanel) listPanel.classList.add('hidden');
+        if (detailPanel) detailPanel.classList.add('hidden');
+        if (timelineContainer) timelineContainer.classList.add('hidden');
+
+        // Tampilkan Mode Timeline Narrative Split Screen (50:50)
+        if (narrativeContainer) narrativeContainer.classList.remove('hidden');
+
+        // Inisialisasi & Refresh render peta narasi
+        if (typeof initNarrativeMap === 'function') {
+            initNarrativeMap();
+        }
+
+        if (typeof initNarrativeMode === 'function') {
+            initNarrativeMode(typeof dataObjekAtlas !== 'undefined' ? dataObjekAtlas : []);
+        }
+
+        if (typeof narrativeMap !== 'undefined' && narrativeMap) {
+            setTimeout(() => narrativeMap.invalidateSize(), 200);
         }
     }
 }
