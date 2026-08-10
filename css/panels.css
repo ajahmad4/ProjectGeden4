@@ -216,3 +216,12 @@
 #list-panel .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--scroll-hover);
 }
+
+/* Memastikan right-panel melayang di bawah header */
+#right-panel {
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    bottom: 1rem !important;
+    height: calc(100% - 2rem) !important;
+}
