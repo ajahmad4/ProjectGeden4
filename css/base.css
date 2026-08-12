@@ -78,3 +78,18 @@ header h1:hover {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
     background: #bdb5aa; 
 }
+
+/* =========================================================================
+   UTILITY: HIDE SCROLLBAR (TETAP BISA DI-SCROLL)
+   ========================================================================= */
+
+/* Sembunyikan scrollbar untuk Chrome, Safari, dan Opera */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Sembunyikan scrollbar untuk IE, Edge, dan Firefox */
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE dan Edge */
+    scrollbar-width: none;  /* Firefox */
+}

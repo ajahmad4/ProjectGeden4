@@ -1,6 +1,6 @@
 /**
  * ENGINE UTAMA INTERAKSI ANTARMUKA DAN MANIPULASI DATA DOM
- * Arsitektur Baru: "Objek Atlas" memisahkan narasi pembelajaran dari data geometris spasial.
+ * Arsitektur Terintegrasi: Menghubungkan dataObjekAtlas, data-kurikulum, dan antarmuka Leaflet.
  */
 
 // ==========================================
@@ -17,12 +17,13 @@ const activeMarkers = {};
 const activePolylines = {};
 const activePolygons = {};
 
+let currentActiveObjekId = null;
+
 // ==========================================
 // 2. INISIALISASI & BUILDER CARD
 // ==========================================
 
 function inisialisasiData() {
-    // Membangun map lookup dari data mentah
     if (typeof dataMarker !== 'undefined') dataMarker.forEach(m => markerMap[m.id] = m);
     if (typeof dataJalur !== 'undefined') dataJalur.forEach(j => jalurMap[j.id] = j);
     if (typeof dataWilayah !== 'undefined') dataWilayah.forEach(w => wilayahMap[w.id] = w);
@@ -32,9 +33,9 @@ function inisialisasiData() {
 inisialisasiData();
 
 function buatCardHTML(objek) {
-    const iconName = getMaterialIcon(objek.kategori);
-    const eraObjek = TIMELINE_ERAS.find(e => e.id === objek.era);
-    const namaEra = eraObjek ? eraObjek.name : '';
+    const iconName = typeof getMaterialIcon === 'function' ? getMaterialIcon(objek.kategori) : 'place';
+    const eraObjek = (typeof TIMELINE_ERAS !== 'undefined') ? TIMELINE_ERAS.find(e => e.id === objek.era) : null;
+    const namaEra = eraObjek ? (eraObjek.name || eraObjek.nama || '') : '';
 
     return `
         <div
@@ -48,11 +49,11 @@ function buatCardHTML(objek) {
 
             <div class="flex-1 min-w-0">
                 <p class="font-medium text-[13px] text-primary truncate group-hover:text-title transition-colors">
-                    ${objek.nama}
+                    ${objek.nama || ''}
                 </p>
                 <div class="flex items-center gap-1.5 mt-0.5">
                     <span class="text-[10px] text-muted">
-                        ${objek.tahun} M
+                        ${objek.tahun ? objek.tahun + ' M' : (objek.periode || '-')}
                     </span>
                     <span class="text-[9px] px-1.5 py-0.2 rounded bg-badge text-muted-alt border border-border-light truncate max-w-[110px]">
                         ${namaEra}
@@ -70,11 +71,8 @@ function buatCardHTML(objek) {
 // 3. MUAT LOKASI APLIKASI
 // ==========================================
 
-/**
- * Membaca dataObjekAtlas, memfilter berdasarkan mode filter aktif,
- * lalu merender marker ke peta dan card ke panel navigasi kiri.
- */
 function muatLokasiAplikasi() {
+    inisialisasiData();
     const locationList = document.getElementById('location-list');
     if (!locationList) return;
 
@@ -89,8 +87,8 @@ function muatLokasiAplikasi() {
     for (const key in activeMarkers) delete activeMarkers[key];
 
     const currentYear = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
-    const eraAktif = getCurrentEra(currentYear);
-    if (!eraAktif) return;    
+    const eraAktif = (typeof getCurrentEra === 'function') ? getCurrentEra(currentYear) : null;
+    if (!eraAktif || typeof dataObjekAtlas === 'undefined') return;    
 
     const cardFragments = [];
     const processedMarkers = new Set();
@@ -99,7 +97,7 @@ function muatLokasiAplikasi() {
         .filter(objek => objek.era === eraAktif.id)
         .forEach(objek => {
 
-            if (map && objek.relasi && objek.relasi.markers) {
+            if (typeof map !== 'undefined' && map && objek.relasi && objek.relasi.markers) {
                 objek.relasi.markers.forEach(markerId => {
                     if (processedMarkers.has(markerId)) return;
                     processedMarkers.add(markerId);
@@ -110,14 +108,16 @@ function muatLokasiAplikasi() {
                         return;
                     }
 
-                    const marker = L.marker(dataTitik.koordinat, { icon: buatIkonSejarah(objek.kategori) });
+                    const marker = L.marker(dataTitik.koordinat, { 
+                        icon: typeof buatIkonSejarah === 'function' ? buatIkonSejarah(objek.kategori) : new L.Icon.Default() 
+                    });
                     activeMarkers[markerId] = marker;
 
                     marker.on("click", function () {
                         map.flyTo(dataTitik.koordinat, 12, { animate: true, duration: 1.5 });
                         const objekTerkait = dataObjekAtlas.find(oa => 
                             oa.era === eraAktif.id && 
-                            oa.relasi.markers.includes(markerId)
+                            oa.relasi && oa.relasi.markers && oa.relasi.markers.includes(markerId)
                         );
                         
                         if (objekTerkait) {
@@ -127,10 +127,10 @@ function muatLokasiAplikasi() {
                     });
 
                     switch (objek.kategori) {
-                        case 'masjid':    marker.addTo(layerMasjid);    break;
-                        case 'kerajaan':  marker.addTo(layerKerajaan);  break;
-                        case 'pelabuhan': marker.addTo(layerPelabuhan); break;
-                        default:          marker.addTo(layerKota);      break;
+                        case 'masjid':    if (typeof layerMasjid !== 'undefined') marker.addTo(layerMasjid); break;
+                        case 'kerajaan':  if (typeof layerKerajaan !== 'undefined') marker.addTo(layerKerajaan); break;
+                        case 'pelabuhan': if (typeof layerPelabuhan !== 'undefined') marker.addTo(layerPelabuhan); break;
+                        default:          if (typeof layerKota !== 'undefined') marker.addTo(layerKota); break;
                     }
                 });
             }
@@ -139,7 +139,6 @@ function muatLokasiAplikasi() {
             cardFragments.push(buatCardHTML(objek));
         });
 
-    // Masukkan fragment ke DOM
     if (cardFragments.length === 0) {
         locationList.innerHTML = `
             <div class="flex flex-col items-center justify-center py-8 text-center">
@@ -151,7 +150,6 @@ function muatLokasiAplikasi() {
         locationList.innerHTML = cardFragments.join('');
     }
 
-    // Eksekusi render jalur & wilayah
     if (typeof renderJalurDanWilayah === 'function') {
         renderJalurDanWilayah(currentYear);
     }
@@ -181,6 +179,7 @@ function aktifkanCard(idObjekAtlas) {
         polygon.setStyle({ fillOpacity: 0.05, opacity: 0.15 });
     });
 
+    if (typeof dataObjekAtlas === 'undefined') return;
     const objek = dataObjekAtlas.find(oa => oa.id === idObjekAtlas);
     if (!objek) return;
 
@@ -195,8 +194,12 @@ function aktifkanCard(idObjekAtlas) {
             const marker = activeMarkers[markerId];
             if (marker) {
                 marker.setZIndexOffset(1000);
-                const el = marker.getElement();
-                if (el) el.style.opacity = "1";
+                if (typeof marker.setOpacity === 'function') {
+                    marker.setOpacity(1);
+                } else {
+                    const el = marker.getElement();
+                    if (el) el.style.opacity = "1";
+                }
             }
         });
     }
@@ -231,6 +234,7 @@ function aktifkanCard(idObjekAtlas) {
 }
 
 function eksekusiNavigasiLokal(idObjekAtlas) {
+    if (typeof dataObjekAtlas === 'undefined') return;
     const objek = dataObjekAtlas.find(oa => oa.id === idObjekAtlas);
     if (!objek) return;
 
@@ -239,56 +243,59 @@ function eksekusiNavigasiLokal(idObjekAtlas) {
         listPanel.classList.add("mobile-closed");
     }
 
-    animateTimelineYear(
-        Number(objek.tahun),
-        () => {
-            if (map && objek.relasi) {
-                const bounds = L.latLngBounds();
-                let hasPoint = false;
+    const jalankanNavigasi = () => {
+        if (typeof map !== 'undefined' && map && objek.relasi) {
+            const bounds = L.latLngBounds();
+            let hasPoint = false;
 
-                if (objek.relasi.markers) {
-                    objek.relasi.markers.forEach(id => {
-                        if (markerMap[id]) {
-                            bounds.extend(markerMap[id].koordinat);
-                            hasPoint = true;
-                        }
-                    });
-                }
-
-                if (objek.relasi.jalur) {
-                    objek.relasi.jalur.forEach(id => {
-                        if (jalurMap[id] && jalurMap[id].koordinat) {
-                            jalurMap[id].koordinat.forEach(coord => bounds.extend(coord));
-                            hasPoint = true;
-                        }
-                    });
-                }
-
-                if (objek.relasi.wilayah) {
-                    objek.relasi.wilayah.forEach(id => {
-                        if (wilayahMap[id] && wilayahMap[id].koordinat) {
-                            wilayahMap[id].koordinat.forEach(coord => bounds.extend(coord));
-                            hasPoint = true;
-                        }
-                    });
-                }
-
-                if (hasPoint) {
-                    const sw = bounds.getSouthWest();
-                    const ne = bounds.getNorthEast();
-                    
-                    if (sw.lat === ne.lat && sw.lng === ne.lng) {
-                        map.flyTo(sw, 12, { animate: true, duration: 1.5, easeLinearity: 0.25 });
-                    } else {
-                        map.flyToBounds(bounds, { animate: true, duration: 1.5, padding: [40, 40] });
+            if (objek.relasi.markers) {
+                objek.relasi.markers.forEach(id => {
+                    if (markerMap[id]) {
+                        bounds.extend(markerMap[id].koordinat);
+                        hasPoint = true;
                     }
+                });
+            }
+
+            if (objek.relasi.jalur) {
+                objek.relasi.jalur.forEach(id => {
+                    if (jalurMap[id] && jalurMap[id].koordinat) {
+                        jalurMap[id].koordinat.forEach(coord => bounds.extend(coord));
+                        hasPoint = true;
+                    }
+                });
+            }
+
+            if (objek.relasi.wilayah) {
+                objek.relasi.wilayah.forEach(id => {
+                    if (wilayahMap[id] && wilayahMap[id].koordinat) {
+                        wilayahMap[id].koordinat.forEach(coord => bounds.extend(coord));
+                        hasPoint = true;
+                    }
+                });
+            }
+
+            if (hasPoint) {
+                const sw = bounds.getSouthWest();
+                const ne = bounds.getNorthEast();
+                
+                if (sw.lat === ne.lat && sw.lng === ne.lng) {
+                    map.flyTo(sw, 12, { animate: true, duration: 1.5, easeLinearity: 0.25 });
+                } else {
+                    map.flyToBounds(bounds, { animate: true, duration: 1.5, padding: [40, 40] });
                 }
             }
-            
-            showDetail(objek);
-            aktifkanCard(idObjekAtlas);
         }
-    );
+        
+        showDetail(objek);
+        aktifkanCard(idObjekAtlas);
+    };
+
+    if (typeof animateTimelineYear === 'function' && objek.tahun) {
+        animateTimelineYear(Number(objek.tahun), jalankanNavigasi);
+    } else {
+        jalankanNavigasi();
+    }
 }
 
 function showDetail(objek) {
@@ -308,43 +315,12 @@ function showDetail(objek) {
         return;
     }
 
-    detailContent.classList.add("fading");
+    if (detailContent) detailContent.classList.add("fading");
 
     setTimeout(() => {
         isiDetailPanel(objek);
-        detailContent.classList.remove("fading");
+        if (detailContent) detailContent.classList.remove("fading");
     }, 180);
-}
-
-function isiDetailPanel(objek) {
-    const fields = {
-        "detail-nama": objek.nama,
-        "detail-tahun": objek.periode,
-        "detail-waktu": objek.tahun ? `${objek.tahun} M` : "-",
-        "detail-lokasi": objek.lokasi,
-        "detail-kategori": objek.kategori.charAt(0).toUpperCase() + objek.kategori.slice(1),
-        "detail-wilayah": objek.wilayah,
-        "detail-deskripsi": objek.deskripsi,
-    };
-
-    Object.entries(fields).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val;
-    });
-
-    const fotoWrapper = document.getElementById("detail-foto-wrapper");
-    const foto = document.getElementById("detail-foto");
-
-    if (objek.foto && objek.foto.length > 0) {
-        foto.src = objek.foto;
-        foto.alt = objek.nama;
-        foto.onerror = function () {
-            this.src = "assets/images/placeholder.jpg";
-        };
-        fotoWrapper.classList.remove("hidden");
-    } else {
-        fotoWrapper.classList.add("hidden");
-    }
 }
 
 function tutupDetailPanel() {
@@ -355,12 +331,10 @@ function tutupDetailPanel() {
         detailPanel.classList.remove('snap-peek', 'snap-half', 'snap-full');
     }
 
-    // Reset sorotan card di panel kiri
     document.querySelectorAll("#location-list > div").forEach(card => {
         card.classList.remove("location-card-active");
     });
 
-    // Kembalikan transparansi marker & jalur di peta ke normal
     Object.values(activeMarkers).forEach(marker => {
         marker.setZIndexOffset(0);
         if (typeof marker.setOpacity === 'function') {
@@ -394,7 +368,7 @@ function resetTampilanDefault() {
         el.classList.remove('geser-kiri');
     });
 
-    if (map) {
+    if (typeof map !== 'undefined' && map) {
         map.flyTo([1.0, 115.0], 5, {
             animate: true,
             duration: 1.5,
@@ -404,13 +378,9 @@ function resetTampilanDefault() {
 }
 
 // ==========================================
-// 5. PENYESUAIAN SWITCH APP MODE & INITIALIZER
+// 5. SWITCH APP MODE & INITIALIZER
 // ==========================================
 
-/**
- * Mengubah mode utama antarmuka
- * @param {string} mode - 'WELCOME' | 'EXPLORE' | 'CURRICULUM'
- */
 function switchAppMode(mode) {
     const modalLayer = document.getElementById('modal-layer');
     const welcomePanel = document.getElementById('welcome-panel');
@@ -419,14 +389,11 @@ function switchAppMode(mode) {
     const timelineContainer = document.getElementById('timeline-container');
     const modeSelect = document.getElementById('mode-select');
     const badgeMode = document.getElementById('badge-mode-aktif');
-    
-    // Elemen baru untuk Mode Narrative (Split Screen 50:50)
     const narrativeContainer = document.getElementById('narrative-mode-container');
 
     if (modeSelect) modeSelect.value = mode;
 
     if (mode === 'WELCOME') {
-        // Tambahkan kelas mode-welcome pada body
         document.body.classList.add('mode-welcome');
 
         if (modalLayer) modalLayer.classList.remove('hidden');
@@ -434,22 +401,16 @@ function switchAppMode(mode) {
         if (listPanel) listPanel.classList.add('hidden');
         if (detailPanel) detailPanel.classList.add('hidden');
         if (timelineContainer) timelineContainer.classList.add('hidden');
-        
-        // Sembunyikan mode narasi
         if (narrativeContainer) narrativeContainer.classList.add('hidden');
 
     } else if (mode === 'EXPLORE') {
-        // Hapus kelas mode-welcome dari body
         document.body.classList.remove('mode-welcome');
 
-        // Tampilkan UI Mode Eksplorasi Peta Utama
         if (modalLayer) modalLayer.classList.add('hidden');
         if (welcomePanel) welcomePanel.classList.add('hidden');
         if (listPanel) listPanel.classList.remove('hidden');
         if (timelineContainer) timelineContainer.classList.remove('hidden');
         if (detailPanel) detailPanel.classList.add('hidden');
-
-        // Sembunyikan mode narasi
         if (narrativeContainer) narrativeContainer.classList.add('hidden');
 
         if (badgeMode) {
@@ -457,26 +418,21 @@ function switchAppMode(mode) {
             badgeMode.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono";
         }
 
-        // Refresh render peta utama
         if (typeof map !== 'undefined' && map) {
             setTimeout(() => map.invalidateSize(), 200);
         }
 
     } else if (mode === 'CURRICULUM') {
-        // Hapus kelas mode-welcome dari body
         document.body.classList.remove('mode-welcome');
 
-        // Sembunyikan semua UI Mode Eksplorasi & Modal
         if (modalLayer) modalLayer.classList.add('hidden');
         if (welcomePanel) welcomePanel.classList.add('hidden');
         if (listPanel) listPanel.classList.add('hidden');
         if (detailPanel) detailPanel.classList.add('hidden');
         if (timelineContainer) timelineContainer.classList.add('hidden');
 
-        // Tampilkan Mode Timeline Narrative Split Screen (50:50)
         if (narrativeContainer) narrativeContainer.classList.remove('hidden');
 
-        // Inisialisasi & Refresh render peta narasi
         if (typeof initNarrativeMap === 'function') {
             initNarrativeMap();
         }
@@ -492,8 +448,8 @@ function switchAppMode(mode) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    inisialisasiData();
 
-    // Set tampilan awal ke WELCOME
     if (typeof switchAppMode === 'function') {
         switchAppMode('WELCOME');
     }
@@ -501,7 +457,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const tahunAwal = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
 
     muatLokasiAplikasi();
-    updateEraHeader(tahunAwal);
+    if (typeof updateEraHeader === 'function') {
+        updateEraHeader(tahunAwal);
+    }
 
     // Event Listener Pencarian
     const searchInput = document.getElementById("search-input");
@@ -510,8 +468,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const keyword = this.value.toLowerCase().trim();
             const locationList = document.getElementById("location-list");
 
+            if (typeof dataObjekAtlas === 'undefined') return;
+
             const currentYear = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
-            const eraAktif = getCurrentEra(currentYear);
+            const eraAktif = typeof getCurrentEra === 'function' ? getCurrentEra(currentYear) : null;
 
             let dataSumber = [];
 
@@ -527,10 +487,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             dataSumber.forEach(objek => {
                 const cocok =
-                    objek.nama.toLowerCase().includes(keyword) ||
-                    objek.kategori.toLowerCase().includes(keyword) ||
-                    objek.lokasi.toLowerCase().includes(keyword) ||
-                    objek.wilayah.toLowerCase().includes(keyword);
+                    (objek.nama && objek.nama.toLowerCase().includes(keyword)) ||
+                    (objek.kategori && objek.kategori.toLowerCase().includes(keyword)) ||
+                    (objek.lokasi && objek.lokasi.toLowerCase().includes(keyword)) ||
+                    (objek.wilayah && objek.wilayah.toLowerCase().includes(keyword));
 
                 if (cocok) hasilFragments.push(buatCardHTML(objek));
             });
@@ -549,9 +509,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// =========================================================================
-// 6. RENDER JALUR & WILAYAH KEKUASAAN
-// =========================================================================
+// ==========================================
+// 6. RENDER JALUR & WILAYAH
+// ==========================================
 
 function renderJalurDanWilayah(tahunAktif) {
     tahunAktif = Math.round(Number(tahunAktif));
@@ -587,15 +547,15 @@ function renderJalurDanWilayah(tahunAktif) {
                         <p>${jalur.deskripsi}</p>
                     </div>`);
 
-                polyline.addTo(layerJalurSitus);
+                if (typeof layerJalurSitus !== 'undefined') polyline.addTo(layerJalurSitus);
                 activePolylines[jalur.id] = polyline;
 
                 polyline.on('click', function () {
-                    const eraAktif = getCurrentEra(tahunAktif);
-                    if (!eraAktif) return;
+                    const eraAktif = typeof getCurrentEra === 'function' ? getCurrentEra(tahunAktif) : null;
+                    if (!eraAktif || typeof dataObjekAtlas === 'undefined') return;
                     const objekTerkait = dataObjekAtlas.find(oa => 
                         oa.era === eraAktif.id && 
-                        oa.relasi.jalur && oa.relasi.jalur.includes(jalur.id)
+                        oa.relasi && oa.relasi.jalur && oa.relasi.jalur.includes(jalur.id)
                     );
                     if (objekTerkait) {
                         showDetail(objekTerkait);
@@ -625,15 +585,15 @@ function renderJalurDanWilayah(tahunAktif) {
                         <p>${wilayah.deskripsi}</p>
                     </div>`);
 
-                polygon.addTo(layerWilayahKekuasaan);
+                if (typeof layerWilayahKekuasaan !== 'undefined') polygon.addTo(layerWilayahKekuasaan);
                 activePolygons[wilayah.id] = polygon;
 
                 polygon.on('click', function () {
-                    const eraAktif = getCurrentEra(tahunAktif);
-                    if (!eraAktif) return;
+                    const eraAktif = typeof getCurrentEra === 'function' ? getCurrentEra(tahunAktif) : null;
+                    if (!eraAktif || typeof dataObjekAtlas === 'undefined') return;
                     const objekTerkait = dataObjekAtlas.find(oa => 
                         oa.era === eraAktif.id && 
-                        oa.relasi.wilayah && oa.relasi.wilayah.includes(wilayah.id)
+                        oa.relasi && oa.relasi.wilayah && oa.relasi.wilayah.includes(wilayah.id)
                     );
                     if (objekTerkait) {
                         showDetail(objekTerkait);
@@ -645,15 +605,15 @@ function renderJalurDanWilayah(tahunAktif) {
     }
 }
 
-// =========================================================================
+// ==========================================
 // 7. UTILITAS ERA & NAVIGATION CONTROL
-// =========================================================================
+// ==========================================
 
 function updateEraHeader(tahunAktif) {
     const container = document.getElementById("era-header");
     if (!container) return;
 
-    const eraAktif = getCurrentEra(tahunAktif);
+    const eraAktif = typeof getCurrentEra === 'function' ? getCurrentEra(tahunAktif) : null;
 
     container.className = "era-header";
 
@@ -669,12 +629,13 @@ function updateEraHeader(tahunAktif) {
     container.innerHTML = `
         <h3>Era Aktif</h3>
         <div class="era-item">
-            <strong>${eraAktif.name}</strong>
+            <strong>${eraAktif.name || eraAktif.nama}</strong>
             <span>${eraAktif.start}–${eraAktif.end} M</span>
         </div>`;
 }
 
 function getCurrentEra(tahunAktif) {
+    if (typeof TIMELINE_ERAS === 'undefined' || !Array.isArray(TIMELINE_ERAS)) return null;
     return TIMELINE_ERAS.find((era, index) => {
         if (index === TIMELINE_ERAS.length - 1) {
             return tahunAktif >= era.start && tahunAktif <= era.end;
@@ -712,9 +673,11 @@ function resetMapViewState() {
         });
     }
 }
+
 // ==========================================
-// TAMPILAN DEFAULT SEBELUM ITEM DIPILIH
+// 8. DETAIL PANEL & INTEGRASI KURIKULUM
 // ==========================================
+
 function showInitialNarrativePlaceholder() {
     const container = document.getElementById('narrative-content-body');
     if (!container) return;
@@ -731,12 +694,11 @@ function showInitialNarrativePlaceholder() {
         </div>
     `;
 
-    // Reset teks progress & status tombol navigasi
     const progressEl = document.getElementById('narrative-progress-text');
     if (progressEl) progressEl.textContent = `Pilih materi pada daftar`;
 
     const stepEl = document.getElementById('narrative-step-indicator');
-    if (stepEl) stepEl.textContent = `- / ${filteredNarrativeList.length}`;
+    if (stepEl) stepEl.textContent = `- / ${(typeof filteredNarrativeList !== 'undefined') ? filteredNarrativeList.length : 0}`;
 
     const btnPrev = document.getElementById('btn-narrative-prev');
     if (btnPrev) btnPrev.disabled = true;
@@ -746,7 +708,6 @@ function showInitialNarrativePlaceholder() {
 }
 
 function renderCarousel(objek) {
-  // Ambil data gambar dari galeri, gambar, atau foto
   const rawImages = objek.galeri || objek.gambar || (objek.foto ? [objek.foto] : []);
   
   if (!rawImages || rawImages.length === 0) {
@@ -754,13 +715,12 @@ function renderCarousel(objek) {
   }
 
   const imagesHtml = rawImages.map((img, index) => {
-    // Cek apakah data berupa String ("assets/...") atau Objek ({url: "assets/..."})
-    const src = typeof img === 'string' ? img : img.url;
-    const caption = typeof img === 'object' && img.caption ? img.caption : (objek.caption || objek.nama);
+    const src = typeof img === 'string' ? img : (img.url || img);
+    const caption = typeof img === 'object' && img.caption ? img.caption : (objek.caption || objek.nama || '');
     
     return `
       <div class="carousel-slide ${index === 0 ? 'active' : ''}">
-        <img src="${src}" alt="${caption}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x250?text=Gambar+Tidak+Ditemukan';">
+        <img src="${src}" alt="${caption}" onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';">
         <div class="carousel-caption">
           <p><strong>${caption}</strong></p>
         </div>
@@ -769,4 +729,92 @@ function renderCarousel(objek) {
   }).join('');
 
   return `<div class="carousel-container">${imagesHtml}</div>`;
+}
+
+function bukaSubMateriDariNarasi(storyId, stepIndex) {
+    if (typeof dataKurikulum === 'undefined') return;
+
+    const cerita = dataKurikulum.find(c => c.id === storyId);
+    if (!cerita || !cerita.steps || !cerita.steps[stepIndex]) {
+        alert("Sub-materi belum tersedia untuk titik ini.");
+        return;
+    }
+
+    const stepData = cerita.steps[stepIndex];
+
+    const tagEl = document.getElementById('submateri-tag-cerita');
+    if (tagEl) tagEl.textContent = cerita.judulCerita || 'MODUL KURIKULUM';
+
+    const judulEl = document.getElementById('submateri-judul');
+    if (judulEl) judulEl.textContent = stepData.judul || '';
+
+    const kontenEl = document.getElementById('submateri-konten');
+    if (kontenEl) kontenEl.innerHTML = stepData.konten || '';
+
+    document.getElementById('panel-ringkasan-view')?.classList.add('hidden');
+    document.getElementById('panel-submateri-view')?.classList.remove('hidden');
+
+    document.getElementById('detail-content')?.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function tutupSubMateriView() {
+    document.getElementById('panel-submateri-view')?.classList.add('hidden');
+    document.getElementById('panel-ringkasan-view')?.classList.remove('hidden');
+}
+
+function isiDetailPanel(objek) {
+    if (!objek) return;
+    currentActiveObjekId = objek.id;
+
+    if (typeof tutupSubMateriView === 'function') {
+        tutupSubMateriView();
+    }
+
+    const fields = {
+        "detail-nama": objek.nama || '',
+        "detail-tahun": objek.periode || '',
+        "detail-waktu": objek.tahun ? `${objek.tahun} M` : '-',
+        "detail-lokasi": objek.lokasi || '-',
+        "detail-kategori": objek.kategori ? (objek.kategori.charAt(0).toUpperCase() + objek.kategori.slice(1)) : '-',
+        "detail-wilayah": objek.wilayah || '-',
+        "detail-deskripsi": objek.deskripsi || objek.kronologi || '',
+    };
+
+    Object.entries(fields).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+    });
+
+    const fotoWrapper = document.getElementById("detail-foto-wrapper");
+    const foto = document.getElementById("detail-foto");
+
+    let imgUrl = null;
+    if (objek.foto && objek.foto.length > 0) {
+        imgUrl = typeof objek.foto === 'string' ? objek.foto : objek.foto[0];
+    } else if (objek.gambar && objek.gambar.length > 0) {
+        imgUrl = typeof objek.gambar[0] === 'string' ? objek.gambar[0] : (objek.gambar[0].url || objek.gambar[0]);
+    } else if (objek.galeri && objek.galeri.length > 0) {
+        imgUrl = typeof objek.galeri[0] === 'string' ? objek.galeri[0] : (objek.galeri[0].url || objek.galeri[0]);
+    }
+
+    if (imgUrl && fotoWrapper && foto) {
+        foto.src = imgUrl;
+        foto.alt = objek.nama || 'Foto Sejarah';
+        foto.onerror = function () {
+            this.src = "assets/images/placeholder.jpg";
+        };
+        fotoWrapper.classList.remove("hidden");
+    } else if (fotoWrapper) {
+        fotoWrapper.classList.add("hidden");
+    }
+
+    const wrapperBtn = document.getElementById('wrapper-btn-submateri');
+    const btnSubMateri = document.getElementById('btn-buka-submateri');
+
+    if (objek.refStoryId && wrapperBtn && btnSubMateri) {
+        wrapperBtn.classList.remove('hidden');
+        btnSubMateri.onclick = () => bukaSubMateriDariNarasi(objek.refStoryId, objek.refStepIndex || 0);
+    } else if (wrapperBtn) {
+        wrapperBtn.classList.add('hidden');
+    }
 }

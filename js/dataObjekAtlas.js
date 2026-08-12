@@ -10,7 +10,10 @@ const dataObjekAtlas = [
     kategori: "peristiwa",
     lokasi: "Mekkah",
     wilayah: "Jazirah Arab",
+    refStoryId: "oa-tahun-gajah-story",
+    refStepIndex: 0,
     deskripsi: "Pasukan Abrahah dari Kerajaan Yaman menyerang Ka'bah dengan pasukan bergajah. Serangan gagal setelah Allah mengirim burung ababil. Peristiwa ini diabadikan dalam Al-Qur'an Surat Al-Fil.",
+    kronologi: "Pada tahun 570 M, pasukan Abrahah dari Yaman menyerang Ka'bah dengan pasukan bergajah. Serangan ini gagal setelah Allah mengirim burung ababil yang melempari pasukan Abrahah dengan batu dari neraka, sehingga mereka hancur dan mundur. Peristiwa ini dikenal sebagai Tahun Gajah dan diabadikan dalam Al-Qur'an Surat Al-Fil.",
     gambar: [
       "assets/images/era-pra-islam/tahun-gajah-1.jpg",
       "assets/images/era-pra-islam/tahun-gajah-2.jpg",

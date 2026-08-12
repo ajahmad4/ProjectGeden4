@@ -320,7 +320,7 @@ function loadNarrativeStep(index) {
                 <span class="w-1 h-3 rounded-full" style="background-color: var(--accent-primary);"></span> Uraian / Kronologi Sejarah
             </h4>
             <div class="text-xs md:text-sm leading-relaxed space-y-2 text-justify" style="color: var(--text-secondary);">
-                ${kronologiText.split('\n').map(p => `<p>${p}</p>`).join('')}
+                ${kronologiText.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('')}
             </div>
         </div>
     `;
@@ -519,18 +519,23 @@ function changeNarrativeImage(direction) {
     
     if (!images || images.length <= 1) return;
 
+    // Sembunyikan slide aktif saat ini
     images[currentCarouselIndex].classList.add('hidden');
     if (dots[currentCarouselIndex]) {
-        dots[currentCarouselIndex].classList.remove('bg-emerald-400', 'w-4');
-        dots[currentCarouselIndex].classList.add('bg-slate-500/50', 'w-1.5');
+        dots[currentCarouselIndex].style.backgroundColor = 'var(--border-light)';
+        dots[currentCarouselIndex].classList.remove('w-4');
+        dots[currentCarouselIndex].classList.add('w-1.5');
     }
 
+    // Hitung indeks baru
     currentCarouselIndex = (currentCarouselIndex + direction + images.length) % images.length;
 
+    // Tampilkan slide baru
     images[currentCarouselIndex].classList.remove('hidden');
     if (dots[currentCarouselIndex]) {
-        dots[currentCarouselIndex].classList.remove('bg-slate-500/50', 'w-1.5');
-        dots[currentCarouselIndex].classList.add('bg-emerald-400', 'w-4');
+        dots[currentCarouselIndex].style.backgroundColor = 'var(--accent-primary)';
+        dots[currentCarouselIndex].classList.remove('w-1.5');
+        dots[currentCarouselIndex].classList.add('w-4');
     }
 
     if (captionEl) {
@@ -539,10 +544,12 @@ function changeNarrativeImage(direction) {
     }
 }
 
-function setNarrativeImage(index) {
+function setNarrativeImage(targetIndex) {
     const images = document.querySelectorAll('.narrative-carousel-slide');
-    if (!images || index < 0 || index >= images.length) return;
+    if (!images || targetIndex < 0 || targetIndex >= images.length) return;
     
-    const diff = index - currentCarouselIndex;
-    changeNarrativeImage(diff);
+    const diff = targetIndex - currentCarouselIndex;
+    if (diff !== 0) {
+        changeNarrativeImage(diff);
+    }
 }
