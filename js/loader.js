@@ -99,45 +99,45 @@ function muatLokasiAplikasi() {
         .filter(objek => objek.era === eraAktif.id)
         .forEach(objek => {
 
-        if (map && objek.relasi && objek.relasi.markers) {
-            objek.relasi.markers.forEach(markerId => {
-                if (processedMarkers.has(markerId)) return;
-                processedMarkers.add(markerId);
+            if (map && objek.relasi && objek.relasi.markers) {
+                objek.relasi.markers.forEach(markerId => {
+                    if (processedMarkers.has(markerId)) return;
+                    processedMarkers.add(markerId);
 
-                const dataTitik = markerMap[markerId];
-                if (!dataTitik) {
-                    console.warn(`[Data Error] Marker ID '${markerId}' tidak ditemukan di dataMarker.js (Dirujuk oleh ${objek.id})`);
-                    return;
-                }
+                    const dataTitik = markerMap[markerId];
+                    if (!dataTitik) {
+                        console.warn(`[Data Error] Marker ID '${markerId}' tidak ditemukan di dataMarker.js (Dirujuk oleh ${objek.id})`);
+                        return;
+                    }
 
-                const marker = L.marker(dataTitik.koordinat, { icon: buatIkonSejarah(objek.kategori) });
-                activeMarkers[markerId] = marker;
+                    const marker = L.marker(dataTitik.koordinat, { icon: buatIkonSejarah(objek.kategori) });
+                    activeMarkers[markerId] = marker;
 
-                marker.on("click", function () {
-                    map.flyTo(dataTitik.koordinat, 12, { animate: true, duration: 1.5 });
-                    const objekTerkait = dataObjekAtlas.find(oa => 
-                        oa.era === eraAktif.id && 
-                        oa.relasi.markers.includes(markerId)
-                    );
-                    
-                    if (objekTerkait) {
-                        showDetail(objekTerkait);
-                        aktifkanCard(objekTerkait.id);
+                    marker.on("click", function () {
+                        map.flyTo(dataTitik.koordinat, 12, { animate: true, duration: 1.5 });
+                        const objekTerkait = dataObjekAtlas.find(oa => 
+                            oa.era === eraAktif.id && 
+                            oa.relasi.markers.includes(markerId)
+                        );
+                        
+                        if (objekTerkait) {
+                            showDetail(objekTerkait);
+                            aktifkanCard(objekTerkait.id);
+                        }
+                    });
+
+                    switch (objek.kategori) {
+                        case 'masjid':    marker.addTo(layerMasjid);    break;
+                        case 'kerajaan':  marker.addTo(layerKerajaan);  break;
+                        case 'pelabuhan': marker.addTo(layerPelabuhan); break;
+                        default:          marker.addTo(layerKota);      break;
                     }
                 });
+            }
 
-                switch (objek.kategori) {
-                    case 'masjid':    marker.addTo(layerMasjid);    break;
-                    case 'kerajaan':  marker.addTo(layerKerajaan);  break;
-                    case 'pelabuhan': marker.addTo(layerPelabuhan); break;
-                    default:          marker.addTo(layerKota);      break;
-                }
-            });
-        }
-
-        // Render Card HTML
-        cardFragments.push(buatCardHTML(objek));
-    });
+            // Render Card HTML
+            cardFragments.push(buatCardHTML(objek));
+        });
 
     // Masukkan fragment ke DOM
     if (cardFragments.length === 0) {
@@ -590,7 +590,7 @@ function renderJalurDanWilayah(tahunAktif) {
                 polyline.addTo(layerJalurSitus);
                 activePolylines[jalur.id] = polyline;
 
-                polyline.on('click', function() {
+                polyline.on('click', function () {
                     const eraAktif = getCurrentEra(tahunAktif);
                     if (!eraAktif) return;
                     const objekTerkait = dataObjekAtlas.find(oa => 
@@ -628,7 +628,7 @@ function renderJalurDanWilayah(tahunAktif) {
                 polygon.addTo(layerWilayahKekuasaan);
                 activePolygons[wilayah.id] = polygon;
 
-                polygon.on('click', function() {
+                polygon.on('click', function () {
                     const eraAktif = getCurrentEra(tahunAktif);
                     if (!eraAktif) return;
                     const objekTerkait = dataObjekAtlas.find(oa => 
@@ -711,4 +711,62 @@ function resetMapViewState() {
             duration: 2.5
         });
     }
+}
+// ==========================================
+// TAMPILAN DEFAULT SEBELUM ITEM DIPILIH
+// ==========================================
+function showInitialNarrativePlaceholder() {
+    const container = document.getElementById('narrative-content-body');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="flex flex-col items-center justify-center h-full py-16 text-center space-y-3">
+            <div class="p-4 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 animate-pulse">
+                <span class="material-symbols-outlined text-3xl">touch_app</span>
+            </div>
+            <h3 class="text-base font-semibold text-slate-200">Pilih Objek Sejarah</h3>
+            <p class="text-xs text-slate-400 max-w-xs leading-relaxed">
+                Silakan klik salah satu titik peristiwa atau materi pada timeline sebelah kiri untuk menampilkan detail konten dan lokasi peta.
+            </p>
+        </div>
+    `;
+
+    // Reset teks progress & status tombol navigasi
+    const progressEl = document.getElementById('narrative-progress-text');
+    if (progressEl) progressEl.textContent = `Pilih materi pada daftar`;
+
+    const stepEl = document.getElementById('narrative-step-indicator');
+    if (stepEl) stepEl.textContent = `- / ${filteredNarrativeList.length}`;
+
+    const btnPrev = document.getElementById('btn-narrative-prev');
+    if (btnPrev) btnPrev.disabled = true;
+
+    const btnNext = document.getElementById('btn-narrative-next');
+    if (btnNext) btnNext.disabled = true;
+}
+
+function renderCarousel(objek) {
+  // Ambil data gambar dari galeri, gambar, atau foto
+  const rawImages = objek.galeri || objek.gambar || (objek.foto ? [objek.foto] : []);
+  
+  if (!rawImages || rawImages.length === 0) {
+    return `<div class="p-4 text-center text-xs text-slate-500">Gambar belum tersedia</div>`;
+  }
+
+  const imagesHtml = rawImages.map((img, index) => {
+    // Cek apakah data berupa String ("assets/...") atau Objek ({url: "assets/..."})
+    const src = typeof img === 'string' ? img : img.url;
+    const caption = typeof img === 'object' && img.caption ? img.caption : (objek.caption || objek.nama);
+    
+    return `
+      <div class="carousel-slide ${index === 0 ? 'active' : ''}">
+        <img src="${src}" alt="${caption}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x250?text=Gambar+Tidak+Ditemukan';">
+        <div class="carousel-caption">
+          <p><strong>${caption}</strong></p>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `<div class="carousel-container">${imagesHtml}</div>`;
 }

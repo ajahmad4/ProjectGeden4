@@ -402,3 +402,27 @@
 #year-next{
     left: 15px;
 }
+
+/* --- NARRATIVE TIMELINE LEFT PANEL STYLING --- */
+#narrative-timeline-list .timeline-item {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background: transparent;
+}
+
+#narrative-timeline-list .timeline-item:hover {
+    color: var(--accent-primary);
+    background-color: var(--bg-badge);
+}
+
+#narrative-timeline-list .timeline-item.active {
+    color: var(--accent-orange);
+    font-weight: 700;
+    background-color: var(--bg-active);
+    border-left: 3px solid var(--accent-orange);
+}

@@ -1,7 +1,6 @@
 // ==========================================
 // 1. DEKLARASI VARIABEL GLOBAL
 // ==========================================
-// Menggunakan 'window.' agar tidak error jika sudah dideklarasikan di file lain
 if (typeof window.narrativeMap === 'undefined') {
     window.narrativeMap = null;
 }
@@ -13,37 +12,7 @@ var narrativeMapMarkers = narrativeMapMarkers || [];
 // ==========================================
 // 2. INISIALISASI MODE NARASI
 // ==========================================
-function initNarrativeMode(externalData) {
-    // 1. Prioritaskan data yang di-pass, lalu dataObjekAtlas global, lalu narrativeDataList
-    if (externalData && Array.isArray(externalData) && externalData.length > 0) {
-        narrativeDataList = externalData;
-    } else if (typeof dataObjekAtlas !== 'undefined' && dataObjekAtlas.length > 0) {
-        narrativeDataList = dataObjekAtlas;
-    }
 
-    // 2. Set list yang terfilter dengan seluruh data awal
-    filteredNarrativeList = [...narrativeDataList];
-    currentNarrativeIndex = 0;
-    
-    // 3. Inisialisasi Peta Narasi jika belum ada
-    if (!window.narrativeMap && typeof L !== 'undefined' && typeof initNarrativeMap === 'function') {
-        initNarrativeMap();
-    }
-
-    // 4. Render UI jika data tersedia
-    if (filteredNarrativeList.length > 0) {
-        renderNarrativeTimeline();
-        loadNarrativeStep(0);
-    } else {
-        console.warn("[Narrative Engine] Tidak ada data objek sejarah yang dapat dimuat.");
-        const listContainer = document.getElementById('narrative-timeline-list');
-        if (listContainer) {
-            listContainer.innerHTML = `<div class="text-xs text-amber-400 p-3 bg-slate-900/90 rounded-xl border border-amber-500/30">⚠️ Data atlas belum tersedia.</div>`;
-        }
-    }
-}
-
-// Helper untuk mengambil koordinat utama
 function getObjekCoordinates(item) {
     if (!item) return null;
     if (item.lat && item.lng) return [item.lat, item.lng];
@@ -59,9 +28,6 @@ function getObjekCoordinates(item) {
 // ==========================================
 // 3. FUNGSI FILTER BERDASARKAN ERA
 // ==========================================
-// ==========================================
-// FUNGSI FILTER ERA (SINKRON DENGAN TIMELINE_ERAS)
-// ==========================================
 function filterNarrativeByEra(selectedEraId) {
     if (!narrativeDataList || narrativeDataList.length === 0) {
         if (typeof dataObjekAtlas !== 'undefined' && dataObjekAtlas.length > 0) {
@@ -72,7 +38,6 @@ function filterNarrativeByEra(selectedEraId) {
         }
     }
 
-    // Jika memilih 'ALL'
     if (!selectedEraId || selectedEraId === 'ALL') {
         filteredNarrativeList = [...narrativeDataList];
     } else {
@@ -81,12 +46,10 @@ function filterNarrativeByEra(selectedEraId) {
             : null;
 
         filteredNarrativeList = narrativeDataList.filter(item => {
-            // A. Cek kesamaan ID Era langsung (misal: item.era === "era-pasca-abbasiyah")
             if (item.era === selectedEraId || item.eraId === selectedEraId) {
                 return true;
             }
 
-            // B. Cek berdasarkan rentang tahun era dari TIMELINE_ERAS
             if (item.tahun && targetEraObj) {
                 const yr = parseInt(item.tahun, 10);
                 if (!isNaN(yr) && yr >= targetEraObj.start && yr <= targetEraObj.end) {
@@ -98,52 +61,26 @@ function filterNarrativeByEra(selectedEraId) {
         });
     }
 
-    // Fallback Safety: Jika era yang dipilih belum memiliki data, berikan pemberitahuan tanpa merusak UI
-    currentNarrativeIndex = 0;
+    currentNarrativeIndex = -1;
     
+    // SEMBUNYIKAN KEMBALI PANEL MATERI KETIKA ERA DIBUAT BERUBAH
+    const floatingPanel = document.getElementById('narrative-floating-panel');
+    if (floatingPanel) {
+        floatingPanel.classList.add('hidden');
+    }
+
     if (filteredNarrativeList.length === 0) {
-        const container = document.getElementById('narrative-content-body');
         const listContainer = document.getElementById('narrative-timeline-list');
-        
         if (listContainer) {
             listContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">Tidak ada data di era ini</div>`;
         }
-        if (container) {
-            container.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-12 text-center space-y-3">
-                    <span class="material-symbols-outlined text-4xl text-slate-600">manage_search</span>
-                    <p class="text-sm font-semibold text-slate-300">Belum ada objek sejarah pada era ini.</p>
-                    <p class="text-xs text-slate-500">Silakan pilih era lain pada filter di atas.</p>
-                </div>`;
-        }
     } else {
         renderNarrativeTimeline();
-        loadNarrativeStep(0);
     }
 }
 
-function matchesEraYear(tahunInput, eraKey) {
-    const yr = parseInt(tahunInput);
-    if (isNaN(yr)) return false;
-
-    const key = String(eraKey).toLowerCase();
-
-    if (key.includes('pra') || key.includes('570')) return yr >= 570 && yr <= 610;
-    if (key.includes('kenabian') || key.includes('610')) return yr >= 610 && yr <= 633;
-    if (key.includes('rashidun') || key.includes('633')) return yr >= 633 && yr <= 662;
-    if (key.includes('umayyah') || key.includes('662')) return yr >= 662 && yr <= 751;
-    if (key.includes('abbasiyah') || key.includes('751')) return yr >= 751 && yr <= 1258;
-    if (key.includes('pasca') || key.includes('1259')) return yr >= 1259 && yr <= 1400;
-    if (key.includes('nusantara') || key.includes('1400')) return yr >= 1400 && yr <= 1525;
-    if (key.includes('kesultanan') || key.includes('1525')) return yr >= 1525 && yr <= 1700;
-    if (key.includes('imperium') || key.includes('1700')) return yr >= 1700 && yr <= 1800;
-    if (key.includes('kemunduran') || key.includes('1800')) return yr >= 1800 && yr <= 2000;
-
-    return false;
-}
-
 // ==========================================
-// 4. RENDER TIMELINE VERTIKAL KIRI
+// 4. RENDER TIMELINE VERTIKAL KIRI (MELAYANG DAN MULTILINE)
 // ==========================================
 function renderNarrativeTimeline() {
     const listContainer = document.getElementById('narrative-timeline-list');
@@ -154,7 +91,7 @@ function renderNarrativeTimeline() {
         : narrativeDataList;
 
     if (!currentList || currentList.length === 0) {
-        listContainer.innerHTML = `<div class="text-xs text-slate-500 p-2">Data belum dimuat</div>`;
+        listContainer.innerHTML = `<div class="text-xs p-2 rounded-lg border" style="color: var(--text-muted); background: var(--bg-panel); border-color: var(--border-light);">Data belum dimuat</div>`;
         return;
     }
 
@@ -164,11 +101,26 @@ function renderNarrativeTimeline() {
         const titleText = item.nama || item.title || 'Objek Sejarah';
 
         return `
-            <button onclick="loadNarrativeStep(${idx})" class="group flex items-center gap-3 my-1.5 transition-all outline-none text-left">
-                <div class="w-3.5 h-3.5 rounded-full border-2 ${isActive ? 'bg-emerald-400 border-white scale-125 shadow-lg shadow-emerald-500/50' : 'bg-slate-800 border-slate-600 group-hover:border-emerald-400'} transition-all"></div>
-                <div class="px-3 py-1.5 rounded-xl border ${isActive ? 'bg-slate-900/90 border-emerald-500/60 text-emerald-300 shadow-md' : 'bg-slate-900/50 border-slate-800/80 text-slate-400 group-hover:text-slate-200'} text-xs font-mono backdrop-blur-md transition-all">
-                    <span class="block font-bold text-[10px] ${isActive ? 'text-emerald-400' : 'text-slate-500'}">${yearText}</span>
-                    <span class="line-clamp-1">${titleText}</span>
+            <button onclick="loadNarrativeStep(${idx})" class="timeline-item group flex items-start gap-2.5 my-2 transition-all outline-none text-left max-w-[260px] p-1.5 rounded-lg">
+                <!-- Titik Marker -->
+                <div class="w-3.5 h-3.5 mt-0.5 rounded-full border-2 shrink-0 transition-all duration-200"
+                     style="${isActive 
+                        ? 'background-color: var(--accent-orange); border-color: var(--bg-panel-solid); transform: scale(1.25); box-shadow: 0 0 10px rgba(var(--accent-orange-rgb), 0.6);' 
+                        : 'background-color: var(--bg-badge); border-color: var(--timeline-tick);'}">
+                </div>
+                
+                <!-- Teks & Tahun -->
+                <div class="text-xs font-mono transition-all duration-200">
+                    <!-- TAHUN -->
+                    <span class="block font-bold text-[10px] transition-colors" 
+                          style="color: ${isActive ? 'var(--accent-orange)' : 'var(--text-title)'};">
+                        ${yearText}
+                    </span>
+                    <!-- JUDUL -->
+                    <span class="block text-xs leading-snug line-clamp-2 transition-colors ${isActive ? 'font-bold' : 'font-medium'}"
+                          style="color: ${isActive ? 'var(--accent-orange)' : 'var(--text-primary)'};">
+                        ${titleText}
+                    </span>
                 </div>
             </button>
         `;
@@ -176,7 +128,27 @@ function renderNarrativeTimeline() {
 }
 
 // ==========================================
-// 5. RENDER DETAIL KONTEN NARASI
+// 5. TOGGLE HIDE/SHOW PANEL MATERI KANAN
+// ==========================================
+function toggleNarrativePanel() {
+    const floatingPanel = document.getElementById('narrative-floating-panel');
+    const reopenBtn = document.getElementById('btn-reopen-panel');
+
+    if (!floatingPanel) return;
+
+    if (floatingPanel.classList.contains('hidden')) {
+        // Tampilkan Panel Materi Melayang (Menutupi 50% kanan)
+        floatingPanel.classList.remove('hidden');
+        if (reopenBtn) reopenBtn.classList.add('hidden');
+    } else {
+        // Sembunyikan Panel Materi (Peta Fullscreen Utuh Terlihat Semua)
+        floatingPanel.classList.add('hidden');
+        if (reopenBtn) reopenBtn.classList.remove('hidden');
+    }
+}
+
+// ==========================================
+// 6. RENDER DETAIL KONTEN NARASI (WITH CAROUSEL)
 // ==========================================
 function loadNarrativeStep(index) {
     const activeList = (filteredNarrativeList && filteredNarrativeList.length > 0) 
@@ -186,11 +158,22 @@ function loadNarrativeStep(index) {
     if (!activeList || index < 0 || index >= activeList.length) return;
     currentNarrativeIndex = index;
 
+    const floatingPanel = document.getElementById('narrative-floating-panel');
+    if (floatingPanel) {
+        floatingPanel.classList.remove('hidden');
+    }
+
     const data = activeList[index];
+
+    // 1. UPDATE HEADER STATIS (AGAR JUDUL TIDAK TERGESER SAAT SCROLL)
+    const topicTitleEl = document.getElementById('narrative-topic-title');
+    if (topicTitleEl) {
+        topicTitleEl.textContent = data.nama || data.title || 'Situs Sejarah';
+    }
+
     const container = document.getElementById('narrative-content-body');
     if (!container) return;
 
-    // Data Variabel + Fallback
     const tipePeristiwa = data.kategori || data.tipe || 'Kerajaan Islam';
     const tahunText = data.tahun ? `${data.tahun} M` : 'Nusantara';
     const eraText = data.era || data.periodeEra || 'Klasik Islam';
@@ -202,118 +185,142 @@ function loadNarrativeStep(index) {
     const buktiText = data.bukti || data.artefak || 'Batu Nisan & Naskah Kuno';
     const statusText = data.status || 'Pusat Peradaban Islam';
 
-    const ringkasanText = data.ringkasan || data.deskripsiSingkat || data.deskripsi || 'Ringkasan materi belum tersedia.';
     const kronologiText = data.kronologi || data.deskripsi || 'Kronologi peristiwa sejarah belum diuraikan.';
-    const dampakText = data.dampak || data.signifikansi || 'Memberikan pengaruh besar terhadap penyebaran dakwah Islam di wilayah Nusantara.';
-    const fotoUrl = data.foto || data.image || '';
-    const captionFoto = data.caption || namaJudul;
-    const keterkaitanList = data.keterkaitan || data.tags || ['SKI Kelas 12', 'Islamisasi Nusantara', 'Jalur Rempah'];
+    
+    // Penanganan Gambar Carousel
+    let imageList = [];
+    if (Array.isArray(data.gambar) && data.gambar.length > 0) {
+        imageList = data.gambar;
+    } else if (Array.isArray(data.images) && data.images.length > 0) {
+        imageList = data.images;
+    } else if (data.foto || data.image) {
+        imageList = [data.foto || data.image];
+    }
+    const validImages = imageList.filter(img => img && typeof img === 'string');
+    
+    // Reset Index Carousel saat langkah diganti
+    currentCarouselIndex = 0;
 
     container.innerHTML = `
         <!-- 1. TIPE PERISTIWA & TAHUN -->
-        <div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-800">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <div class="flex items-center justify-between gap-2 pb-2 border-b shrink-0" style="border-color: var(--border-light);">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider" style="background-color: var(--bg-badge); color: var(--accent-primary); border: 1px solid var(--border-light);">
+                <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--accent-primary);"></span>
                 ${tipePeristiwa}
             </span>
-            <span class="text-xs font-mono text-slate-300 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800 flex items-center gap-1">
+            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-md flex items-center gap-1" style="background-color: var(--bg-badge); color: var(--text-title); border: 1px solid var(--border-light);">
                 ⏱️ <strong>${tahunText}</strong>
             </span>
         </div>
 
-        <!-- 2. JUDUL UTAMA -->
-        <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wide uppercase font-title drop-shadow">
+        <!-- JUDUL UTAMA MATERI (Gunakan --text-title agar Hijau Tua Tegas) -->
+        <h3 class="text-xl md:text-2xl font-bold tracking-tight pt-2" style="color: var(--text-title);">
             ${namaJudul}
-        </h1>
+        </h3>
 
-        <!-- 3. META DATA RAMAI (Grid 2x3 Box) -->
-        <div class="grid grid-cols-2 gap-2 p-3.5 bg-slate-900/70 rounded-xl border border-slate-800 text-[11px] md:text-xs">
-            <div class="flex items-center gap-2 text-slate-300">
-                <span class="material-symbols-outlined text-emerald-400 text-base shrink-0">location_on</span>
-                <span class="truncate"><strong>Wilayah:</strong> ${wilayahText}</span>
-            </div>
-            <div class="flex items-center gap-2 text-slate-300">
-                <span class="material-symbols-outlined text-amber-400 text-base shrink-0">person</span>
-                <span class="truncate"><strong>Tokoh:</strong> ${tokohText}</span>
-            </div>
-            <div class="flex items-center gap-2 text-slate-300">
-                <span class="material-symbols-outlined text-blue-400 text-base shrink-0">history_edu</span>
-                <span class="truncate"><strong>Era:</strong> ${eraText}</span>
-            </div>
-            <div class="flex items-center gap-2 text-slate-300">
-                <span class="material-symbols-outlined text-cyan-400 text-base shrink-0">sailing</span>
-                <span class="truncate"><strong>Jalur:</strong> ${jalurText}</span>
-            </div>
-            <div class="flex items-center gap-2 text-slate-300">
-                <span class="material-symbols-outlined text-purple-400 text-base shrink-0">account_balance</span>
-                <span class="truncate"><strong>Bukti:</strong> ${buktiText}</span>
-            </div>
-            <div class="flex items-center gap-2 text-slate-300">
-                <span class="material-symbols-outlined text-rose-400 text-base shrink-0">verified</span>
-                <span class="truncate"><strong>Status:</strong> ${statusText}</span>
-            </div>
-        </div>
-
-        <!-- 4. RINGKASAN -->
-        <div class="space-y-1.5">
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <span class="w-1 h-3 bg-emerald-500 rounded-full"></span> Ringkasan
-            </h4>
-            <div class="p-3 bg-emerald-950/20 border-l-2 border-emerald-500 text-slate-200 text-xs md:text-sm italic rounded-r-lg leading-relaxed">
-                "${ringkasanText}"
-            </div>
-        </div>
-
-        <!-- 5. KRONOLOGI -->
-        <div class="space-y-1.5">
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <span class="w-1 h-3 bg-blue-500 rounded-full"></span> Kronologi Sejarah
-            </h4>
-            <div class="text-xs md:text-sm text-slate-300 leading-relaxed space-y-2 text-justify">
-                ${kronologiText.split('\n').map(p => `<p>${p}</p>`).join('')}
-            </div>
-        </div>
-
-        <!-- 6. DAMPAK / SIGNIFIKANSI -->
-        <div class="space-y-1.5">
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <span class="w-1 h-3 bg-amber-500 rounded-full"></span> Dampak & Signifikansi
-            </h4>
-            <div class="p-3 bg-slate-900/80 border border-slate-800 rounded-xl text-xs md:text-sm text-amber-200/90 leading-relaxed">
-                ${dampakText}
-            </div>
-        </div>
-
-        <!-- 7. DOKUMENTASI -->
-        <div class="space-y-1.5">
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <span class="w-1 h-3 bg-purple-500 rounded-full"></span> Dokumentasi Visual
-            </h4>
-            ${fotoUrl ? `
-                <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 group">
-                    <img src="${fotoUrl}" alt="${namaJudul}" class="w-full h-48 md:h-56 object-cover group-hover:scale-105 transition-transform duration-300">
-                    <div class="p-2 bg-slate-900/90 text-[11px] text-slate-400 italic text-center border-t border-slate-800">
-                        📷 ${captionFoto}
+        <!-- 2. METADATA 2 KOLOM (KIRI) & GAMBAR FULL COVER (KANAN) -->
+        <div class="flex flex-col md:flex-row items-stretch gap-4 my-2">
+            
+            <!-- Metadata 2 Kolom -->
+            <div class="flex-1 grid grid-cols-2 gap-y-3 gap-x-4 p-4 rounded-xl text-[11px] md:text-xs justify-center items-center shadow-sm" style="background-color: var(--bg-badge); border: 1px solid var(--border-panel); color: var(--text-primary);">
+                <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">location_on</span>
+                    <div>
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Wilayah</span>
+                        <span class="font-medium" style="color: var(--text-primary);">${wilayahText}</span>
                     </div>
                 </div>
-            ` : `
-                <div class="p-4 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-500">
-                    Dokumentasi gambar belum tersedia
+
+                <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">sailing</span>
+                    <div>
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Jalur</span>
+                        <span class="font-medium" style="color: var(--text-primary);">${jalurText}</span>
+                    </div>
                 </div>
-            `}
+
+                <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">person</span>
+                    <div>
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Tokoh</span>
+                        <span class="font-medium" style="color: var(--text-primary);">${tokohText}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">account_balance</span>
+                    <div>
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Bukti</span>
+                        <span class="font-medium" style="color: var(--text-primary);">${buktiText}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">history_edu</span>
+                    <div>
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Era</span>
+                        <span class="font-medium" style="color: var(--text-primary);">${eraText}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">verified</span>
+                    <div>
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Status</span>
+                        <span class="font-medium" style="color: var(--text-primary);">${statusText}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carousel Gambar Materi Aktif di Kanan (Full Fit tanpa ruang hitam) -->
+            <div class="w-full md:w-[280px] lg:w-[320px] shrink-0 min-h-[180px] rounded-xl overflow-hidden relative group flex flex-col justify-between shadow-sm" style="border: 1px solid var(--border-panel); background-color: var(--bg-badge);">
+                ${validImages.length > 0 ? `
+                    <div class="relative w-full flex-1 overflow-hidden min-h-[150px]">
+                        ${validImages.map((imgUrl, idx) => `
+                            <img src="${imgUrl}" 
+                                 alt="${namaJudul} - ${idx + 1}" 
+                                 data-caption="${data.caption || `${namaJudul} (${idx + 1}/${validImages.length})`}"
+                                 class="narrative-carousel-slide w-full h-full object-cover transition-all duration-300 ${idx !== 0 ? 'hidden' : ''}">
+                        `).join('')}
+
+                        <!-- Navigasi Panah Carousel -->
+                        ${validImages.length > 1 ? `
+                            <button onclick="changeNarrativeImage(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-md z-10 cursor-pointer" style="background-color: var(--bg-panel-solid); color: var(--text-title); border: 1px solid var(--border-light);">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </button>
+                            <button onclick="changeNarrativeImage(1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-md z-10 cursor-pointer" style="background-color: var(--bg-panel-solid); color: var(--text-title); border: 1px solid var(--border-light);">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </button>
+
+                            <!-- Dots Indikator -->
+                            <div class="absolute top-2 inset-x-0 flex justify-center gap-1 z-10">
+                                ${validImages.map((_, idx) => `
+                                    <button onclick="setNarrativeImage(${idx})" class="narrative-carousel-dot h-1.5 rounded-full transition-all duration-300 ${idx === 0 ? 'w-4' : 'w-1.5'}" style="background-color: ${idx === 0 ? 'var(--accent-primary)' : 'var(--border-light)'};"></button>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Caption Gambar -->
+                    <div id="narrative-carousel-caption" class="p-2 text-[10px] italic text-center border-t truncate shrink-0" style="background-color: var(--bg-panel-solid); color: var(--text-muted); border-color: var(--border-light);">
+                        📷 ${data.caption || `${namaJudul} (1/${validImages.length})`}
+                    </div>
+                ` : `
+                    <div class="w-full h-full flex flex-col items-center justify-center p-4 text-center text-xs" style="color: var(--text-muted);">
+                        <span class="material-symbols-outlined text-2xl mb-1">image_not_supported</span>
+                        <span>Gambar belum tersedia</span>
+                    </div>
+                `}
+            </div>
         </div>
 
-        <!-- 8. KETERKAITAN KONSEP -->
-        <div class="space-y-1.5 pt-2 border-t border-slate-800">
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <span class="w-1 h-3 bg-teal-500 rounded-full"></span> Keterkaitan Konsep
+        <!-- 3. KRONOLOGI / MATERI UTAMA -->
+        <div class="space-y-1.5 pt-2">
+            <h4 class="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5" style="color: var(--text-muted);">
+                <span class="w-1 h-3 rounded-full" style="background-color: var(--accent-primary);"></span> Uraian / Kronologi Sejarah
             </h4>
-            <div class="flex flex-wrap gap-1.5">
-                ${keterkaitanList.map(tag => `
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-slate-900 text-slate-300 border border-slate-800 hover:border-emerald-500/50 hover:text-emerald-300 transition-colors">
-                        <span class="text-emerald-400">➔</span> ${tag}
-                    </span>
-                `).join('')}
+            <div class="text-xs md:text-sm leading-relaxed space-y-2 text-justify" style="color: var(--text-secondary);">
+                ${kronologiText.split('\n').map(p => `<p>${p}</p>`).join('')}
             </div>
         </div>
     `;
@@ -323,6 +330,9 @@ function loadNarrativeStep(index) {
     if (window.narrativeMap && coords) {
         window.narrativeMap.flyTo(coords, 9, { duration: 1.5 });
     }
+
+    // Re-render daftar timeline untuk memperbarui status 'isActive'
+    renderNarrativeTimeline();
 
     // Update Text Progress & Navigasi
     const progressEl = document.getElementById('narrative-progress-text');
@@ -339,7 +349,7 @@ function loadNarrativeStep(index) {
 }
 
 // ==========================================
-// 6. NAVIGASI STEPPER
+// 7. NAVIGASI STEPPER & UTILITY RENDER
 // ==========================================
 function navigateNarrative(direction) {
     const activeList = (filteredNarrativeList && filteredNarrativeList.length > 0) 
@@ -349,6 +359,190 @@ function navigateNarrative(direction) {
     const newIndex = currentNarrativeIndex + direction;
     if (newIndex >= 0 && newIndex < activeList.length) {
         loadNarrativeStep(newIndex);
+    }
+}
+
+function populateEraDropdown() {
+    const selectEl = document.getElementById('filter-era-select');
+    if (!selectEl) return;
+
+    // Pastikan TIMELINE_ERAS tersedia dari timeline-data.js
+    if (typeof TIMELINE_ERAS !== 'undefined' && Array.isArray(TIMELINE_ERAS)) {
+        let optionsHtml = `<option value="ALL">Semua Era Sejarah</option>`;
+        
+        TIMELINE_ERAS.forEach(era => {
+            const rangeText = (era.start && era.end) ? ` (${era.start}–${era.end} M)` : '';
+            optionsHtml += `<option value="${era.id}">${era.nama || era.name}${rangeText}</option>`;
+        });
+
+        selectEl.innerHTML = optionsHtml;
+    } else {
+        console.warn("[Narrative] Variable TIMELINE_ERAS tidak ditemukan di timeline-data.js.");
+    }
+}
+
+function initNarrativeMode(externalData) {
+    // Integrasikan dropdown era otomatis dari timeline-data.js
+    populateEraDropdown();
+
+    if (externalData && Array.isArray(externalData) && externalData.length > 0) {
+        narrativeDataList = externalData;
+    } else if (typeof dataObjekAtlas !== 'undefined' && dataObjekAtlas.length > 0) {
+        narrativeDataList = dataObjekAtlas;
+    }
+
+    filteredNarrativeList = [...narrativeDataList];
+    currentNarrativeIndex = -1; // -1 artinya belum ada yang dipilih
+    
+    if (!window.narrativeMap && typeof L !== 'undefined' && typeof initNarrativeMap === 'function') {
+        initNarrativeMap();
+    }
+
+    // 1. SEMBUNYIKAN PANEL MATERI SECARA DEFAULT (Hanya Peta & Timeline Kiri)
+    const floatingPanel = document.getElementById('narrative-floating-panel');
+    if (floatingPanel) {
+        floatingPanel.classList.add('hidden');
+    }
+
+    // 2. Render hanya timeline melayang di kiri
+    if (filteredNarrativeList.length > 0) {
         renderNarrativeTimeline();
     }
+}
+
+function renderNarrativeContent(item) {
+    if (!item) return;
+
+    // 1. Dapatkan & Isi Seluruh Metadata Awal
+    const metaContainer = document.getElementById('narrative-metadata-container');
+    if (metaContainer) {
+        let metaHTML = '';
+        
+        if (item.tahun || item.periode) {
+            metaHTML += `
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm" style="color: var(--accent-orange);">event</span>
+                    <div>
+                        <span class="text-[9px] uppercase font-semibold block" style="color: var(--text-muted);">Tahun / Periode</span>
+                        <span class="font-bold text-xs">${item.tahun ? item.tahun + ' M' : item.periode}</span>
+                    </div>
+                </div>`;
+        }
+        
+        if (item.lokasi || item.tempat) {
+            metaHTML += `
+                <div class="flex items-center gap-2 pt-1 border-t" style="border-color: var(--border-light);">
+                    <span class="material-symbols-outlined text-sm" style="color: var(--accent-primary);">location_on</span>
+                    <div>
+                        <span class="text-[9px] uppercase font-semibold block" style="color: var(--text-muted);">Lokasi</span>
+                        <span class="font-semibold text-xs">${item.lokasi || item.tempat}</span>
+                    </div>
+                </div>`;
+        }
+
+        if (item.era || item.kategori) {
+            metaHTML += `
+                <div class="flex items-center gap-2 pt-1 border-t" style="border-color: var(--border-light);">
+                    <span class="material-symbols-outlined text-sm" style="color: var(--accent-primary);">bookmark</span>
+                    <div>
+                        <span class="text-[9px] uppercase font-semibold block" style="color: var(--text-muted);">Era / Kategori</span>
+                        <span class="font-semibold text-xs">${item.era || item.kategori}</span>
+                    </div>
+                </div>`;
+        }
+
+        // Render metadata tambahan secara otomatis
+        Object.keys(item).forEach(key => {
+            if (!['nama', 'title', 'tahun', 'periode', 'lokasi', 'tempat', 'era', 'kategori', 'deskripsi', 'description', 'gambar', 'images'].includes(key)) {
+                if (typeof item[key] === 'string' || typeof item[key] === 'number') {
+                    metaHTML += `
+                        <div class="flex items-center gap-2 pt-1 border-t" style="border-color: var(--border-light);">
+                            <span class="material-symbols-outlined text-sm" style="color: var(--text-muted);">info</span>
+                            <div>
+                                <span class="text-[9px] uppercase font-semibold block" style="color: var(--text-muted);">${key}</span>
+                                <span class="font-medium text-xs">${item[key]}</span>
+                            </div>
+                        </div>`;
+                }
+            }
+        });
+
+        metaContainer.innerHTML = metaHTML;
+    }
+
+    // 2. Gambar Utama (Gambar Pertama)
+    const mainImg = document.getElementById('narrative-main-image');
+    const mainImgWrapper = document.getElementById('narrative-main-image-wrapper');
+    const imageList = Array.isArray(item.gambar) ? item.gambar : (Array.isArray(item.images) ? item.images : [item.gambar || item.image || item.foto]);
+    
+    const validImages = imageList.filter(img => img && typeof img === 'string');
+
+    if (validImages.length > 0) {
+        if (mainImg) mainImg.src = validImages[0];
+        if (mainImgWrapper) mainImgWrapper.classList.remove('hidden');
+    } else {
+        if (mainImgWrapper) mainImgWrapper.classList.add('hidden');
+    }
+
+    // 3. Deskripsi Materi
+    const descEl = document.getElementById('narrative-description');
+    if (descEl) descEl.innerText = item.deskripsi || item.description || 'Tidak ada deskripsi.';
+
+    // 4. Galeri Gambar Relevan
+    const gallerySection = document.getElementById('narrative-gallery-section');
+    const galleryGrid = document.getElementById('narrative-gallery-grid');
+    const extraImages = validImages.slice(1);
+
+    if (extraImages.length > 0 && galleryGrid && gallerySection) {
+        galleryGrid.innerHTML = extraImages.map((imgUrl, idx) => `
+            <div class="w-20 h-20 rounded-lg overflow-hidden border shadow-xs group cursor-pointer shrink-0" 
+                 style="border-color: var(--border-panel);"
+                 onclick="window.open('${imgUrl}', '_blank')">
+                <img src="${imgUrl}" alt="Visual ${idx + 2}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200">
+            </div>
+        `).join('');
+        
+        gallerySection.classList.remove('hidden');
+    } else if (gallerySection) {
+        gallerySection.classList.add('hidden');
+    }
+}
+// ==========================================
+// FUNGSIONALITAS CAROUSEL GAMBAR NARASI
+// ==========================================
+let currentCarouselIndex = 0;
+
+function changeNarrativeImage(direction) {
+    const images = document.querySelectorAll('.narrative-carousel-slide');
+    const dots = document.querySelectorAll('.narrative-carousel-dot');
+    const captionEl = document.getElementById('narrative-carousel-caption');
+    
+    if (!images || images.length <= 1) return;
+
+    images[currentCarouselIndex].classList.add('hidden');
+    if (dots[currentCarouselIndex]) {
+        dots[currentCarouselIndex].classList.remove('bg-emerald-400', 'w-4');
+        dots[currentCarouselIndex].classList.add('bg-slate-500/50', 'w-1.5');
+    }
+
+    currentCarouselIndex = (currentCarouselIndex + direction + images.length) % images.length;
+
+    images[currentCarouselIndex].classList.remove('hidden');
+    if (dots[currentCarouselIndex]) {
+        dots[currentCarouselIndex].classList.remove('bg-slate-500/50', 'w-1.5');
+        dots[currentCarouselIndex].classList.add('bg-emerald-400', 'w-4');
+    }
+
+    if (captionEl) {
+        const activeImg = images[currentCarouselIndex];
+        captionEl.textContent = `📷 ${activeImg.getAttribute('data-caption') || 'Gambar Sejarah'}`;
+    }
+}
+
+function setNarrativeImage(index) {
+    const images = document.querySelectorAll('.narrative-carousel-slide');
+    if (!images || index < 0 || index >= images.length) return;
+    
+    const diff = index - currentCarouselIndex;
+    changeNarrativeImage(diff);
 }

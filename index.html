@@ -297,80 +297,94 @@
             </div>
         </div>
 
-        <!-- LAYER 5: MODE TIMELINE NARRATIVE (Split Screen 50:50) -->
-        <div id="narrative-mode-container" class="hidden fixed inset-0 top-[56px] z-[1500] flex flex-col md:flex-row bg-slate-950/20 text-slate-100 overflow-hidden">
+        <!-- LAYER 5: MODE TIMELINE NARRATIVE (Mengacu ke variables.css) -->
+        <div id="narrative-mode-container" class="hidden fixed inset-0 top-[56px] z-[1500] overflow-hidden" style="background-color: var(--bg-page); color: var(--text-primary);">
             
-            <!-- SISI KIRI (50% Layar): Peta + Timeline Vertikal Melayang -->
-            <div class="relative w-full md:w-1/2 h-1/2 md:h-full">
-                <!-- Peta Utama Mode Narasi -->
-                <div id="narrative-map" class="w-full h-full z-0"></div>
+            <!-- 1. PETA UTAMA (BACKGROUND) -->
+            <div id="narrative-map-wrapper" class="absolute inset-0 w-full h-full z-0">
+                <div id="narrative-map" class="w-full h-full"></div>
 
-                <!-- Timeline Vertikal Melayang (Container Dinamis) -->
-                <div id="narrative-timeline-list" class="absolute left-6 top-1/2 -translate-y-1/2 z-[1000] flex flex-col items-start pointer-events-auto max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
-                    <!-- Item timeline di-render otomatis dari JS -->
+                <!-- Filter Era Atas Kiri -->
+                <div class="absolute top-4 left-4 z-[1000] px-3 py-2 rounded-xl border shadow-xl flex items-center gap-2"
+                     style="background-color: var(--bg-panel); border-color: var(--border-light); backdrop-filter: blur(12px);">
+                    <span class="w-2.5 h-2.5 rounded-full animate-pulse" style="background-color: var(--accent-primary);"></span>
+                    <label for="filter-era-select" class="text-[11px] font-mono font-semibold uppercase" style="color: var(--text-title);">Era:</label>
+                    <select id="filter-era-select" onchange="filterNarrativeByEra(this.value)" 
+                            class="text-xs rounded-lg px-2 py-1 border focus:outline-none cursor-pointer"
+                            style="background-color: var(--bg-input); color: var(--text-primary); border-color: var(--border-input);">
+                    </select>
                 </div>
 
-                <!-- Filter Era Atas Kiri (Menggantikan Badge Lama) -->
-                <div class="absolute top-4 left-4 z-[1000] bg-slate-900/90 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-700/80 shadow-2xl flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <label for="filter-era-select" class="text-[11px] font-mono text-slate-300 font-semibold uppercase">Era:</label>
-                    <select id="filter-era-select" onchange="filterNarrativeByEra(this.value)" class="bg-slate-900 text-emerald-400 text-xs rounded-lg px-2 py-1 border border-slate-700 focus:outline-none cursor-pointer">
-                        <option value="ALL">Semua Era Sejarah</option>
-                        <option value="era-pasca-abbasiyah">Pasca Abbasiyah (1259–1400 M)</option>
-                        <option value="era-penyebaran-nusantara">Masuknya Islam & Wali Songo (1400–1525 M)</option>
-                        <option value="era-kesultanan">Kesultanan Islam Indonesia (1525–1700 M)</option>
-                        <option value="era-imperium-dunia">Imperium Islam Dunia (1700–1800 M)</option>
-                        <option value="era-kemunduran">Kemunduran & Penjajahan (1800–1945 M)</option>
-                    </select>
+                <!-- Timeline Vertikal Melayang Kiri -->
+                <div id="narrative-timeline-list" class="absolute left-6 top-1/2 -translate-y-1/2 z-[1000] flex flex-col items-start pointer-events-auto max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
                 </div>
             </div>
 
-            <!-- SISI KANAN (50% Layar): Panel Narasi Berstruktur -->
-            <div class="w-full md:w-1/2 h-1/2 md:h-full bg-slate-950/85 backdrop-blur-xl flex flex-col justify-between relative overflow-hidden border-l border-white/10 shadow-2xl">
+            <!-- 2. PANEL MATERI MELAYANG (50% KANAN) -->
+            <div id="narrative-floating-panel" 
+                 class="absolute top-0 right-0 bottom-0 w-full md:w-1/2 border-l shadow-2xl z-[1100] flex flex-col transition-all duration-300 ease-in-out"
+                 style="background-color: var(--bg-panel); border-color: var(--border-panel); backdrop-filter: blur(16px);">
                 
-                <!-- EFEK GRADIENT MASK -->
-                <div class="hidden md:block absolute top-0 bottom-0 -left-16 w-16 bg-gradient-to-r from-transparent via-slate-950/40 to-slate-950/85 pointer-events-none z-20"></div>
-                <div class="block md:hidden absolute left-0 right-0 -top-12 h-12 bg-gradient-to-b from-transparent to-slate-950/85 pointer-events-none z-20"></div>
-
                 <!-- Header Kanan dengan Tombol Close (X) -->
-                <div class="p-4 md:p-5 border-b border-white/10 flex items-center justify-between bg-slate-900/50 backdrop-blur-md shrink-0 relative z-10">
+                <div class="p-4 md:p-5 border-b flex items-center justify-between shrink-0 relative z-10"
+                     style="border-color: var(--border-light); background-color: var(--bg-era-header);">
                     <div>
-                        <span id="narrative-progress-text" class="text-[10px] font-mono text-emerald-400 uppercase tracking-widest block">Materi 1 dari 1</span>
-                        <h2 id="narrative-topic-title" class="text-xs md:text-sm font-semibold text-slate-300">Jejak Sejarah SKI Kelas 12</h2>
+                        <span id="narrative-progress-text" class="text-[10px] font-mono uppercase tracking-widest block font-bold" style="color: var(--accent-orange);">
+                            Materi 1 dari 1
+                        </span>
+                        <h2 id="narrative-topic-title" class="text-xs md:text-sm font-bold" style="color: var(--text-title);">
+                            Jejak Sejarah SKI Kelas 12
+                        </h2>
                     </div>
                     
-                    <!-- Tombol Close (Ganti Mode Jelajah) -->
-                    <button onclick="switchAppMode('EXPLORE')" title="Tutup Mode Narasi" class="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-rose-600/80 text-slate-300 hover:text-white transition-all border border-slate-700/60 flex items-center justify-center shadow-lg group">
-                        <span class="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform">close</span>
+                    <button onclick="toggleNarrativePanel()" title="Sembunyikan Panel Materi" 
+                            class="w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-md group"
+                            style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
+                        <span class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">close</span>
                     </button>
                 </div>
 
                 <!-- AREA KONTEN UTAMA -->
-                <div id="narrative-content-body" class="flex-1 overflow-y-auto p-5 md:p-7 space-y-6 custom-scrollbar relative z-10">
-                    <!-- Isi materi berstruktur akan dimuat secara dinamis di sini -->
+                <div id="narrative-content-body" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 custom-scrollbar relative z-10">
+
+                    <!-- 1. METADATA & GAMBAR UTAMA (Split 50:50) -->
+                    <div class="flex flex-col md:flex-row gap-4 items-stretch">
+                        
+                        <!-- Kiri 50%: Kontainer Metadata -->
+                        <div id="narrative-metadata-container" 
+                            class="w-full md:w-1/2 p-3.5 rounded-xl border flex flex-col justify-center space-y-2 text-xs shadow-sm"
+                            style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-primary);">
+                        </div>
+
+                        <!-- Kanan 50%: Gambar Utama -->
+                        <div id="narrative-main-image-wrapper" 
+                            class="w-full md:w-1/2 min-h-[130px] rounded-xl overflow-hidden border shadow-sm relative group bg-black/5"
+                            style="border-color: var(--border-panel);">
+                            <img id="narrative-main-image" src="" alt="Gambar Utama" 
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        </div>
+
+                    </div>
+
+                    <!-- 2. DESKRIPSI UTAMA MATERI -->
+                    <div class="space-y-1.5">
+                        <h3 class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-title);">Deskripsi Peristiwa</h3>
+                        <p id="narrative-description" class="text-xs md:text-sm leading-relaxed" style="color: var(--text-secondary);"></p>
+                    </div>
+
+                    <!-- 3. GALERI GAMBAR RELEVAN -->
+                    <div id="narrative-gallery-section" class="hidden space-y-2.5 pt-3 border-t" style="border-color: var(--border-light);">
+                        <h4 class="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5" style="color: var(--text-title);">
+                            <span class="material-symbols-outlined text-sm" style="color: var(--accent-orange);">collections</span>
+                            <span>Gambar Terkait</span>
+                        </h4>
+                        
+                        <div id="narrative-gallery-grid" class="flex flex-wrap gap-2"></div>
+                    </div>
+
                 </div>
-
-                <!-- Footer Navigasi (Stepper Bawah) -->
-                <div class="p-4 border-t border-white/10 bg-slate-950/80 backdrop-blur-md flex items-center justify-between gap-4 shrink-0 relative z-10">
-                    <button id="btn-narrative-prev" onclick="navigateNarrative(-1)" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 text-xs font-medium transition-all border border-slate-700/50">
-                        <span class="material-symbols-outlined text-sm">arrow_back</span>
-                        <span>Sebelumnya</span>
-                    </button>
-
-                    <span id="narrative-step-indicator" class="text-[11px] font-mono text-slate-400">
-                        1 / 1
-                    </span>
-
-                    <button id="btn-narrative-next" onclick="navigateNarrative(1)" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-semibold transition-all shadow-lg shadow-emerald-950/50">
-                        <span>Selanjutnya</span>
-                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                    </button>
-                </div>
-
             </div>
-
         </div>
-
     </main>
 
     <!-- SKRIP DEPENDENSI -->
