@@ -731,16 +731,46 @@ function renderCarousel(objek) {
   return `<div class="carousel-container">${imagesHtml}</div>`;
 }
 
-function bukaSubMateriDariNarasi(storyId, stepIndex) {
+function bukaSubMateriDariNarasi(storyId, stepIndex, objek) {
     if (typeof dataKurikulum === 'undefined') return;
 
-    const cerita = dataKurikulum.find(c => c.id === storyId);
-    if (!cerita || !cerita.steps || !cerita.steps[stepIndex]) {
+    let cerita = dataKurikulum.find(c => c.id === storyId);
+    let stepData;
+
+    if (!cerita) {
+        // Buat cerita placeholder dinamis jika tidak ada di kurikulum
+        const namaObjek = objek ? (objek.nama || 'Objek Sejarah') : 'Detail Peristiwa';
+        const deskripsiObjek = objek ? (objek.deskripsi || objek.kronologi || 'Kronologi lengkap peristiwa sedang dalam proses penyusunan.') : 'Kronologi lengkap peristiwa sedang dalam proses penyusunan.';
+        
+        cerita = {
+            id: storyId,
+            judulCerita: `Modul Pembelajaran: ${namaObjek}`,
+            steps: [
+                {
+                    judul: `Uraian Mendalam: ${namaObjek}`,
+                    konten: `
+                        <p class="text-secondary leading-relaxed mb-3"><strong>Pendahuluan:</strong></p>
+                        <p class="text-secondary leading-relaxed mb-3">Halaman ini berisi modul kurikulum mendalam untuk mempelajari peristiwa <strong>${namaObjek}</strong>. Materi ini disesuaikan dengan kurikulum Sejarah Kebudayaan Islam (SKI) Kelas 12.</p>
+                        <hr class="my-3 border-border-light">
+                        <p class="text-secondary leading-relaxed mb-3"><strong>Kronologi Peristiwa:</strong></p>
+                        <p class="text-secondary leading-relaxed mb-3">${deskripsiObjek}</p>
+                        <hr class="my-3 border-border-light">
+                        <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-400 text-center">
+                            📖 Modul pembelajaran SKI Kelas 12. Peta interaktif & materi kronologis.
+                        </div>
+                    `
+                }
+            ]
+        };
+        stepData = cerita.steps[0];
+    } else {
+        stepData = cerita.steps[stepIndex];
+    }
+
+    if (!stepData) {
         alert("Sub-materi belum tersedia untuk titik ini.");
         return;
     }
-
-    const stepData = cerita.steps[stepIndex];
 
     const tagEl = document.getElementById('submateri-tag-cerita');
     if (tagEl) tagEl.textContent = cerita.judulCerita || 'MODUL KURIKULUM';
@@ -811,9 +841,9 @@ function isiDetailPanel(objek) {
     const wrapperBtn = document.getElementById('wrapper-btn-submateri');
     const btnSubMateri = document.getElementById('btn-buka-submateri');
 
-    if (objek.refStoryId && wrapperBtn && btnSubMateri) {
+    if (wrapperBtn && btnSubMateri) {
         wrapperBtn.classList.remove('hidden');
-        btnSubMateri.onclick = () => bukaSubMateriDariNarasi(objek.refStoryId, objek.refStepIndex || 0);
+        btnSubMateri.onclick = () => bukaSubMateriDariNarasi(objek.refStoryId || `fallback-${objek.id}`, objek.refStepIndex || 0, objek);
     } else if (wrapperBtn) {
         wrapperBtn.classList.add('hidden');
     }

@@ -301,7 +301,7 @@ function syncTimelineUI(year) {
             // Jalankan kalkulasi hanya saat kontainer benar-benar sudah punya lebar (terlihat di layar)
             if (entry.contentRect.width > 0) {
                 // Ambil tahun aktif saat ini dari input atau variabel global
-                const currentYear = parseInt(document.getElementById('year-input')?.value || 570);
+                const currentYear = timeline.currentYear || parseInt(document.getElementById('timeline-current')?.value || "570");
 
                 // Panggil fungsi pembaruan posisi timeline milikmu
                 if (typeof updateTimelineUI === 'function') {

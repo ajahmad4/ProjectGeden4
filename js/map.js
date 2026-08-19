@@ -138,6 +138,15 @@ window.updateMapTheme = function(theme) {
         });
         miniMap.changeLayer(newLayerMini);
     }
+
+    if (narrativeMap && narrativeTileLayer) {
+        const tileUrl = theme === 'dark' 
+            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+        
+        narrativeMap.removeLayer(narrativeTileLayer);
+        narrativeTileLayer = L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(narrativeMap);
+    }
 };
 
 // ==========================================
@@ -218,6 +227,7 @@ map.on("moveend", function () {
 
 // Variable global untuk map narasi
 let narrativeMap = null;
+let narrativeTileLayer = null;
 
 function initNarrativeMap() {
     if (narrativeMap) return; // Mencegah inisialisasi ulang jika sudah ada
@@ -228,8 +238,21 @@ function initNarrativeMap() {
         attributionControl: false
     }).setView([-2.548926, 118.014863], 5); // Default Indonesia
 
-    // Tambahkan Basemap Tile Layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // Tambahkan Basemap Tile Layer sesuai tema saat inisialisasi
+    const theme = document.documentElement.getAttribute('data-theme') || 'light';
+    const tileUrl = theme === 'dark' 
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+    narrativeTileLayer = L.tileLayer(tileUrl, {
         maxZoom: 19
     }).addTo(narrativeMap);
+
+    window.narrativeMap = narrativeMap;
 }
+
+window.addEventListener('themeChanged', function (e) {
+    if (typeof window.updateMapTheme === 'function') {
+        window.updateMapTheme(e.detail.theme);
+    }
+});

@@ -63,11 +63,22 @@ function filterNarrativeByEra(selectedEraId) {
 
     currentNarrativeIndex = -1;
     
-    // SEMBUNYIKAN KEMBALI PANEL MATERI KETIKA ERA DIBUAT BERUBAH
+    // SEMBUNYIKAN PANEL MATERI & TOMBOL REOPEN KETIKA ERA BERUBAH
     const floatingPanel = document.getElementById('narrative-floating-panel');
-    if (floatingPanel) {
-        floatingPanel.classList.add('hidden');
-    }
+    if (floatingPanel) floatingPanel.classList.add('hidden');
+
+    const reopenBtnEra = document.getElementById('btn-reopen-panel');
+    if (reopenBtnEra) reopenBtnEra.classList.add('hidden');
+
+    // Reset stepper
+    const stepElEra = document.getElementById('narrative-step-indicator');
+    if (stepElEra) stepElEra.textContent = `- / ${filteredNarrativeList.length}`;
+    const btnPrevEra = document.getElementById('btn-narrative-prev');
+    if (btnPrevEra) btnPrevEra.disabled = true;
+    const btnNextEra = document.getElementById('btn-narrative-next');
+    if (btnNextEra) btnNextEra.disabled = true;
+    const progressElEra = document.getElementById('narrative-progress-text');
+    if (progressElEra) progressElEra.textContent = 'Pilih materi pada daftar';
 
     if (filteredNarrativeList.length === 0) {
         const listContainer = document.getElementById('narrative-timeline-list');
@@ -325,10 +336,161 @@ function loadNarrativeStep(index) {
         </div>
     `;
 
-    // Fly map ke lokasi
-    const coords = getObjekCoordinates(data);
-    if (window.narrativeMap && coords) {
-        window.narrativeMap.flyTo(coords, 9, { duration: 1.5 });
+    // Bersihkan marker lama di map narasi
+    if (window.narrativeMap) {
+        if (typeof narrativeMapMarkers !== 'undefined' && Array.isArray(narrativeMapMarkers)) {
+            narrativeMapMarkers.forEach(m => {
+                if (m && typeof window.narrativeMap.removeLayer === 'function') {
+                    window.narrativeMap.removeLayer(m);
+                }
+            });
+        }
+        narrativeMapMarkers = [];
+
+        if (data.relasi) {
+            // 1. Render wilayah (polygons)
+            if (data.relasi.wilayah && typeof wilayahMap !== 'undefined') {
+                data.relasi.wilayah.forEach(wilayahId => {
+                    const wilayah = wilayahMap[wilayahId];
+                    if (wilayah) {
+                        const polygon = L.polygon(wilayah.koordinat, {
+                            color:       wilayah.warna,
+                            fillColor:   wilayah.warna,
+                            fillOpacity: 0.18,
+                            weight:      2
+                        });
+                        polygon.addTo(window.narrativeMap);
+                        narrativeMapMarkers.push(polygon);
+                    }
+                });
+            }
+
+            // 2. Render jalur (polylines)
+            if (data.relasi.jalur && typeof jalurMap !== 'undefined') {
+                data.relasi.jalur.forEach(jalurId => {
+                    const jalur = jalurMap[jalurId];
+                    if (jalur) {
+                        const polyline = L.polyline(jalur.koordinat, {
+                            color:        jalur.warna,
+                            weight:       5,
+                            opacity:      0.9,
+                            dashArray:    "10 6",
+                            smoothFactor: 1,
+                            lineJoin:     "round",
+                            lineCap:      "round"
+                        });
+                        polyline.addTo(window.narrativeMap);
+                        narrativeMapMarkers.push(polyline);
+                    }
+                });
+            }
+
+            // 3. Render markers (points)
+            if (data.relasi.markers && typeof markerMap !== 'undefined') {
+                data.relasi.markers.forEach(markerId => {
+                    const dataTitik = markerMap[markerId];
+                    if (dataTitik) {
+                        const markerIcon = typeof buatIkonSejarah === 'function' 
+                            ? buatIkonSejarah(data.kategori) 
+                            : new L.Icon.Default();
+                        const marker = L.marker(dataTitik.koordinat, { icon: markerIcon });
+                        
+                        marker.bindPopup(`
+                            <div class="popup-narasi p-1">
+                                <h4 class="font-bold text-xs" style="color: var(--text-title);">${data.nama}</h4>
+                                <p class="text-[10px] text-muted">${dataTitik.nama || ''}</p>
+                            </div>
+                        `);
+                        
+                        marker.addTo(window.narrativeMap);
+                        narrativeMapMarkers.push(marker);
+                        
+                        // Buka popup secara otomatis untuk marker pertama
+                        if (markerId === data.relasi.markers[0]) {
+                            marker.openPopup();
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    // Hide reopen button
+    const reopenBtn = document.getElementById('btn-reopen-panel');
+    if (reopenBtn) reopenBtn.classList.add('hidden');
+
+    // Fly map ke lokasi — pakai bounds seperti explore mode, dgn padding kanan 50% layar
+    // agar marker tidak tertutup panel materi
+    if (window.narrativeMap) {
+        const mapWidth  = window.narrativeMap.getContainer().offsetWidth;
+        const panelW    = Math.floor(mapWidth * 0.5); // panel materi 50% lebar peta
+        const padRight  = panelW + 24;                 // +24px margin
+        const padOther  = 60;
+
+        const navBounds = L.latLngBounds();
+        let hasNavPoint = false;
+
+        // Kumpulkan semua titik dari relasi data
+        if (data.relasi) {
+            if (data.relasi.markers) {
+                data.relasi.markers.forEach(id => {
+                    if (markerMap[id]) { navBounds.extend(markerMap[id].koordinat); hasNavPoint = true; }
+                });
+            }
+            if (data.relasi.jalur) {
+                data.relasi.jalur.forEach(id => {
+                    if (jalurMap[id] && jalurMap[id].koordinat) {
+                        jalurMap[id].koordinat.forEach(c => navBounds.extend(c));
+                        hasNavPoint = true;
+                    }
+                });
+            }
+            if (data.relasi.wilayah) {
+                data.relasi.wilayah.forEach(id => {
+                    if (wilayahMap[id] && wilayahMap[id].koordinat) {
+                        wilayahMap[id].koordinat.forEach(c => navBounds.extend(c));
+                        hasNavPoint = true;
+                    }
+                });
+            }
+        }
+
+        // Fallback ke koordinat tunggal
+        if (!hasNavPoint) {
+            const coords = getObjekCoordinates(data);
+            if (coords) { navBounds.extend(coords); hasNavPoint = true; }
+        }
+
+        if (hasNavPoint) {
+            const sw = navBounds.getSouthWest();
+            const ne = navBounds.getNorthEast();
+
+            if (sw.lat === ne.lat && sw.lng === ne.lng) {
+                // Titik tunggal — flyTo dulu, lalu panBy ke kiri setelah animasi selesai
+                // agar marker tidak tertutup panel materi (panel = 50% lebar kanan)
+                window.narrativeMap.flyTo(sw, 10, {
+                    animate: true,
+                    duration: 2.0,
+                    easeLinearity: 0.25
+                });
+
+                // Setelah flyTo selesai, geser peta ke kiri setengah lebar panel
+                window.narrativeMap.once('moveend', function () {
+                    const mapW   = window.narrativeMap.getContainer().offsetWidth;
+                    const offset = Math.floor(mapW * 0.25); // geser 25% ke kiri (panel tutup 50% kanan)
+                    window.narrativeMap.panBy([offset, 0], { animate: true, duration: 0.6 });
+                });
+            } else {
+                // Jalur / wilayah — flyToBounds dengan padding kanan ekstra
+                window.narrativeMap.flyToBounds(navBounds, {
+                    animate:    true,
+                    duration:   2.0,
+                    easeLinearity: 0.25,
+                    paddingTopLeft:     [padOther, padOther],
+                    paddingBottomRight: [padRight, padOther]
+                });
+            }
+        }
     }
 
     // Re-render daftar timeline untuk memperbarui status 'isActive'
@@ -398,11 +560,27 @@ function initNarrativeMode(externalData) {
         initNarrativeMap();
     }
 
-    // 1. SEMBUNYIKAN PANEL MATERI SECARA DEFAULT (Hanya Peta & Timeline Kiri)
+    // 1. SEMBUNYIKAN PANEL MATERI — baru tampil setelah event dipilih
     const floatingPanel = document.getElementById('narrative-floating-panel');
     if (floatingPanel) {
         floatingPanel.classList.add('hidden');
     }
+
+    // Sembunyikan tombol reopen, tampilkan hanya setelah panel ditutup manual
+    const reopenBtn = document.getElementById('btn-reopen-panel');
+    if (reopenBtn) {
+        reopenBtn.classList.add('hidden');
+    }
+
+    // Reset stepper indicator
+    const stepEl = document.getElementById('narrative-step-indicator');
+    if (stepEl) stepEl.textContent = `- / ${narrativeDataList.length}`;
+    const btnPrev = document.getElementById('btn-narrative-prev');
+    if (btnPrev) btnPrev.disabled = true;
+    const btnNext = document.getElementById('btn-narrative-next');
+    if (btnNext) btnNext.disabled = true;
+    const progressEl = document.getElementById('narrative-progress-text');
+    if (progressEl) progressEl.textContent = 'Pilih materi pada daftar';
 
     // 2. Render hanya timeline melayang di kiri
     if (filteredNarrativeList.length > 0) {
