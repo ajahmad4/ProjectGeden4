@@ -39,24 +39,21 @@ const map = L.map('map', {
 map.setMinZoom(4);                      // Batas maksimal zoom out (skala makro Nusantara)
 map.setMaxZoom(15);                     // Batas maksimal zoom in (skala mikro situs lokal)
 
-// ==========================================
+/// ==========================================
 // 3. INTEGRASI RENDER BASEMAP UTAMA
 // ==========================================
-// Menggunakan ubin peta (tile layer) CartoDB Light Minimalist agar fokus visual siswa
-// tetap tertuju pada kontras warna marker situs sejarah kebudayaan Islam.
+// Menggunakan ubin peta OpenStreetMap Standar (100% Gratis & Tanpa API Key / Tanpa CartoDB)
 let currentBasemap = null;
 
 function setBasemap(theme) {
     if (currentBasemap) {
         map.removeLayer(currentBasemap);
     }
-    const tileUrl = theme === 'dark' 
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         
     currentBasemap = L.tileLayer(tileUrl, { 
         maxZoom: 18,
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 }
 
@@ -91,9 +88,7 @@ L.control.zoom({ position: 'topright' }).addTo(map);
 // 5. IMPLEMENTASI PLUGIN LEAFLET-MINIMAP
 // ==========================================
 // Membuat layer independen sekunder khusus untuk peta kecil penunjuk orientasi regional
-const initialMiniTile = initialTheme === 'dark' 
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+const initialMiniTile = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
 var layerMini = L.tileLayer(initialMiniTile, {
     minZoom: 0,
@@ -129,9 +124,7 @@ window.updateMapTheme = function(theme) {
     setBasemap(theme);
     
     if (miniMap) {
-        const tileUrl = theme === 'dark' 
-            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+        const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
             
         var newLayerMini = L.tileLayer(tileUrl, {
             minZoom: 0, maxZoom: 13, attribution: false 
@@ -140,9 +133,7 @@ window.updateMapTheme = function(theme) {
     }
 
     if (narrativeMap && narrativeTileLayer) {
-        const tileUrl = theme === 'dark' 
-            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+        const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         
         narrativeMap.removeLayer(narrativeTileLayer);
         narrativeTileLayer = L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(narrativeMap);

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas SKI — Converter Excel ke JSON/JS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet"/>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .font-title {
+            font-family: 'EB Garamond', serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-8">
+
+    <!-- HEADER TOPBAR -->
+    <header class="w-full max-w-5xl mx-auto flex items-center justify-between py-4 mb-8 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
+                <span class="material-symbols-outlined text-2xl">table_convert</span>
+            </div>
+            <div>
+                <h1 class="font-title text-2xl md:text-3xl font-bold text-emerald-400">Converter Excel ➔ Atlas SKI Data</h1>
+                <p class="text-xs text-slate-400">Ubah File Excel (.xlsx) menjadi JavaScript Data siap pakai untuk Atlas SKI</p>
+            </div>
+        </div>
+        <div>
+            <a href="index.html" class="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-emerald-400 bg-slate-800 hover:bg-slate-700 px-3.5 py-2 rounded-lg border border-slate-700 transition-all">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                <span>Kembali ke Atlas</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="w-full max-w-5xl mx-auto flex-1 space-y-6">
+
+        <!-- STEP 1 & 2 GRID CARD -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- CARD 1: DOWNLOAD TEMPLATE EXCEL -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-all">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 text-emerald-400">
+                        <span class="material-symbols-outlined">download_for_offline</span>
+                        <h2 class="font-semibold text-base">Langkah 1: Unduh Template Excel</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Unduh struktur file Excel standar (`Template_Database_Atlas_SKI.xlsx`) yang sudah memiliki 5 Sheet lengkap: <code class="text-emerald-300 font-mono">ObjekAtlas</code>, <code class="text-emerald-300 font-mono">Markers</code>, <code class="text-emerald-300 font-mono">Jalur</code>, <code class="text-emerald-300 font-mono">Wilayah</code>, dan <code class="text-emerald-300 font-mono">Kurikulum</code>.
+                    </p>
+                </div>
+
+                <div class="pt-6">
+                    <button onclick="downloadExcelTemplate()" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs px-4 py-3 rounded-xl shadow-lg shadow-emerald-950/40 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-lg">file_download</span>
+                        <span>Download Template Excel (.xlsx)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARD 2: UPLOAD FILE EXCEL -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-all">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 text-emerald-400">
+                        <span class="material-symbols-outlined">upload_file</span>
+                        <h2 class="font-semibold text-base">Langkah 2: Unggah File Excel Anda</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Drag & drop atau pilih file Excel yang telah Anda isi. Sistem akan otomatis memproses dan menguji validitas relasi data.
+                    </p>
+                </div>
+
+                <div class="pt-4">
+                    <label id="drop-zone" for="excel-input" class="w-full border-2 border-dashed border-slate-700 hover:border-emerald-500/60 bg-slate-950/40 hover:bg-emerald-500/5 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all">
+                        <span class="material-symbols-outlined text-3xl text-emerald-400 mb-1">cloud_upload</span>
+                        <span class="text-xs font-medium text-slate-300">Pilih atau Tarik File Excel di Sini</span>
+                        <span class="text-[10px] text-slate-500 mt-0.5">Format pendukung: .xlsx, .xls</span>
+                        <input id="excel-input" type="file" accept=".xlsx, .xls" class="hidden" onchange="handleFileSelect(event)">
+                    </label>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SECTION RESULTS & VALIDATION LOGS -->
+        <div id="result-section" class="hidden space-y-6">
+
+            <!-- STATS SUMMARY CARD -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-emerald-400">analytics</span>
+                        <h3 class="font-semibold text-sm text-slate-200">Hasil Parsing Excel</h3>
+                    </div>
+                    <span id="file-name-badge" class="text-[11px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        File Loaded
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
+                        <span class="block text-xl font-bold text-emerald-400" id="stat-objek">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400">Objek Atlas</span>
+                    </div>
+                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
+                        <span class="block text-xl font-bold text-emerald-400" id="stat-markers">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400">Markers</span>
+                    </div>
+                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
+                        <span class="block text-xl font-bold text-emerald-400" id="stat-jalur">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400">Jalur</span>
+                    </div>
+                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
+                        <span class="block text-xl font-bold text-emerald-400" id="stat-wilayah">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400">Wilayah</span>
+                    </div>
+                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
+                        <span class="block text-xl font-bold text-emerald-400" id="stat-kurikulum">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400">Kurikulum</span>
+                    </div>
+                </div>
+
+                <!-- VALIDATION LOGS BOX -->
+                <div id="log-box-container" class="space-y-2 pt-2">
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Catatan Validasi Data</h4>
+                    <div id="log-box" class="p-3 bg-slate-950 rounded-xl border border-slate-800 max-h-40 overflow-y-auto font-mono text-[11px] space-y-1 text-slate-300">
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPORT ACTION CARD -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                <div class="flex items-center gap-2 text-emerald-400 border-b border-slate-800 pb-3">
+                    <span class="material-symbols-outlined">folder_zip</span>
+                    <h3 class="font-semibold text-sm text-slate-200">Unduh File JavaScript (.js) Siap Pakai</h3>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Klik tombol di bawah ini untuk mengunduh masing-masing file `.js`. Timpa file hasil unduhan ke dalam folder <code class="text-emerald-300 font-mono">js/</code> pada proyek Atlas SKI Anda.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
+                    <button onclick="exportDataObjekAtlasJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
+                        <div class="text-left">
+                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">dataObjekAtlas.js</span>
+                            <span class="text-[10px] text-slate-400">Master Peristiwa/Tokoh</span>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+                    </button>
+
+                    <button onclick="exportDataMarkerJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
+                        <div class="text-left">
+                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">dataMarker.js</span>
+                            <span class="text-[10px] text-slate-400">Titik Spasial Peta</span>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+                    </button>
+
+                    <button onclick="exportDataJalurJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
+                        <div class="text-left">
+                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">dataJalur.js</span>
+                            <span class="text-[10px] text-slate-400">Polyline Rute</span>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+                    </button>
+
+                    <button onclick="exportDataWilayahJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
+                        <div class="text-left">
+                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">dataWilayah.js</span>
+                            <span class="text-[10px] text-slate-400">Polygon Area Kekuasaan</span>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+                    </button>
+
+                    <button onclick="exportDataKurikulumJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
+                        <div class="text-left">
+                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">datakurikulum.js</span>
+                            <span class="text-[10px] text-slate-400">Modul Narasi SKI</span>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="w-full max-w-5xl mx-auto py-6 mt-8 border-t border-slate-800 text-center text-xs text-slate-500">
+        Atlas Sejarah Kebudayaan Islam — Internal Content Converter Tool
+    </footer>
+
+    <!-- SCRIPT UTAMA LOGIKA CONVERTER -->
+    <script src="js/converter-logic.js"></script>
+
+    <script>
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                processUploadedFile(files[0]);
+            }
+        }
+
+        function processUploadedFile(file) {
+            document.getElementById('file-name-badge').textContent = file.name;
+            
+            processExcelFile(file, function(data) {
+                document.getElementById('result-section').classList.remove('hidden');
+
+                // Render Counter Stats
+                document.getElementById('stat-objek').textContent = data.dataObjekAtlas.length;
+                document.getElementById('stat-markers').textContent = data.dataMarker.length;
+                document.getElementById('stat-jalur').textContent = data.dataJalur.length;
+                document.getElementById('stat-wilayah').textContent = data.dataWilayah.length;
+                document.getElementById('stat-kurikulum').textContent = data.dataKurikulum.length;
+
+                // Render Logs & Errors
+                const logBox = document.getElementById('log-box');
+                logBox.innerHTML = '';
+
+                if (data.errors.length === 0 && data.logs.length === 0) {
+                    logBox.innerHTML = `<div class="text-emerald-400">✓ Seluruh data berhasil diparse sempurna tanpa kesalahan relasi!</div>`;
+                } else {
+                    data.errors.forEach(err => {
+                        logBox.innerHTML += `<div class="text-rose-400 font-semibold">❌ ${err}</div>`;
+                    });
+                    data.logs.forEach(info => {
+                        logBox.innerHTML += `<div class="text-amber-400">⚠️ ${info}</div>`;
+                    });
+                }
+            });
+        }
+
+        // Drag & Drop Handling
+        const dropZone = document.getElementById('drop-zone');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                processUploadedFile(files[0]);
+            }
+        });
+    </script>
+</body>
+</html>
