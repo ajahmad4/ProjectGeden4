@@ -159,8 +159,8 @@ function buatIkonSejarah(kategori) {
         </div>
         `,
         className: 'bg-transparent', // Hapus kotak bawaan native CSS Leaflet
-        iconSize: [42, 42],          // Dimensi pembungkus ikon
-        iconAnchor: [21, 21]         // Titik anchor pada koordinat peta
+        iconSize: [44, 46], // Dimensi pembungkus ikon
+        iconAnchor: [22, 46] // Ujung pin tepat pada koordinat peta
     });
 }
 
