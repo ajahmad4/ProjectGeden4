@@ -156,6 +156,10 @@ function toggleNarrativePanel() {
         floatingPanel.classList.add('hidden');
         if (reopenBtn) reopenBtn.classList.remove('hidden');
     }
+
+    if (window.narrativeMap) {
+        setTimeout(() => window.narrativeMap.invalidateSize(), 300);
+    }
 }
 
 // ==========================================
@@ -419,13 +423,17 @@ function loadNarrativeStep(index) {
     const reopenBtn = document.getElementById('btn-reopen-panel');
     if (reopenBtn) reopenBtn.classList.add('hidden');
 
-    // Fly map ke lokasi — pakai bounds seperti explore mode, dgn padding kanan 50% layar
-    // agar marker tidak tertutup panel materi
+    // Fly map ke lokasi — pakai bounds dgn padding kanan 50% layar
+    // agar marker langsung bergeser ke titik fokus 25% (area kiri) dalam 1 animasi mulus
     if (window.narrativeMap) {
         const mapWidth  = window.narrativeMap.getContainer().offsetWidth;
-        const panelW    = Math.floor(mapWidth * 0.5); // panel materi 50% lebar peta
-        const padRight  = panelW + 24;                 // +24px margin
-        const padOther  = 60;
+        const floatingPanel = document.getElementById('narrative-floating-panel');
+        const isPanelVisible = floatingPanel && !floatingPanel.classList.contains('hidden');
+        const isDesktop = window.innerWidth >= 768;
+
+        const panelW    = (isDesktop && isPanelVisible) ? Math.floor(mapWidth * 0.5) : 0; // panel materi 50% lebar peta
+        const padRight  = panelW > 0 ? (panelW + 24) : 60;                                // +24px margin jika panel terbuka
+        const padOther  = isDesktop ? 60 : 30;
 
         const navBounds = L.latLngBounds();
         let hasNavPoint = false;
@@ -462,34 +470,18 @@ function loadNarrativeStep(index) {
         }
 
         if (hasNavPoint) {
-            const sw = navBounds.getSouthWest();
-            const ne = navBounds.getNorthEast();
-
-            if (sw.lat === ne.lat && sw.lng === ne.lng) {
-                // Titik tunggal — flyTo dulu, lalu panBy ke kiri setelah animasi selesai
-                // agar marker tidak tertutup panel materi (panel = 50% lebar kanan)
-                window.narrativeMap.flyTo(sw, 10, {
-                    animate: true,
-                    duration: 2.0,
-                    easeLinearity: 0.25
-                });
-
-                // Setelah flyTo selesai, geser peta ke kiri setengah lebar panel
-                window.narrativeMap.once('moveend', function () {
-                    const mapW   = window.narrativeMap.getContainer().offsetWidth;
-                    const offset = Math.floor(mapW * 0.25); // geser 25% ke kiri (panel tutup 50% kanan)
-                    window.narrativeMap.panBy([offset, 0], { animate: true, duration: 0.6 });
-                });
-            } else {
-                // Jalur / wilayah — flyToBounds dengan padding kanan ekstra
-                window.narrativeMap.flyToBounds(navBounds, {
-                    animate:    true,
-                    duration:   2.0,
-                    easeLinearity: 0.25,
-                    paddingTopLeft:     [padOther, padOther],
-                    paddingBottomRight: [padRight, padOther]
-                });
-            }
+            // Menggunakan flyToBounds langsung untuk SEMUA titik (tunggal maupun area)
+            // Dengan paddingRight yang disesuaikan sejak awal (50% panel + margin),
+            // animasi pergeseran peta (fly) langsung menuju titik pusat area 25% (kiri panel)
+            // dalam 1 gerakan mulus tanpa pergeseran sekunder (panBy/moveend).
+            window.narrativeMap.flyToBounds(navBounds, {
+                animate: true,
+                duration: 1.8,
+                easeLinearity: 0.25,
+                maxZoom: 10,
+                paddingTopLeft:     [padOther, padOther],
+                paddingBottomRight: [padRight, padOther]
+            });
         }
     }
 

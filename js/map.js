@@ -229,14 +229,12 @@ function initNarrativeMap() {
         attributionControl: false
     }).setView([-2.548926, 118.014863], 5); // Default Indonesia
 
-    // Tambahkan Basemap Tile Layer sesuai tema saat inisialisasi
-    const theme = document.documentElement.getAttribute('data-theme') || 'light';
-    const tileUrl = theme === 'dark' 
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    // Tambahkan Basemap Tile Layer (OpenStreetMap - 100% Gratis & Tanpa API Key)
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     narrativeTileLayer = L.tileLayer(tileUrl, {
-        maxZoom: 19
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(narrativeMap);
 
     window.narrativeMap = narrativeMap;
