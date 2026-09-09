@@ -23,12 +23,15 @@
     --text-icon: #9a9388;      /* Teks ikon search */
     --text-tooltip: #f5f2ee;   /* Teks dalam tooltip hitam */
     --text-button: #6d6a63;    /* Teks tombol tutup panel */
+    --text: #444444;           /* Alias kompatibilitas teks */
+    --title: #1f4b3a;          /* Alias kompatibilitas judul */
 
     /* --- Borders & Outlines --- */
     --border-light: #e4dfd8;   /* Garis pemisah standar */
     --border-input: #e3ddd5;   /* Garis luar input search */
     --border-panel: #e7e1da;   /* Garis border foto detail */
     --border-active: #1f4b3a;  /* Garis card aktif */
+    --border: #e4dfd8;         /* Alias kompatibilitas border */
 
     /* --- Accents & Specifics --- */
     --accent-primary: #1f4b3a; /* Hijau utama Atlas */
@@ -78,12 +81,15 @@
     --text-icon: #aaaaaa;      
     --text-tooltip: #121212;   
     --text-button: #999999;    
+    --text: #e0e0e0;
+    --title: #7dc4a5;
 
     /* --- Borders & Outlines --- */
     --border-light: #333333;   
     --border-input: #444444;   
     --border-panel: #333333;   
     --border-active: #7dc4a5;  
+    --border: #333333;  
 
     /* --- Accents & Specifics --- */
     --accent-primary: #7dc4a5; 

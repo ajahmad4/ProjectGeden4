@@ -156,10 +156,6 @@ function toggleNarrativePanel() {
         floatingPanel.classList.add('hidden');
         if (reopenBtn) reopenBtn.classList.remove('hidden');
     }
-
-    if (window.narrativeMap) {
-        setTimeout(() => window.narrativeMap.invalidateSize(), 300);
-    }
 }
 
 // ==========================================
@@ -190,28 +186,34 @@ function loadNarrativeStep(index) {
     if (!container) return;
 
     const tipePeristiwa = data.kategori || data.tipe || 'Kerajaan Islam';
-    const tahunText = data.tahun ? `${data.tahun} M` : 'Nusantara';
-    const eraText = data.era || data.periodeEra || 'Klasik Islam';
+    const tahunText = data.tahun ? `${data.tahun} M` : '-';
+    const periodeText = data.periode || (data.tahun ? `Abad ke-${Math.ceil(data.tahun / 100)} M` : '-');
+    const kategoriText = data.kategori ? (data.kategori.charAt(0).toUpperCase() + data.kategori.slice(1)) : (data.tipe || '-');
+    const lokasiText = data.lokasi || '-';
+    const wilayahText = data.wilayah || '-';
+    const tokohText = Array.isArray(data.tokoh) ? data.tokoh.join(', ') : (data.tokoh || '-');
     const namaJudul = data.nama || data.title || 'Situs Sejarah';
-    
-    const wilayahText = data.wilayah || data.lokasi || 'Nusantara';
-    const tokohText = data.tokoh || 'Sultan & Ulama Setempat';
-    const jalurText = data.jalur || data.metode || 'Perdagangan & Maritim';
-    const buktiText = data.bukti || data.artefak || 'Batu Nisan & Naskah Kuno';
-    const statusText = data.status || 'Pusat Peradaban Islam';
 
     const kronologiText = data.kronologi || data.deskripsi || 'Kronologi peristiwa sejarah belum diuraikan.';
     
-    // Penanganan Gambar Carousel
+    // Penanganan Gambar Carousel (mendukung galeri, gambar, images, foto)
     let imageList = [];
-    if (Array.isArray(data.gambar) && data.gambar.length > 0) {
+    if (Array.isArray(data.galeri) && data.galeri.length > 0) {
+        imageList = data.galeri;
+    } else if (Array.isArray(data.gambar) && data.gambar.length > 0) {
         imageList = data.gambar;
     } else if (Array.isArray(data.images) && data.images.length > 0) {
         imageList = data.images;
     } else if (data.foto || data.image) {
         imageList = [data.foto || data.image];
     }
-    const validImages = imageList.filter(img => img && typeof img === 'string');
+
+    const validImages = imageList.map(img => {
+        if (!img) return null;
+        if (typeof img === 'string') return { url: img, caption: (Array.isArray(data.caption) ? data.caption[0] : data.caption) || namaJudul };
+        if (typeof img === 'object' && img.url) return { url: img.url, caption: img.caption || namaJudul };
+        return null;
+    }).filter(Boolean);
     
     // Reset Index Carousel saat langkah diganti
     currentCarouselIndex = 0;
@@ -236,65 +238,66 @@ function loadNarrativeStep(index) {
         <!-- 2. METADATA 2 KOLOM (KIRI) & GAMBAR FULL COVER (KANAN) -->
         <div class="flex flex-col md:flex-row items-stretch gap-4 my-2">
             
-            <!-- Metadata 2 Kolom -->
+            <!-- Metadata 2 Kolom (Tahun, Periode, Kategori, Lokasi, Wilayah, Tokoh) -->
             <div class="flex-1 grid grid-cols-2 gap-y-3 gap-x-4 p-4 rounded-xl text-[11px] md:text-xs justify-center items-center shadow-sm" style="background-color: var(--bg-badge); border: 1px solid var(--border-panel); color: var(--text-primary);">
                 <div class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">location_on</span>
-                    <div>
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Wilayah</span>
-                        <span class="font-medium" style="color: var(--text-primary);">${wilayahText}</span>
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">calendar_today</span>
+                    <div class="min-w-0">
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Tahun</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${tahunText}">${tahunText}</span>
                     </div>
                 </div>
 
                 <div class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">sailing</span>
-                    <div>
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Jalur</span>
-                        <span class="font-medium" style="color: var(--text-primary);">${jalurText}</span>
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">timelapse</span>
+                    <div class="min-w-0">
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Periode</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${periodeText}">${periodeText}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">category</span>
+                    <div class="min-w-0">
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Kategori</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${kategoriText}">${kategoriText}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">place</span>
+                    <div class="min-w-0">
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Lokasi</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${lokasiText}">${lokasiText}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">location_on</span>
+                    <div class="min-w-0">
+                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Wilayah</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${wilayahText}">${wilayahText}</span>
                     </div>
                 </div>
 
                 <div class="flex items-start gap-2">
                     <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">person</span>
-                    <div>
+                    <div class="min-w-0">
                         <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Tokoh</span>
-                        <span class="font-medium" style="color: var(--text-primary);">${tokohText}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">account_balance</span>
-                    <div>
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Bukti</span>
-                        <span class="font-medium" style="color: var(--text-primary);">${buktiText}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">history_edu</span>
-                    <div>
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Era</span>
-                        <span class="font-medium" style="color: var(--text-primary);">${eraText}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">verified</span>
-                    <div>
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Status</span>
-                        <span class="font-medium" style="color: var(--text-primary);">${statusText}</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${tokohText}">${tokohText}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Carousel Gambar Materi Aktif di Kanan (Full Fit tanpa ruang hitam) -->
-            <div class="w-full md:w-[280px] lg:w-[320px] shrink-0 min-h-[180px] rounded-xl overflow-hidden relative group flex flex-col justify-between shadow-sm" style="border: 1px solid var(--border-panel); background-color: var(--bg-badge);">
+            <div class="w-full md:w-[280px] lg:w-[320px] shrink-0 h-[180px] rounded-xl overflow-hidden relative group flex flex-col justify-between shadow-sm" style="border: 1px solid var(--border-panel); background-color: var(--bg-badge);">
                 ${validImages.length > 0 ? `
-                    <div class="relative w-full flex-1 overflow-hidden min-h-[150px]">
-                        ${validImages.map((imgUrl, idx) => `
-                            <img src="${imgUrl}" 
+                    <div class="relative w-full flex-1 overflow-hidden min-h-0">
+                        ${validImages.map((imgObj, idx) => `
+                            <img src="${imgObj.url}" 
                                  alt="${namaJudul} - ${idx + 1}" 
-                                 data-caption="${data.caption || `${namaJudul} (${idx + 1}/${validImages.length})`}"
+                                 data-caption="${imgObj.caption || `${namaJudul} (${idx + 1}/${validImages.length})`}"
+                                 onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';"
                                  class="narrative-carousel-slide w-full h-full object-cover transition-all duration-300 ${idx !== 0 ? 'hidden' : ''}">
                         `).join('')}
 
@@ -317,8 +320,8 @@ function loadNarrativeStep(index) {
                     </div>
 
                     <!-- Caption Gambar -->
-                    <div id="narrative-carousel-caption" class="p-2 text-[10px] italic text-center border-t truncate shrink-0" style="background-color: var(--bg-panel-solid); color: var(--text-muted); border-color: var(--border-light);">
-                        📷 ${data.caption || `${namaJudul} (1/${validImages.length})`}
+                    <div id="narrative-carousel-caption" class="h-[32px] p-1.5 text-[10px] italic text-center border-t truncate shrink-0 flex items-center justify-center" style="background-color: var(--bg-panel-solid); color: var(--text-muted); border-color: var(--border-light);">
+                        📷 ${validImages[0]?.caption || `${namaJudul} (1/${validImages.length})`}
                     </div>
                 ` : `
                     <div class="w-full h-full flex flex-col items-center justify-center p-4 text-center text-xs" style="color: var(--text-muted);">
@@ -339,6 +342,8 @@ function loadNarrativeStep(index) {
             </div>
         </div>
     `;
+
+    let markerUtama = null;
 
     // Bersihkan marker lama di map narasi
     if (window.narrativeMap) {
@@ -404,14 +409,14 @@ function loadNarrativeStep(index) {
                                 <h4 class="font-bold text-xs" style="color: var(--text-title);">${data.nama}</h4>
                                 <p class="text-[10px] text-muted">${dataTitik.nama || ''}</p>
                             </div>
-                        `);
+                        `, { autoPan: false });
                         
                         marker.addTo(window.narrativeMap);
                         narrativeMapMarkers.push(marker);
                         
-                        // Buka popup secara otomatis untuk marker pertama
+                        // Catat marker pertama sebagai target fokus utama
                         if (markerId === data.relasi.markers[0]) {
-                            marker.openPopup();
+                            markerUtama = marker;
                         }
                     }
                 });
@@ -423,17 +428,10 @@ function loadNarrativeStep(index) {
     const reopenBtn = document.getElementById('btn-reopen-panel');
     if (reopenBtn) reopenBtn.classList.add('hidden');
 
-    // Fly map ke lokasi — pakai bounds dgn padding kanan 50% layar
-    // agar marker langsung bergeser ke titik fokus 25% (area kiri) dalam 1 animasi mulus
+    // Navigasi Peta: Gunakan animasi flyTo halus seperti di Mode Eksplorasi
+    // dengan pergeseran 25% ke kiri layar agar marker berada tepat di tengah area bebas (tidak tertutup panel materi kanan)
     if (window.narrativeMap) {
-        const mapWidth  = window.narrativeMap.getContainer().offsetWidth;
-        const floatingPanel = document.getElementById('narrative-floating-panel');
-        const isPanelVisible = floatingPanel && !floatingPanel.classList.contains('hidden');
-        const isDesktop = window.innerWidth >= 768;
-
-        const panelW    = (isDesktop && isPanelVisible) ? Math.floor(mapWidth * 0.5) : 0; // panel materi 50% lebar peta
-        const padRight  = panelW > 0 ? (panelW + 24) : 60;                                // +24px margin jika panel terbuka
-        const padOther  = isDesktop ? 60 : 30;
+        window.narrativeMap.invalidateSize();
 
         const navBounds = L.latLngBounds();
         let hasNavPoint = false;
@@ -463,24 +461,56 @@ function loadNarrativeStep(index) {
             }
         }
 
-        // Fallback ke koordinat tunggal
+        // Fallback ke koordinat tunggal jika relasi kosong
         if (!hasNavPoint) {
             const coords = getObjekCoordinates(data);
             if (coords) { navBounds.extend(coords); hasNavPoint = true; }
         }
 
         if (hasNavPoint) {
-            // Menggunakan flyToBounds langsung untuk SEMUA titik (tunggal maupun area)
-            // Dengan paddingRight yang disesuaikan sejak awal (50% panel + margin),
-            // animasi pergeseran peta (fly) langsung menuju titik pusat area 25% (kiri panel)
-            // dalam 1 gerakan mulus tanpa pergeseran sekunder (panBy/moveend).
-            window.narrativeMap.flyToBounds(navBounds, {
+            const sw = navBounds.getSouthWest();
+            const ne = navBounds.getNorthEast();
+            const isSinglePoint = (sw.lat === ne.lat && sw.lng === ne.lng);
+
+            let centerCoord = isSinglePoint ? sw : navBounds.getCenter();
+            let targetZoom = isSinglePoint ? 9 : 8;
+
+            if (!isSinglePoint) {
+                const calculatedZoom = window.narrativeMap.getBoundsZoom(navBounds, false, [60, 60]);
+                targetZoom = Math.min(Math.max(calculatedZoom, 6), 10);
+            }
+
+            const isDesktop = window.innerWidth > 768;
+            const floatingPanel = document.getElementById('narrative-floating-panel');
+            const isPanelOpen = !floatingPanel || !floatingPanel.classList.contains('hidden');
+
+            const mapWidth = window.narrativeMap.getSize().x || window.innerWidth;
+            const shiftX = (isDesktop && isPanelOpen) ? (mapWidth * 0.25) : 0;
+
+            const targetPoint = window.narrativeMap.project(centerCoord, targetZoom);
+            const offsetPoint = L.point(targetPoint.x + shiftX, targetPoint.y);
+            const offsetLatLng = window.narrativeMap.unproject(offsetPoint, targetZoom);
+
+            // Bersihkan timer/listener popup sebelumnya jika ada
+            if (window.narrativeMap._narrativePopupHandler) {
+                window.narrativeMap.off('moveend', window.narrativeMap._narrativePopupHandler);
+                window.narrativeMap._narrativePopupHandler = null;
+            }
+
+            // Buka popup setelah animasi terbang mendarat dengan anggun
+            if (markerUtama) {
+                window.narrativeMap._narrativePopupHandler = function() {
+                    markerUtama.openPopup();
+                    window.narrativeMap._narrativePopupHandler = null;
+                };
+                window.narrativeMap.once('moveend', window.narrativeMap._narrativePopupHandler);
+            }
+
+            // Eksekusi flyTo mulus (durasi 1.5s dengan easing standar Leaflet)
+            window.narrativeMap.flyTo(offsetLatLng, targetZoom, {
                 animate: true,
-                duration: 1.8,
-                easeLinearity: 0.25,
-                maxZoom: 10,
-                paddingTopLeft:     [padOther, padOther],
-                paddingBottomRight: [padRight, padOther]
+                duration: 1.5,
+                easeLinearity: 0.25
             });
         }
     }

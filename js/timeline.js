@@ -193,25 +193,57 @@ function dragTimeline(deltaX) {
 // =========================================================================
 
 // Menggerakkan timeline ke tahun tujuan secara halus dengan efek easing cubic-out
-function animateTimelineYear(targetYear, callback = null) {
+function animateTimelineYear(targetYear, callback = null, shouldReload = true) {
     targetYear = Math.round(targetYear);
     targetYear = Math.max(timeline.minYear, Math.min(timeline.maxYear, targetYear));
 
     const startYear = timeline.currentYear;
+    if (startYear === targetYear) {
+        if (callback) callback();
+        return;
+    }
+
+    const startEra = typeof getCurrentEra === 'function' ? getCurrentEra(startYear) : null;
+    const targetEra = typeof getCurrentEra === 'function' ? getCurrentEra(targetYear) : null;
+    const eraChanged = !startEra || !targetEra || (startEra.id !== targetEra.id);
+
     const startTime = performance.now();
     const duration = 300; // Durasi animasi dalam milidetik
 
     function frame(now) {
         const t = Math.min((now - startTime) / duration, 1);
         const progress = 1 - Math.pow(1 - t, 3); // Rumus Easing Out Cubic
-        const year = startYear + (targetYear - startYear) * progress;
+        const year = Math.round(startYear + (targetYear - startYear) * progress);
 
-        setTimelineYear(year, false);
+        // Update posisi visual timeline & indikator tahun saja (tanpa render ulang layer peta tiap frame)
+        timeline.currentYear = year;
+        if (typeof translateFromYear === 'function') {
+            timeline.currentTranslate = translateFromYear(year);
+        }
+        notifyTimelineChanged();
 
         if (t < 1) {
             requestAnimationFrame(frame);
         } else {
-            muatLokasiAplikasi();
+            timeline.currentYear = targetYear;
+            if (typeof translateFromYear === 'function') {
+                timeline.currentTranslate = translateFromYear(targetYear);
+            }
+            notifyTimelineChanged();
+
+            // Render layer jalur & batas wilayah sekali saja di akhir animasi
+            if (typeof renderJalurDanWilayah === 'function') {
+                renderJalurDanWilayah(targetYear);
+            }
+            if (typeof updateEraHeader === 'function') {
+                updateEraHeader(targetYear);
+            }
+
+            // Hanya reload daftar lokasi & marker jika era benar-benar berganti
+            if (shouldReload && eraChanged && typeof muatLokasiAplikasi === 'function') {
+                muatLokasiAplikasi();
+            }
+
             if (callback) callback();
         }
     }
@@ -261,8 +293,8 @@ function updateTimelineInterval() {
 }
 
 function syncTimelineUI(year) {
-    const minYear = 570;  // Tahun minimal aplikasi Anda
-    const maxYear = 1500; // Tahun maksimal aplikasi Anda (sesuaikan jika beda)
+    const minYear = (typeof TIMELINE_CONFIG !== 'undefined') ? TIMELINE_CONFIG.minYear : 570;
+    const maxYear = (typeof TIMELINE_CONFIG !== 'undefined') ? TIMELINE_CONFIG.maxYear : 2000;
 
     const indicator = document.getElementById('timeline-indicator'); // elemen segitiga oranye
     const timelineRuler = document.getElementById('timeline-ruler');

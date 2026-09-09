@@ -18,6 +18,7 @@ const activePolylines = {};
 const activePolygons = {};
 
 let currentActiveObjekId = null;
+let currentCategoryFilter = 'all';
 
 // ==========================================
 // 2. INISIALISASI & BUILDER CARD
@@ -68,7 +69,79 @@ function buatCardHTML(objek) {
 }
 
 // ==========================================
-// 3. MUAT LOKASI APLIKASI
+// 3. FILTER KATEGORI UI
+// ==========================================
+
+function renderCategoryFilterUI(eraId) {
+    const container = document.getElementById('category-filter-container');
+    const chipsContainer = document.getElementById('category-chips');
+    const countLabel = document.getElementById('category-filter-count');
+    if (!container || !chipsContainer || typeof dataObjekAtlas === 'undefined') return;
+
+    const objekDiEra = dataObjekAtlas.filter(oa => oa.era === eraId);
+    if (objekDiEra.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+
+    container.classList.remove('hidden');
+
+    // Hitung frekuensi kategori di era ini
+    const catCounts = {};
+    objekDiEra.forEach(oa => {
+        const cat = oa.kategori || 'umum';
+        catCounts[cat] = (catCounts[cat] || 0) + 1;
+    });
+
+    // Jika filter yang sedang aktif tidak tersedia di era baru, reset ke 'all'
+    if (currentCategoryFilter !== 'all' && !catCounts[currentCategoryFilter]) {
+        currentCategoryFilter = 'all';
+    }
+
+    const categories = Object.keys(catCounts).sort();
+    const formatCatName = (c) => c.charAt(0).toUpperCase() + c.slice(1);
+
+    let html = `
+        <button
+            type="button"
+            onclick="setCategoryFilter('all')"
+            class="px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1 shrink-0 border transition-all cursor-pointer ${currentCategoryFilter === 'all' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm' : 'bg-badge text-muted border-border-light hover:bg-active hover:text-title'}">
+            <span class="material-symbols-outlined text-[14px]">apps</span>
+            <span>Semua</span>
+            <span class="text-[10px] opacity-75 ml-0.5">(${objekDiEra.length})</span>
+        </button>
+    `;
+
+    categories.forEach(cat => {
+        const icon = typeof getMaterialIcon === 'function' ? getMaterialIcon(cat) : 'place';
+        const isAktif = currentCategoryFilter === cat;
+        html += `
+            <button
+                type="button"
+                onclick="setCategoryFilter('${cat}')"
+                class="px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1 shrink-0 border transition-all cursor-pointer ${isAktif ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm' : 'bg-badge text-muted border-border-light hover:bg-active hover:text-title'}">
+                <span class="material-symbols-outlined text-[14px]">${icon}</span>
+                <span>${formatCatName(cat)}</span>
+                <span class="text-[10px] opacity-75 ml-0.5">(${catCounts[cat]})</span>
+            </button>
+        `;
+    });
+
+    chipsContainer.innerHTML = html;
+
+    if (countLabel) {
+        const totalShown = currentCategoryFilter === 'all' ? objekDiEra.length : (catCounts[currentCategoryFilter] || 0);
+        countLabel.textContent = `${totalShown} dari ${objekDiEra.length}`;
+    }
+}
+
+function setCategoryFilter(kategori) {
+    currentCategoryFilter = kategori;
+    muatLokasiAplikasi();
+}
+
+// ==========================================
+// 4. MUAT LOKASI APLIKASI
 // ==========================================
 
 function muatLokasiAplikasi() {
@@ -90,11 +163,32 @@ function muatLokasiAplikasi() {
     const eraAktif = (typeof getCurrentEra === 'function') ? getCurrentEra(currentYear) : null;
     if (!eraAktif || typeof dataObjekAtlas === 'undefined') return;    
 
+    // Perbarui chips filter kategori
+    renderCategoryFilterUI(eraAktif.id);
+
+    // Filter berdasarkan kategori dan keyword pencarian
+    const searchInput = document.getElementById("search-input");
+    const keyword = searchInput ? searchInput.value.toLowerCase().trim() : "";
+
     const cardFragments = [];
     const processedMarkers = new Set();
 
     dataObjekAtlas
-        .filter(objek => objek.era === eraAktif.id)
+        .filter(objek => {
+            if (keyword === "") {
+                if (objek.era !== eraAktif.id) return false;
+            }
+            if (currentCategoryFilter !== 'all' && (objek.kategori || 'umum') !== currentCategoryFilter) return false;
+            if (keyword !== "") {
+                const cocok =
+                    (objek.nama && objek.nama.toLowerCase().includes(keyword)) ||
+                    (objek.kategori && objek.kategori.toLowerCase().includes(keyword)) ||
+                    (objek.lokasi && objek.lokasi.toLowerCase().includes(keyword)) ||
+                    (objek.wilayah && objek.wilayah.toLowerCase().includes(keyword));
+                if (!cocok) return false;
+            }
+            return true;
+        })
         .forEach(objek => {
 
             if (typeof map !== 'undefined' && map && objek.relasi && objek.relasi.markers) {
@@ -116,7 +210,6 @@ function muatLokasiAplikasi() {
                     marker.on("click", function () {
                         map.flyTo(dataTitik.koordinat, 12, { animate: true, duration: 1.5 });
                         const objekTerkait = dataObjekAtlas.find(oa => 
-                            oa.era === eraAktif.id && 
                             oa.relasi && oa.relasi.markers && oa.relasi.markers.includes(markerId)
                         );
                         
@@ -140,11 +233,16 @@ function muatLokasiAplikasi() {
         });
 
     if (cardFragments.length === 0) {
+        const pesanKosong = keyword !== ""
+            ? `Tidak ada hasil untuk "${keyword}"`
+            : (currentCategoryFilter !== 'all'
+                ? `Tidak ada objek dengan kategori "${currentCategoryFilter}" di era ini.`
+                : `Pada era ini belum ada data tercatat.`);
         locationList.innerHTML = `
             <div class="flex flex-col items-center justify-center py-8 text-center">
                 <span class="material-symbols-outlined text-[36px] text-muted-alt">explore_off</span>
                 <p class="mt-2 text-[13px] font-semibold text-secondary">Tidak ada objek sejarah</p>
-                <p class="mt-0.5 text-[11px] text-muted">Pada era ini belum ada data tercatat.</p>
+                <p class="mt-0.5 text-[11px] text-muted">${pesanKosong}</p>
             </div>`;
     } else {
         locationList.innerHTML = cardFragments.join('');
@@ -291,10 +389,12 @@ function eksekusiNavigasiLokal(idObjekAtlas) {
         aktifkanCard(idObjekAtlas);
     };
 
+    // 1. Jalankan navigasi peta flyTo & tampilkan detail secara instan tanpa jeda
+    jalankanNavigasi();
+
+    // 2. Animasikan jarum timeline secara paralel tanpa reload list berulang
     if (typeof animateTimelineYear === 'function' && objek.tahun) {
-        animateTimelineYear(Number(objek.tahun), jalankanNavigasi);
-    } else {
-        jalankanNavigasi();
+        animateTimelineYear(Number(objek.tahun), null, false);
     }
 }
 
@@ -324,11 +424,15 @@ function showDetail(objek) {
 }
 
 function tutupDetailPanel() {
+    if (typeof tutupSubMateriView === 'function') {
+        tutupSubMateriView();
+    }
+
     const detailPanel = document.getElementById('detail-panel');
 
     if (detailPanel) {
         detailPanel.classList.add('hidden');
-        detailPanel.classList.remove('snap-peek', 'snap-half', 'snap-full');
+        detailPanel.classList.remove('snap-peek', 'snap-half', 'snap-full', 'detail-panel-expanded');
     }
 
     document.querySelectorAll("#location-list > div").forEach(card => {
@@ -381,6 +485,26 @@ function resetTampilanDefault() {
 // 5. SWITCH APP MODE & INITIALIZER
 // ==========================================
 
+function sembunyikanSemuaMarkerDiMenuUtama() {
+    if (typeof map === 'undefined' || !map) return;
+    if (typeof layerMasjid !== 'undefined' && map.hasLayer(layerMasjid)) map.removeLayer(layerMasjid);
+    if (typeof layerKerajaan !== 'undefined' && map.hasLayer(layerKerajaan)) map.removeLayer(layerKerajaan);
+    if (typeof layerPelabuhan !== 'undefined' && map.hasLayer(layerPelabuhan)) map.removeLayer(layerPelabuhan);
+    if (typeof layerKota !== 'undefined' && map.hasLayer(layerKota)) map.removeLayer(layerKota);
+    if (typeof layerJalurSitus !== 'undefined' && map.hasLayer(layerJalurSitus)) map.removeLayer(layerJalurSitus);
+    if (typeof layerWilayahKekuasaan !== 'undefined' && map.hasLayer(layerWilayahKekuasaan)) map.removeLayer(layerWilayahKekuasaan);
+}
+
+function tampilkanSemuaMarkerDiEksplorasi() {
+    if (typeof map === 'undefined' || !map) return;
+    if (typeof layerMasjid !== 'undefined' && !map.hasLayer(layerMasjid)) map.addLayer(layerMasjid);
+    if (typeof layerKerajaan !== 'undefined' && !map.hasLayer(layerKerajaan)) map.addLayer(layerKerajaan);
+    if (typeof layerPelabuhan !== 'undefined' && !map.hasLayer(layerPelabuhan)) map.addLayer(layerPelabuhan);
+    if (typeof layerKota !== 'undefined' && !map.hasLayer(layerKota)) map.addLayer(layerKota);
+    if (typeof layerJalurSitus !== 'undefined' && !map.hasLayer(layerJalurSitus)) map.addLayer(layerJalurSitus);
+    if (typeof layerWilayahKekuasaan !== 'undefined' && !map.hasLayer(layerWilayahKekuasaan)) map.addLayer(layerWilayahKekuasaan);
+}
+
 function switchAppMode(mode) {
     const modalLayer = document.getElementById('modal-layer');
     const welcomePanel = document.getElementById('welcome-panel');
@@ -396,6 +520,9 @@ function switchAppMode(mode) {
     if (mode === 'WELCOME') {
         document.body.classList.add('mode-welcome');
 
+        // Sembunyikan semua marker dari peta saat di menu utama
+        sembunyikanSemuaMarkerDiMenuUtama();
+
         if (modalLayer) modalLayer.classList.remove('hidden');
         if (welcomePanel) welcomePanel.classList.remove('hidden');
         if (listPanel) listPanel.classList.add('hidden');
@@ -403,8 +530,15 @@ function switchAppMode(mode) {
         if (timelineContainer) timelineContainer.classList.add('hidden');
         if (narrativeContainer) narrativeContainer.classList.add('hidden');
 
+        if (typeof map !== 'undefined' && map) {
+            setTimeout(() => map.invalidateSize(), 150);
+        }
+
     } else if (mode === 'EXPLORE') {
         document.body.classList.remove('mode-welcome');
+
+        // Tampilkan kembali seluruh layer marker
+        tampilkanSemuaMarkerDiEksplorasi();
 
         if (modalLayer) modalLayer.classList.add('hidden');
         if (welcomePanel) welcomePanel.classList.add('hidden');
@@ -418,12 +552,18 @@ function switchAppMode(mode) {
             badgeMode.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono";
         }
 
+        if (typeof muatLokasiAplikasi === 'function') {
+            muatLokasiAplikasi();
+        }
+
         if (typeof map !== 'undefined' && map) {
             setTimeout(() => map.invalidateSize(), 200);
         }
 
     } else if (mode === 'CURRICULUM') {
         document.body.classList.remove('mode-welcome');
+
+        sembunyikanSemuaMarkerDiMenuUtama();
 
         if (modalLayer) modalLayer.classList.add('hidden');
         if (welcomePanel) welcomePanel.classList.add('hidden');
@@ -457,6 +597,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const tahunAwal = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
 
     muatLokasiAplikasi();
+    sembunyikanSemuaMarkerDiMenuUtama();
+
     if (typeof updateEraHeader === 'function') {
         updateEraHeader(tahunAwal);
     }
@@ -465,46 +607,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("search-input");
     if (searchInput) {
         searchInput.addEventListener("input", function () {
-            const keyword = this.value.toLowerCase().trim();
-            const locationList = document.getElementById("location-list");
-
-            if (typeof dataObjekAtlas === 'undefined') return;
-
-            const currentYear = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
-            const eraAktif = typeof getCurrentEra === 'function' ? getCurrentEra(currentYear) : null;
-
-            let dataSumber = [];
-
-            if (keyword !== "") {
-                dataSumber = dataObjekAtlas;
-            } else {
-                dataSumber = eraAktif
-                    ? dataObjekAtlas.filter(oa => oa.era === eraAktif.id)
-                    : dataObjekAtlas;
-            }
-
-            const hasilFragments = [];
-
-            dataSumber.forEach(objek => {
-                const cocok =
-                    (objek.nama && objek.nama.toLowerCase().includes(keyword)) ||
-                    (objek.kategori && objek.kategori.toLowerCase().includes(keyword)) ||
-                    (objek.lokasi && objek.lokasi.toLowerCase().includes(keyword)) ||
-                    (objek.wilayah && objek.wilayah.toLowerCase().includes(keyword));
-
-                if (cocok) hasilFragments.push(buatCardHTML(objek));
-            });
-
-            if (hasilFragments.length === 0) {
-                locationList.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-10 text-center">
-                        <span class="material-symbols-outlined text-[38px] text-muted-alt">search_off</span>
-                        <p class="mt-2 text-[14px] font-semibold text-secondary">Lokasi tidak ditemukan</p>
-                        <p class="mt-0.5 text-[12px] text-muted">Tidak ada hasil untuk "${keyword}" di semua era.</p>
-                    </div>`;
-            } else {
-                locationList.innerHTML = hasilFragments.join('');
-            }
+            muatLokasiAplikasi();
         });
     }
 });
@@ -731,40 +834,40 @@ function renderCarousel(objek) {
   return `<div class="carousel-container">${imagesHtml}</div>`;
 }
 
+let savedMapCenterBeforeExpand = null;
+let savedMapZoomBeforeExpand = null;
+
 function bukaSubMateriDariNarasi(storyId, stepIndex, objek) {
     if (typeof dataKurikulum === 'undefined') return;
 
     let cerita = dataKurikulum.find(c => c.id === storyId);
     let stepData;
 
+    const namaObjek = objek ? (objek.nama || 'Objek Sejarah') : 'Detail Peristiwa';
+    const deskripsiObjek = objek ? (objek.deskripsi || objek.kronologi || 'Kronologi lengkap peristiwa sedang dalam proses penyusunan.') : 'Kronologi lengkap peristiwa sedang dalam proses penyusunan.';
+
     if (!cerita) {
-        // Buat cerita placeholder dinamis jika tidak ada di kurikulum
-        const namaObjek = objek ? (objek.nama || 'Objek Sejarah') : 'Detail Peristiwa';
-        const deskripsiObjek = objek ? (objek.deskripsi || objek.kronologi || 'Kronologi lengkap peristiwa sedang dalam proses penyusunan.') : 'Kronologi lengkap peristiwa sedang dalam proses penyusunan.';
-        
         cerita = {
             id: storyId,
-            judulCerita: `Modul Pembelajaran: ${namaObjek}`,
+            judulCerita: `Modul SKI: ${namaObjek}`,
             steps: [
                 {
                     judul: `Uraian Mendalam: ${namaObjek}`,
                     konten: `
-                        <p class="text-secondary leading-relaxed mb-3"><strong>Pendahuluan:</strong></p>
-                        <p class="text-secondary leading-relaxed mb-3">Halaman ini berisi modul kurikulum mendalam untuk mempelajari peristiwa <strong>${namaObjek}</strong>. Materi ini disesuaikan dengan kurikulum Sejarah Kebudayaan Islam (SKI) Kelas 12.</p>
-                        <hr class="my-3 border-border-light">
-                        <p class="text-secondary leading-relaxed mb-3"><strong>Kronologi Peristiwa:</strong></p>
-                        <p class="text-secondary leading-relaxed mb-3">${deskripsiObjek}</p>
-                        <hr class="my-3 border-border-light">
-                        <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-400 text-center">
-                            📖 Modul pembelajaran SKI Kelas 12. Peta interaktif & materi kronologis.
+                        <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 mb-4">
+                            📖 <strong>Modul Pembelajaran SKI Kelas 12</strong> — Telaah historis dan signifikansi peradaban Islam.
                         </div>
+                        <h4 class="text-sm font-bold text-title mb-1.5">Pendahuluan</h4>
+                        <p class="text-secondary leading-relaxed mb-4">Materi ini menyajikan kajian mendalam mengenai <strong>${namaObjek}</strong> dalam konteks Sejarah Kebudayaan Islam, menganalisis faktor latar belakang, proses perkembangan, serta dampak kultural dan peradaban yang ditimbulkan.</p>
+                        <h4 class="text-sm font-bold text-title mb-1.5">Kronologi & Dinamika Peristiwa</h4>
+                        <p class="text-secondary leading-relaxed mb-4">${deskripsiObjek}</p>
                     `
                 }
             ]
         };
         stepData = cerita.steps[0];
     } else {
-        stepData = cerita.steps[stepIndex];
+        stepData = cerita.steps[stepIndex] || cerita.steps[0];
     }
 
     if (!stepData) {
@@ -772,24 +875,254 @@ function bukaSubMateriDariNarasi(storyId, stepIndex, objek) {
         return;
     }
 
+    // 1. Perbarui Elemen Header & Konten
     const tagEl = document.getElementById('submateri-tag-cerita');
-    if (tagEl) tagEl.textContent = cerita.judulCerita || 'MODUL KURIKULUM';
+    if (tagEl) tagEl.textContent = cerita.judulCerita || 'MODUL KURIKULUM SKI';
+
+    const periodeEl = document.getElementById('submateri-periode');
+    if (periodeEl) periodeEl.textContent = objek ? (objek.tahun ? `${objek.tahun} M` : (objek.periode || '')) : '';
 
     const judulEl = document.getElementById('submateri-judul');
-    if (judulEl) judulEl.textContent = stepData.judul || '';
+    if (judulEl) judulEl.textContent = stepData.judul || namaObjek;
 
     const kontenEl = document.getElementById('submateri-konten');
     if (kontenEl) kontenEl.innerHTML = stepData.konten || '';
 
+    // 2. Perbarui Kotak Metadata 50:50 (6 Kolom: Tahun, Periode, Kategori, Lokasi, Wilayah, Tokoh)
+    const metaBox = document.getElementById('submateri-metadata-box');
+    if (metaBox && objek) {
+        const tahunVal = objek.tahun ? `${objek.tahun} M` : '-';
+        const periodeVal = objek.periode || (objek.tahun ? `Abad ke-${Math.ceil(objek.tahun / 100)} M` : '-');
+        const kategoriVal = objek.kategori ? (objek.kategori.charAt(0).toUpperCase() + objek.kategori.slice(1)) : (objek.tipe || '-');
+        const lokasiVal = objek.lokasi || '-';
+        const wilayahVal = objek.wilayah || '-';
+        const tokohVal = Array.isArray(objek.tokoh) ? objek.tokoh.join(', ') : (objek.tokoh || '-');
+
+        metaBox.className = "flex-1 grid grid-cols-2 gap-y-3 gap-x-4 p-4 rounded-xl text-[11px] md:text-xs justify-center items-center shadow-sm";
+        metaBox.style.backgroundColor = "var(--bg-badge)";
+        metaBox.style.border = "1px solid var(--border-panel)";
+        metaBox.style.color = "var(--text-primary)";
+
+        metaBox.innerHTML = `
+            <div class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">calendar_today</span>
+                <div class="min-w-0">
+                    <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Tahun</span>
+                    <span class="font-medium truncate block" style="color: var(--text-primary);" title="${tahunVal}">${tahunVal}</span>
+                </div>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">timelapse</span>
+                <div class="min-w-0">
+                    <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Periode</span>
+                    <span class="font-medium truncate block" style="color: var(--text-primary);" title="${periodeVal}">${periodeVal}</span>
+                </div>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">category</span>
+                <div class="min-w-0">
+                    <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Kategori</span>
+                    <span class="font-medium truncate block" style="color: var(--text-primary);" title="${kategoriVal}">${kategoriVal}</span>
+                </div>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">place</span>
+                <div class="min-w-0">
+                    <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Lokasi</span>
+                    <span class="font-medium truncate block" style="color: var(--text-primary);" title="${lokasiVal}">${lokasiVal}</span>
+                </div>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">location_on</span>
+                <div class="min-w-0">
+                    <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Wilayah</span>
+                    <span class="font-medium truncate block" style="color: var(--text-primary);" title="${wilayahVal}">${wilayahVal}</span>
+                </div>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">person</span>
+                <div class="min-w-0">
+                    <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Tokoh</span>
+                    <span class="font-medium truncate block" style="color: var(--text-primary);" title="${tokohVal}">${tokohVal}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // 3. Perbarui Kotak Foto / Carousel di Kanan (Fixed Size, Full Fit Cover)
+    const fotoBox = document.getElementById('submateri-foto-box');
+    if (fotoBox) {
+        fotoBox.className = "w-full md:w-[280px] lg:w-[320px] shrink-0 h-[180px] rounded-xl overflow-hidden relative group flex flex-col justify-between shadow-sm";
+        fotoBox.style.border = "1px solid var(--border-panel)";
+        fotoBox.style.backgroundColor = "var(--bg-badge)";
+
+        let imageList = [];
+        if (objek) {
+            if (Array.isArray(objek.galeri) && objek.galeri.length > 0) {
+                imageList = objek.galeri;
+            } else if (Array.isArray(objek.gambar) && objek.gambar.length > 0) {
+                imageList = objek.gambar;
+            } else if (Array.isArray(objek.images) && objek.images.length > 0) {
+                imageList = objek.images;
+            } else if (objek.foto || objek.image) {
+                imageList = [objek.foto || objek.image];
+            }
+        }
+
+        const validImages = imageList.map((img, idx) => {
+            if (!img) return null;
+            if (typeof img === 'string') return { url: img, caption: (Array.isArray(objek.caption) ? objek.caption[idx] || objek.caption[0] : objek.caption) || namaObjek };
+            if (typeof img === 'object' && img.url) return { url: img.url, caption: img.caption || (img.sumber ? `${namaObjek} (${img.sumber})` : `${namaObjek} (${idx + 1})`) };
+            return null;
+        }).filter(Boolean);
+
+        currentSubmateriCarouselIndex = 0;
+
+        if (validImages.length > 0) {
+            fotoBox.innerHTML = `
+                <div class="relative w-full flex-1 overflow-hidden min-h-0">
+                    ${validImages.map((imgObj, idx) => `
+                        <img src="${imgObj.url}" 
+                             alt="${namaObjek} - ${idx + 1}" 
+                             data-caption="${imgObj.caption || `${namaObjek} (${idx + 1}/${validImages.length})`}"
+                             onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';"
+                             class="submateri-carousel-slide w-full h-full object-cover transition-all duration-300 ${idx !== 0 ? 'hidden' : ''}">
+                    `).join('')}
+
+                    <!-- Navigasi Panah Carousel -->
+                    ${validImages.length > 1 ? `
+                        <button type="button" onclick="changeSubmateriImage(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-md z-10 cursor-pointer" style="background-color: var(--bg-panel-solid); color: var(--text-title); border: 1px solid var(--border-light);">
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                        </button>
+                        <button type="button" onclick="changeSubmateriImage(1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-md z-10 cursor-pointer" style="background-color: var(--bg-panel-solid); color: var(--text-title); border: 1px solid var(--border-light);">
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </button>
+
+                        <!-- Dots Indikator -->
+                        <div class="absolute top-2 inset-x-0 flex justify-center gap-1 z-10">
+                            ${validImages.map((_, idx) => `
+                                <button type="button" onclick="setSubmateriImage(${idx})" class="submateri-carousel-dot h-1.5 rounded-full transition-all duration-300 ${idx === 0 ? 'w-4' : 'w-1.5'}" style="background-color: ${idx === 0 ? 'var(--accent-primary)' : 'var(--border-light)'};"></button>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Caption Gambar -->
+                <div id="submateri-carousel-caption" class="h-[32px] p-1.5 text-[10px] italic text-center border-t truncate shrink-0 flex items-center justify-center" style="background-color: var(--bg-panel-solid); color: var(--text-muted); border-color: var(--border-light);">
+                    📷 ${validImages[0]?.caption || `${namaObjek} (1/${validImages.length})`}
+                </div>
+            `;
+            fotoBox.classList.remove('hidden');
+        } else {
+            fotoBox.innerHTML = `
+                <div class="w-full h-full flex flex-col items-center justify-center p-4 text-center text-xs" style="color: var(--text-muted);">
+                    <span class="material-symbols-outlined text-2xl mb-1">image_not_supported</span>
+                    <span>Gambar belum tersedia</span>
+                </div>
+            `;
+        }
+    }
+
+    // 4. Ekspansi Panel ke 50% Layar Kanan & Sembunyikan List Panel Kiri
+    const detailPanel = document.getElementById('detail-panel');
+    const listPanel = document.getElementById('list-panel');
+    if (detailPanel) {
+        detailPanel.classList.add('detail-panel-expanded');
+    }
+    if (listPanel) {
+        listPanel.classList.add('hidden');
+    }
+
+    // Tandai body agar kontrol peta (filter, zoom, minimap) dan timeline bergeser ke kiri 50%
+    document.body.classList.add('submateri-expanded');
+
     document.getElementById('panel-ringkasan-view')?.classList.add('hidden');
     document.getElementById('panel-submateri-view')?.classList.remove('hidden');
-
     document.getElementById('detail-content')?.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Sinkronisasi ruler timeline dan minimap setelah pergeseran panel selesai
+    setTimeout(() => {
+        if (typeof moveRuler === 'function' && typeof timeline !== 'undefined') {
+            moveRuler(timeline.currentYear);
+        }
+        if (typeof miniMap !== 'undefined' && miniMap && miniMap._miniMap) {
+            miniMap._miniMap.invalidateSize();
+        }
+    }, 360);
+
+    // 5. Geser Peta Eksplorasi agar Marker berada di tengah area 50% kiri layar
+    if (typeof map !== 'undefined' && map && objek && objek.relasi && objek.relasi.markers && objek.relasi.markers.length > 0) {
+        const markerId = objek.relasi.markers[0];
+        const dataTitik = markerMap[markerId];
+        if (dataTitik && dataTitik.koordinat) {
+            savedMapCenterBeforeExpand = map.getCenter();
+            savedMapZoomBeforeExpand = map.getZoom();
+
+            const coord = dataTitik.koordinat;
+            const targetZoom = Math.max(map.getZoom(), 7);
+
+            setTimeout(() => {
+                map.invalidateSize();
+                const targetPoint = map.project(coord, targetZoom);
+                const shiftX = (window.innerWidth > 768) ? (window.innerWidth * 0.25) : 0;
+                const offsetPoint = L.point(targetPoint.x + shiftX, targetPoint.y);
+                const offsetLatLng = map.unproject(offsetPoint, targetZoom);
+                map.flyTo(offsetLatLng, targetZoom, { animate: true, duration: 1.2 });
+            }, 60);
+        }
+    }
 }
 
 function tutupSubMateriView() {
+    const detailPanel = document.getElementById('detail-panel');
+    const listPanel = document.getElementById('list-panel');
+
+    const wasExpanded = (detailPanel && detailPanel.classList.contains('detail-panel-expanded')) ||
+                        document.body.classList.contains('submateri-expanded');
+    if (!wasExpanded) return;
+
+    if (detailPanel) {
+        detailPanel.classList.remove('detail-panel-expanded');
+    }
+    if (listPanel) {
+        listPanel.classList.remove('hidden');
+    }
+
+    // Lepas penanda body agar kontrol peta dan timeline kembali ke posisi normal
+    document.body.classList.remove('submateri-expanded');
+
     document.getElementById('panel-submateri-view')?.classList.add('hidden');
     document.getElementById('panel-ringkasan-view')?.classList.remove('hidden');
+
+    // Sinkronisasi kembali posisi ruler timeline dan minimap
+    setTimeout(() => {
+        if (typeof moveRuler === 'function' && typeof timeline !== 'undefined') {
+            moveRuler(timeline.currentYear);
+        }
+        if (typeof miniMap !== 'undefined' && miniMap && miniMap._miniMap) {
+            miniMap._miniMap.invalidateSize();
+        }
+    }, 360);
+
+    // Kembalikan posisi peta ke tengah marker atau center awal
+    if (typeof map !== 'undefined' && map) {
+        setTimeout(() => {
+            map.invalidateSize();
+            if (currentActiveObjekId && typeof dataObjekAtlas !== 'undefined') {
+                const objek = dataObjekAtlas.find(o => o.id === currentActiveObjekId);
+                if (objek && objek.relasi && objek.relasi.markers && objek.relasi.markers[0]) {
+                    const dt = markerMap[objek.relasi.markers[0]];
+                    if (dt && dt.koordinat) {
+                        map.flyTo(dt.koordinat, map.getZoom(), { animate: true, duration: 1.0 });
+                        return;
+                    }
+                }
+            }
+            if (savedMapCenterBeforeExpand) {
+                map.flyTo(savedMapCenterBeforeExpand, savedMapZoomBeforeExpand || 5, { animate: true, duration: 1.0 });
+            }
+        }, 150);
+    }
 }
 
 function isiDetailPanel(objek) {
@@ -848,3 +1181,53 @@ function isiDetailPanel(objek) {
         wrapperBtn.classList.add('hidden');
     }
 }
+
+// ==========================================
+// FUNGSIONALITAS CAROUSEL GAMBAR SUB-MATERI
+// ==========================================
+let currentSubmateriCarouselIndex = 0;
+
+function changeSubmateriImage(direction) {
+    const images = document.querySelectorAll('.submateri-carousel-slide');
+    const dots = document.querySelectorAll('.submateri-carousel-dot');
+    const captionEl = document.getElementById('submateri-carousel-caption');
+    
+    if (!images || images.length <= 1) return;
+
+    // Sembunyikan slide aktif saat ini
+    images[currentSubmateriCarouselIndex].classList.add('hidden');
+    if (dots[currentSubmateriCarouselIndex]) {
+        dots[currentSubmateriCarouselIndex].style.backgroundColor = 'var(--border-light)';
+        dots[currentSubmateriCarouselIndex].classList.remove('w-4');
+        dots[currentSubmateriCarouselIndex].classList.add('w-1.5');
+    }
+
+    // Hitung indeks baru
+    currentSubmateriCarouselIndex = (currentSubmateriCarouselIndex + direction + images.length) % images.length;
+
+    // Tampilkan slide baru
+    images[currentSubmateriCarouselIndex].classList.remove('hidden');
+    if (dots[currentSubmateriCarouselIndex]) {
+        dots[currentSubmateriCarouselIndex].style.backgroundColor = 'var(--accent-primary)';
+        dots[currentSubmateriCarouselIndex].classList.remove('w-1.5');
+        dots[currentSubmateriCarouselIndex].classList.add('w-4');
+    }
+
+    if (captionEl) {
+        const activeImg = images[currentSubmateriCarouselIndex];
+        captionEl.textContent = `📷 ${activeImg.getAttribute('data-caption') || 'Gambar Sejarah'}`;
+    }
+}
+
+function setSubmateriImage(targetIndex) {
+    const images = document.querySelectorAll('.submateri-carousel-slide');
+    if (!images || targetIndex < 0 || targetIndex >= images.length) return;
+    
+    const diff = targetIndex - currentSubmateriCarouselIndex;
+    if (diff !== 0) {
+        changeSubmateriImage(diff);
+    }
+}
+
+window.changeSubmateriImage = changeSubmateriImage;
+window.setSubmateriImage = setSubmateriImage;

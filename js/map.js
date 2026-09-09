@@ -42,24 +42,24 @@ map.setMaxZoom(15);                     // Batas maksimal zoom in (skala mikro s
 /// ==========================================
 // 3. INTEGRASI RENDER BASEMAP UTAMA
 // ==========================================
-// Menggunakan ubin peta OpenStreetMap Standar (100% Gratis & Tanpa API Key / Tanpa CartoDB)
+// Menggunakan ubin peta OpenStreetMap Standar (100% Gratis & Tanpa API Key)
+const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
 let currentBasemap = null;
 
-function setBasemap(theme) {
+function setBasemap() {
     if (currentBasemap) {
         map.removeLayer(currentBasemap);
     }
-    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-        
-    currentBasemap = L.tileLayer(tileUrl, { 
+    currentBasemap = L.tileLayer(OSM_TILE_URL, { 
         maxZoom: 18,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: OSM_ATTRIBUTION
     }).addTo(map);
 }
 
 // Initial basemap load
-const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
-setBasemap(initialTheme);
+setBasemap();
 
 // ==========================================
 // 4. MANAJEMEN KONTROL LAYER & NAVIGASI UI
@@ -111,33 +111,9 @@ var opsiMinimap = {
 // Eksekusi inisialisasi MiniMap kontrol ke dalam peta utama
 var miniMap = new L.Control.MiniMap(layerMini, opsiMinimap).addTo(map);
 
-// Event Handler: Menjamin peta kecil menyegarkan ukuran kontainernya (anti-blank/pecah)
-// sesaat setelah peta utama selesai melakukan proses pergeseran animasi makro (flyTo/drag)
-map.on('moveend zoomend', function () {
-    if (miniMap && miniMap._miniMap) {
-        miniMap._miniMap.invalidateSize();
-    }
-});
-
 // Listener dari js/theme.js
 window.updateMapTheme = function(theme) {
-    setBasemap(theme);
-    
-    if (miniMap) {
-        const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-            
-        var newLayerMini = L.tileLayer(tileUrl, {
-            minZoom: 0, maxZoom: 13, attribution: false 
-        });
-        miniMap.changeLayer(newLayerMini);
-    }
-
-    if (narrativeMap && narrativeTileLayer) {
-        const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-        
-        narrativeMap.removeLayer(narrativeTileLayer);
-        narrativeTileLayer = L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(narrativeMap);
-    }
+    // Mode gelap ditangani via filter CSS pada container peta OSM sehingga 100% bebas API key dan tanpa watermark
 };
 
 // ==========================================
@@ -189,32 +165,7 @@ function buatIkonSejarah(kategori) {
 }
 
 
-// ======================================================
-// BATAS VERTIKAL PETA
-// ======================================================
 
-map.on("moveend", function () {
-
-    const center = map.getCenter();
-
-    let lat = center.lat;
-
-    const lng = center.lng;
-
-    if (lat > 80) lat = 80;
-
-    if (lat < -80) lat = -80;
-
-    if (lat !== center.lat) {
-
-        map.panTo([lat, lng], {
-            animate: true,
-            duration: 0.35
-        });
-
-    }
-
-});
 
 // Variable global untuk map narasi
 let narrativeMap = null;
@@ -229,12 +180,10 @@ function initNarrativeMap() {
         attributionControl: false
     }).setView([-2.548926, 118.014863], 5); // Default Indonesia
 
-    // Tambahkan Basemap Tile Layer (OpenStreetMap - 100% Gratis & Tanpa API Key)
-    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-    narrativeTileLayer = L.tileLayer(tileUrl, {
+    // Tambahkan Basemap OpenStreetMap (100% Bebas API Key & Tanpa Watermark)
+    narrativeTileLayer = L.tileLayer(OSM_TILE_URL, {
         maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: OSM_ATTRIBUTION
     }).addTo(narrativeMap);
 
     window.narrativeMap = narrativeMap;

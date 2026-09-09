@@ -58,7 +58,7 @@ const TIMELINE_ERAS = [
         id: "era-pasca-abbasiyah",
         name: "Pasca Abbasiyah & Awal Penyebaran Islam Nusantara",
         colorRgb: "100, 160, 100",
-        start: 1259,
+        start: 1258,
         end: 1400
     },
     {
@@ -87,7 +87,7 @@ const TIMELINE_ERAS = [
         name: "Kemunduran Umat Islam & Penjajahan Barat",
         colorRgb: "139, 69, 19",
         start: 1800,
-        end: 2000
+        end: 1945
     },
     {
         id: "era-modern",
@@ -98,8 +98,8 @@ const TIMELINE_ERAS = [
     }
 ];
 
-// Contoh generate dropdown dinamis
-const selectEl = document.getElementById('era-select-dropdown');
+// Generate dropdown dinamis jika ada
+const selectEl = document.getElementById('era-select-dropdown') || document.getElementById('filter-era-select');
 if (selectEl && typeof TIMELINE_ERAS !== 'undefined') {
     selectEl.innerHTML = `<option value="ALL">Semua Era Sejarah</option>` + 
         TIMELINE_ERAS.map(era => `<option value="${era.id}">${era.name} (${era.start}-${era.end} M)</option>`).join('');

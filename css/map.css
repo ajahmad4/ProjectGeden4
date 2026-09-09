@@ -9,24 +9,54 @@
     background: var(--bg-page); 
 }
 
-/* --- Position Adjustments for Controls --- */
-.leaflet-top.leaflet-right {
-    top: 60px !important;
-    right: auto !important;
-    left: 320px !important;     
+/* --- Filter Mode Gelap untuk Tile OpenStreetMap (100% Bebas API Key & Tanpa Watermark) --- */
+.leaflet-tile-pane {
+    transition: filter 0.5s ease;
 }
 
-.leaflet-bottom.leaflet-right {
-    bottom: 78px !important;
-    right: auto !important;
-    left: 320px !important;
+[data-theme="dark"] .leaflet-tile-pane {
+    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
 }
 
-.leaflet-right .leaflet-control {
-    float: left !important;
-    clear: left !important;
-    margin-left: 0 !important;
-    margin-right: 10px !important;
+/* --- Position Adjustments for Controls (Desktop only to avoid breaking mobile) --- */
+@media (min-width: 769px) {
+    .leaflet-top.leaflet-right {
+        top: 60px !important;
+        right: auto !important;
+        left: 320px !important;     
+        transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .leaflet-bottom.leaflet-right {
+        bottom: 78px !important;
+        right: auto !important;
+        left: 320px !important;
+        transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .leaflet-right .leaflet-control {
+        float: left !important;
+        clear: left !important;
+        margin-left: 0 !important;
+        margin-right: 10px !important;
+    }
+
+    /* Penyesuaian saat Tampilan Sub-Materi 50:50 Aktif: Geser ke Ujung Kiri */
+    body.submateri-expanded .leaflet-top.leaflet-right {
+        left: 16px !important;
+    }
+
+    body.submateri-expanded .leaflet-bottom.leaflet-right {
+        left: 16px !important;
+        bottom: 85px !important;
+    }
+}
+
+/* Sembunyikan kontrol peta saat di Menu Utama (tampilan wallpaper bersih) */
+body.mode-welcome .leaflet-control-container {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
 
 /* --- Custom Map Element Styles --- */
