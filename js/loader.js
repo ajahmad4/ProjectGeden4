@@ -161,7 +161,7 @@ function muatLokasiAplikasi() {
 
     const currentYear = (typeof timeline !== 'undefined' && timeline.currentYear) ? timeline.currentYear : 570;
     const eraAktif = (typeof getCurrentEra === 'function') ? getCurrentEra(currentYear) : null;
-    if (!eraAktif || typeof dataObjekAtlas === 'undefined') return;    
+    if (!eraAktif || typeof dataObjekAtlas === 'undefined') return;
 
     // Perbarui chips filter kategori
     renderCategoryFilterUI(eraAktif.id);
@@ -202,17 +202,17 @@ function muatLokasiAplikasi() {
                         return;
                     }
 
-                    const marker = L.marker(dataTitik.koordinat, { 
-                        icon: typeof buatIkonSejarah === 'function' ? buatIkonSejarah(objek.kategori) : new L.Icon.Default() 
+                    const marker = L.marker(dataTitik.koordinat, {
+                        icon: typeof buatIkonSejarah === 'function' ? buatIkonSejarah(objek.kategori) : new L.Icon.Default()
                     });
                     activeMarkers[markerId] = marker;
 
                     marker.on("click", function () {
                         map.flyTo(dataTitik.koordinat, 12, { animate: true, duration: 1.5 });
-                        const objekTerkait = dataObjekAtlas.find(oa => 
+                        const objekTerkait = dataObjekAtlas.find(oa =>
                             oa.relasi && oa.relasi.markers && oa.relasi.markers.includes(markerId)
                         );
-                        
+
                         if (objekTerkait) {
                             showDetail(objekTerkait);
                             aktifkanCard(objekTerkait.id);
@@ -220,10 +220,10 @@ function muatLokasiAplikasi() {
                     });
 
                     switch (objek.kategori) {
-                        case 'masjid':    if (typeof layerMasjid !== 'undefined') marker.addTo(layerMasjid); break;
-                        case 'kerajaan':  if (typeof layerKerajaan !== 'undefined') marker.addTo(layerKerajaan); break;
+                        case 'masjid': if (typeof layerMasjid !== 'undefined') marker.addTo(layerMasjid); break;
+                        case 'kerajaan': if (typeof layerKerajaan !== 'undefined') marker.addTo(layerKerajaan); break;
                         case 'pelabuhan': if (typeof layerPelabuhan !== 'undefined') marker.addTo(layerPelabuhan); break;
-                        default:          if (typeof layerKota !== 'undefined') marker.addTo(layerKota); break;
+                        default: if (typeof layerKota !== 'undefined') marker.addTo(layerKota); break;
                     }
                 });
             }
@@ -376,7 +376,7 @@ function eksekusiNavigasiLokal(idObjekAtlas) {
             if (hasPoint) {
                 const sw = bounds.getSouthWest();
                 const ne = bounds.getNorthEast();
-                
+
                 if (sw.lat === ne.lat && sw.lng === ne.lng) {
                     map.flyTo(sw, 12, { animate: true, duration: 1.5, easeLinearity: 0.25 });
                 } else {
@@ -384,7 +384,7 @@ function eksekusiNavigasiLokal(idObjekAtlas) {
                 }
             }
         }
-        
+
         showDetail(objek);
         aktifkanCard(idObjekAtlas);
     };
@@ -623,7 +623,7 @@ function renderJalurDanWilayah(tahunAktif) {
     if (typeof layerWilayahKekuasaan !== 'undefined') layerWilayahKekuasaan.clearLayers();
 
     for (const key in activePolylines) delete activePolylines[key];
-    for (const key in activePolygons)  delete activePolygons[key];
+    for (const key in activePolygons) delete activePolygons[key];
 
     // 1. RENDER JALUR
     if (typeof dataJalur !== 'undefined') {
@@ -634,13 +634,13 @@ function renderJalurDanWilayah(tahunAktif) {
 
             if (isAktif) {
                 const polyline = L.polyline(jalur.koordinat, {
-                    color:        jalur.warna,
-                    weight:       5,
-                    opacity:      0.9,
-                    dashArray:    "10 6",
+                    color: jalur.warna,
+                    weight: 5,
+                    opacity: 0.9,
+                    dashArray: "10 6",
                     smoothFactor: 1,
-                    lineJoin:     "round",
-                    lineCap:      "round"
+                    lineJoin: "round",
+                    lineCap: "round"
                 });
 
                 polyline.bindPopup(`
@@ -656,8 +656,8 @@ function renderJalurDanWilayah(tahunAktif) {
                 polyline.on('click', function () {
                     const eraAktif = typeof getCurrentEra === 'function' ? getCurrentEra(tahunAktif) : null;
                     if (!eraAktif || typeof dataObjekAtlas === 'undefined') return;
-                    const objekTerkait = dataObjekAtlas.find(oa => 
-                        oa.era === eraAktif.id && 
+                    const objekTerkait = dataObjekAtlas.find(oa =>
+                        oa.era === eraAktif.id &&
                         oa.relasi && oa.relasi.jalur && oa.relasi.jalur.includes(jalur.id)
                     );
                     if (objekTerkait) {
@@ -675,10 +675,10 @@ function renderJalurDanWilayah(tahunAktif) {
             if (tahunAktif >= wilayah.tahunMulai && tahunAktif <= wilayah.tahunSelesai) {
 
                 const polygon = L.polygon(wilayah.koordinat, {
-                    color:       wilayah.warna,
-                    fillColor:   wilayah.warna,
+                    color: wilayah.warna,
+                    fillColor: wilayah.warna,
                     fillOpacity: 0.18,
-                    weight:      2
+                    weight: 2
                 });
 
                 polygon.bindPopup(`
@@ -694,8 +694,8 @@ function renderJalurDanWilayah(tahunAktif) {
                 polygon.on('click', function () {
                     const eraAktif = typeof getCurrentEra === 'function' ? getCurrentEra(tahunAktif) : null;
                     if (!eraAktif || typeof dataObjekAtlas === 'undefined') return;
-                    const objekTerkait = dataObjekAtlas.find(oa => 
-                        oa.era === eraAktif.id && 
+                    const objekTerkait = dataObjekAtlas.find(oa =>
+                        oa.era === eraAktif.id &&
                         oa.relasi && oa.relasi.wilayah && oa.relasi.wilayah.includes(wilayah.id)
                     );
                     if (objekTerkait) {
@@ -749,8 +749,8 @@ function getCurrentEra(tahunAktif) {
 
 function ubahTahunAktif(delta) {
     const elInput = document.getElementById("timeline-current");
-    const current = (typeof timeline !== 'undefined' && timeline.currentYear) 
-        ? timeline.currentYear 
+    const current = (typeof timeline !== 'undefined' && timeline.currentYear)
+        ? timeline.currentYear
         : parseInt(elInput?.value || "570", 10);
 
     if (typeof animateTimelineYear === 'function') {
@@ -811,17 +811,17 @@ function showInitialNarrativePlaceholder() {
 }
 
 function renderCarousel(objek) {
-  const rawImages = objek.galeri || objek.gambar || (objek.foto ? [objek.foto] : []);
-  
-  if (!rawImages || rawImages.length === 0) {
-    return `<div class="p-4 text-center text-xs text-slate-500">Gambar belum tersedia</div>`;
-  }
+    const rawImages = objek.galeri || objek.gambar || (objek.foto ? [objek.foto] : []);
 
-  const imagesHtml = rawImages.map((img, index) => {
-    const src = typeof img === 'string' ? img : (img.url || img);
-    const caption = typeof img === 'object' && img.caption ? img.caption : (objek.caption || objek.nama || '');
-    
-    return `
+    if (!rawImages || rawImages.length === 0) {
+        return `<div class="p-4 text-center text-xs text-slate-500">Gambar belum tersedia</div>`;
+    }
+
+    const imagesHtml = rawImages.map((img, index) => {
+        const src = typeof img === 'string' ? img : (img.url || img);
+        const caption = typeof img === 'object' && img.caption ? img.caption : (objek.caption || objek.nama || '');
+
+        return `
       <div class="carousel-slide ${index === 0 ? 'active' : ''}">
         <img src="${src}" alt="${caption}" onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';">
         <div class="carousel-caption">
@@ -829,9 +829,9 @@ function renderCarousel(objek) {
         </div>
       </div>
     `;
-  }).join('');
+    }).join('');
 
-  return `<div class="carousel-container">${imagesHtml}</div>`;
+    return `<div class="carousel-container">${imagesHtml}</div>`;
 }
 
 let savedMapCenterBeforeExpand = null;
@@ -852,11 +852,8 @@ function bukaSubMateriDariNarasi(storyId, stepIndex, objek) {
             judulCerita: `Modul SKI: ${namaObjek}`,
             steps: [
                 {
-                    judul: `Uraian Mendalam: ${namaObjek}`,
+                    judul: `${namaObjek}`,
                     konten: `
-                        <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 mb-4">
-                            📖 <strong>Modul Pembelajaran SKI Kelas 12</strong> — Telaah historis dan signifikansi peradaban Islam.
-                        </div>
                         <h4 class="text-sm font-bold text-title mb-1.5">Pendahuluan</h4>
                         <p class="text-secondary leading-relaxed mb-4">Materi ini menyajikan kajian mendalam mengenai <strong>${namaObjek}</strong> dalam konteks Sejarah Kebudayaan Islam, menganalisis faktor latar belakang, proses perkembangan, serta dampak kultural dan peradaban yang ditimbulkan.</p>
                         <h4 class="text-sm font-bold text-title mb-1.5">Kronologi & Dinamika Peristiwa</h4>
@@ -1078,7 +1075,7 @@ function tutupSubMateriView() {
     const listPanel = document.getElementById('list-panel');
 
     const wasExpanded = (detailPanel && detailPanel.classList.contains('detail-panel-expanded')) ||
-                        document.body.classList.contains('submateri-expanded');
+        document.body.classList.contains('submateri-expanded');
     if (!wasExpanded) return;
 
     if (detailPanel) {
@@ -1191,7 +1188,7 @@ function changeSubmateriImage(direction) {
     const images = document.querySelectorAll('.submateri-carousel-slide');
     const dots = document.querySelectorAll('.submateri-carousel-dot');
     const captionEl = document.getElementById('submateri-carousel-caption');
-    
+
     if (!images || images.length <= 1) return;
 
     // Sembunyikan slide aktif saat ini
@@ -1222,7 +1219,7 @@ function changeSubmateriImage(direction) {
 function setSubmateriImage(targetIndex) {
     const images = document.querySelectorAll('.submateri-carousel-slide');
     if (!images || targetIndex < 0 || targetIndex >= images.length) return;
-    
+
     const diff = targetIndex - currentSubmateriCarouselIndex;
     if (diff !== 0) {
         changeSubmateriImage(diff);
@@ -1230,4 +1227,4 @@ function setSubmateriImage(targetIndex) {
 }
 
 window.changeSubmateriImage = changeSubmateriImage;
-window.setSubmateriImage = setSubmateriImage;
+window.setSubmateriImage = setSubmateriImage;
