@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atlas Sejarah Kebudayaan Islam Interaktif</title>
-    <meta name="description" content="Atlas peta interaktif sejarah kebudayaan Islam — jelajahi titik-titik historis, jalur dakwah, dan wilayah kekuasaan Islam dari abad ke-6 hingga era modern. Media pembelajaran SKI Kelas 12.">
-    
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <meta name="description"
+        content="Atlas peta interaktif sejarah kebudayaan Islam — jelajahi titik-titik historis, jalur dakwah, dan wilayah kekuasaan Islam dari abad ke-6 hingga era modern. Media pembelajaran SKI Kelas 12.">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.css" />
 
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
@@ -34,7 +40,7 @@
                         active: 'var(--bg-active)',
                         tooltip: 'var(--bg-tooltip)',
                         'era-header': 'var(--bg-era-header)',
-                        
+
                         title: 'var(--text-title)',
                         primary: 'var(--text-primary)',
                         secondary: 'var(--text-secondary)',
@@ -65,73 +71,174 @@
     <!-- ========================================== -->
     <!-- LAYER 4: HEADER TOPBAR (z-index: 100)      -->
     <!-- ========================================== -->
-    <header class="fixed top-0 left-0 w-full h-[56px] z-[100] flex items-center justify-between px-4 md:px-7 bg-page/95 backdrop-blur-md border-b border-border-light">
+    <header
+        class="fixed top-0 left-0 w-full h-[56px] z-[100] flex items-center justify-between px-4 md:px-7 bg-page/95 backdrop-blur-md border-b border-border-light">
         <div class="flex items-center gap-3 md:gap-4">
             <img src="assets/logo/atlas-logo.jpg" alt="Logo Atlas" class="w-9 h-9 object-contain select-none">
-            
+
             <!-- Judul Layar Lebar (Desktop/Tablet) -->
-            <h1 onclick="resetMapViewState()" class="font-title text-emerald-400 cursor-pointer text-[2.05rem] leading-none tracking-tight transition-opacity select-none md:block hidden hover:opacity-80" title="Reset Tampilan Peta">
+            <h1 onclick="resetMapViewState()"
+                class="font-title text-emerald-400 cursor-pointer text-[2.05rem] leading-none tracking-tight transition-opacity select-none md:block hidden hover:opacity-80"
+                title="Reset Tampilan Peta">
                 Atlas Sejarah Kebudayaan Islam
             </h1>
 
             <!-- Judul Layar Kecil (Mobile) -->
-            <h1 onclick="resetMapViewState()" class="font-title text-emerald-400 cursor-pointer text-[1.5rem] leading-none tracking-tight transition-opacity select-none md:hidden block hover:opacity-80" title="Reset Tampilan Peta">
+            <h1 onclick="resetMapViewState()"
+                class="font-title text-emerald-400 cursor-pointer text-[1.5rem] leading-none tracking-tight transition-opacity select-none md:hidden block hover:opacity-80"
+                title="Reset Tampilan Peta">
                 Atlas Sejarah
             </h1>
         </div>
+
         <div class="flex items-center gap-2 md:gap-3">
             <!-- MODE SWITCHER DROPDOWN -->
             <div class="relative">
-                <select id="mode-select" onchange="switchAppMode(this.value)" class="bg-badge border border-border-input text-title text-[11px] rounded-full px-3 py-[5px] font-medium focus:outline-none cursor-pointer hover:bg-active transition-colors">
+                <select id="mode-select" onchange="switchAppMode(this.value)"
+                    class="bg-badge border border-border-input text-title text-[11px] rounded-full px-3 py-[5px] font-medium focus:outline-none cursor-pointer hover:bg-active transition-colors">
                     <option value="WELCOME">🏠 Menu Utama</option>
                     <option value="EXPLORE">🧭 Mode Eksplorasi</option>
                     <option value="CURRICULUM">📚 Mode Kurikulum</option>
                 </select>
             </div>
 
-            <span class="hidden lg:inline-block px-3 py-[5px] rounded-full bg-badge border border-border-input text-muted text-[10px] tracking-[0.14em] uppercase font-medium select-none">
-                Media Pembelajaran SKI
-            </span>
-            
-            <button id="mobile-nav-toggle" class="md:hidden flex items-center justify-center w-8 h-8 rounded-full bg-badge border border-border-input text-title hover:bg-active transition-colors cursor-pointer" title="Toggle Menu">
-                <span class="material-symbols-outlined text-[18px]">menu_open</span>
+            <!-- 1. BUTTON PILL MODUL SKI (Desktop Only) -->
+            <button onclick="window.open('assets/materi/modul-ski.pdf', '_blank')"
+                class="hidden md:flex items-center gap-1.5 px-3 py-[5px] rounded-full bg-badge border border-border-input text-muted hover:text-title hover:underline underline-offset-2 text-[10px] tracking-[0.14em] uppercase font-medium select-none cursor-pointer transition-colors"
+                title="Buka Modul Materi SKI (PDF)">
+                <span>📄 Modul Materi SKI</span>
             </button>
-            
-            <button id="theme-toggle" class="flex items-center justify-center w-8 h-8 rounded-full bg-badge border border-border-input text-title hover:bg-active transition-colors cursor-pointer" title="Toggle Dark Mode">
+
+            <!-- 2. TOMBOL PETUNJUK (?) -->
+            <button onclick="bukaModalPetunjuk()"
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-badge border border-border-input text-title hover:bg-active transition-colors cursor-pointer"
+                title="Petunjuk Penggunaan">
+                <span class="material-symbols-outlined text-[18px]">help_outline</span>
+            </button>
+
+            <!-- 3. TOMBOL KUIS INTERAKTIF -->
+            <button onclick="bukaModalKuis()"
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-badge border border-emerald-400/80 text-emerald-400 hover:bg-active transition-colors cursor-pointer"
+                title="Kuis Interaktif">
+                <span class="material-symbols-outlined text-[18px]">quiz</span>
+            </button>
+
+            <!-- TOMBOL DARK MODE -->
+            <button id="theme-toggle"
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-badge border border-border-input text-title hover:bg-active transition-colors cursor-pointer"
+                title="Toggle Dark Mode">
                 <span id="theme-icon" class="material-symbols-outlined text-[18px]">dark_mode</span>
             </button>
 
-            <a href="converter.html" target="_blank" class="flex items-center justify-center w-8 h-8 rounded-full bg-badge border border-border-input text-emerald-400 hover:bg-active transition-colors cursor-pointer" title="Excel to JSON/JS Converter Tool">
-                <span class="material-symbols-outlined text-[18px]">table_convert</span>
-            </a>
+            <!-- 4. DROPDOWN "LAINNYA" (...) -->
+            <div class="relative" id="dropdown-lainnya-wrapper">
+                <button id="btn-dropdown-lainnya" onclick="toggleDesktopLainnyaDropdown(event)"
+                    class="flex items-center justify-center w-8 h-8 rounded-full bg-badge border border-border-input text-title hover:bg-active transition-colors cursor-pointer"
+                    title="Menu Lainnya">
+                    <span class="material-symbols-outlined text-[18px]">more_horiz</span>
+                </button>
+
+                <!-- Menu Dropdown -->
+                <div id="dropdown-lainnya-menu"
+                    class="hidden absolute right-0 mt-2 w-44 bg-panel-solid border border-border-panel rounded-xl shadow-xl py-1.5 z-[210] flex flex-col">
+                    <button onclick="bukaModalTentang(); toggleDesktopLainnyaDropdown();"
+                        class="w-full text-left px-3.5 py-2 text-xs text-primary hover:bg-active flex items-center gap-2.5 transition-colors cursor-pointer">
+                        <span class="text-sm">ℹ️</span>
+                        <span>Tentang</span>
+                    </button>
+                    <button onclick="window.open('converter.html', '_blank'); toggleDesktopLainnyaDropdown();"
+                        class="w-full text-left px-3.5 py-2 text-xs text-primary hover:bg-active flex items-center gap-2.5 transition-colors cursor-pointer">
+                        <span class="text-sm">⚙️</span>
+                        <span>Converter</span>
+                    </button>
+                    <button onclick="bukaModalGlosarium(); toggleDesktopLainnyaDropdown();"
+                        class="w-full text-left px-3.5 py-2 text-xs text-primary hover:bg-active flex items-center gap-2.5 transition-colors cursor-pointer">
+                        <span class="text-sm">📖</span>
+                        <span>Glosarium</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5. MENU MOBILE (☰) & DROPDOWN HEADER MOBILE -->
+            <div class="relative md:hidden" id="mobile-header-dropdown-wrapper">
+                <button id="mobile-nav-toggle"
+                    class="flex items-center justify-center w-8 h-8 rounded-full bg-badge border border-border-input text-title hover:bg-active transition-colors cursor-pointer"
+                    title="Toggle Menu">
+                    <span class="material-symbols-outlined text-[18px]">menu</span>
+                </button>
+
+                <!-- Panel Floating Mobile Menu -->
+                <div id="mobile-header-menu"
+                    class="hidden absolute right-0 mt-2 min-w-[220px] bg-panel-solid border border-border-panel rounded-xl shadow-2xl py-2 z-[200] flex flex-col text-xs">
+                    <button
+                        onclick="window.open('assets/materi/modul-ski.pdf', '_blank'); toggleMobileHeaderDropdown();"
+                        class="w-full text-left px-4 py-2.5 text-primary hover:bg-active flex items-center gap-3 transition-colors cursor-pointer">
+                        <span class="text-base">📄</span>
+                        <span class="font-medium">Modul Materi SKI</span>
+                    </button>
+                    <button onclick="bukaModalPetunjuk(); toggleMobileHeaderDropdown();"
+                        class="w-full text-left px-4 py-2.5 text-primary hover:bg-active flex items-center gap-3 transition-colors cursor-pointer">
+                        <span class="text-base">❓</span>
+                        <span class="font-medium">Petunjuk</span>
+                    </button>
+                    <button onclick="bukaModalKuis(); toggleMobileHeaderDropdown();"
+                        class="w-full text-left px-4 py-2.5 text-primary hover:bg-active flex items-center gap-3 transition-colors cursor-pointer">
+                        <span class="text-base">🎯</span>
+                        <span class="font-medium">Kuis</span>
+                    </button>
+
+                    <hr class="my-1 border-border-light">
+
+                    <button onclick="bukaModalTentang(); toggleMobileHeaderDropdown();"
+                        class="w-full text-left px-4 py-2.5 text-primary hover:bg-active flex items-center gap-3 transition-colors cursor-pointer">
+                        <span class="text-base">ℹ️</span>
+                        <span class="font-medium">Tentang</span>
+                    </button>
+                    <button onclick="window.open('converter.html', '_blank'); toggleMobileHeaderDropdown();"
+                        class="w-full text-left px-4 py-2.5 text-primary hover:bg-active flex items-center gap-3 transition-colors cursor-pointer">
+                        <span class="text-base">⚙️</span>
+                        <span class="font-medium">Converter</span>
+                    </button>
+                    <button onclick="bukaModalGlosarium(); toggleMobileHeaderDropdown();"
+                        class="w-full text-left px-4 py-2.5 text-primary hover:bg-active flex items-center gap-3 transition-colors cursor-pointer">
+                        <span class="text-base">📖</span>
+                        <span class="font-medium">Glosarium</span>
+                    </button>
+                </div>
+            </div>
+
         </div>
-    </header>   
+    </header>
 
     <!-- ========================================== -->
     <!-- MAIN CONTAINER (MAP + INTERACTIVE LAYERS)  -->
     <!-- ========================================== -->
     <main class="flex flex-1 pt-[56px] relative overflow-hidden w-full h-full">
-    
+
         <!-- LAYER 1: BASE MAP (z-index: 0) -->
         <div id="map" class="absolute inset-0 w-full h-full z-0"></div>
 
         <!-- LAYER 2: FLOATING UI PANELS (z-index: 40, Transparan untuk Klik Peta) -->
         <div id="ui-layer" class="absolute inset-0 z-40 pointer-events-none w-full h-full overflow-hidden">
-            
+
             <!-- PANEL KIRI: LIST LOKASI & PENCARIAN -->
-            <aside id="list-panel" class="pointer-events-auto hidden absolute left-4 top-4 bottom-24 w-[300px] flex flex-col glass-panel border border-gray-200/80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
+            <aside id="list-panel"
+                class="pointer-events-auto hidden absolute left-4 top-4 bottom-24 w-[300px] flex flex-col glass-panel border border-gray-200/80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
                 <div class="flex flex-col h-full px-4 pt-4 pb-3 bg-panel-solid select-none">
                     <div class="hidden md:block">
                         <h1 class="text-[26px] font-bold tracking-tight text-title">Atlas Sejarah</h1>
-                        <p class="mt-0.5 text-[10px] uppercase tracking-[0.18em] text-muted-alt">Jelajah Titik Masuknya Islam di Nusantara</p>
+                        <p class="mt-0.5 text-[10px] uppercase tracking-[0.18em] text-muted-alt">Jelajah Titik Masuknya
+                            Islam di Nusantara</p>
                     </div>
-                    
+
                     <div class="mt-0 md:mt-4">
                         <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-icon text-[18px]">
+                            <span
+                                class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-icon text-[18px]">
                                 search
                             </span>
-                            <input id="search-input" type="text" spellcheck="false" placeholder="Cari lokasi..." class="w-full pl-10 pr-3.5 py-2 rounded-xl border border-border-input bg-input text-[13px] text-primary placeholder:text-muted focus:outline-none focus:border-border-active focus:ring-2 focus:ring-accent/10 transition">
+                            <input id="search-input" type="text" spellcheck="false" placeholder="Cari lokasi..."
+                                class="w-full pl-10 pr-3.5 py-2 rounded-xl border border-border-input bg-input text-[13px] text-primary placeholder:text-muted focus:outline-none focus:border-border-active focus:ring-2 focus:ring-accent/10 transition">
                         </div>
                     </div>
 
@@ -143,7 +250,8 @@
                             <span class="text-[10px] uppercase tracking-wider font-semibold text-muted">Kategori</span>
                             <span id="category-filter-count" class="text-[10px] text-muted-alt"></span>
                         </div>
-                        <div id="category-chips" class="flex items-center gap-1.5 overflow-x-auto pb-1 select-none"></div>
+                        <div id="category-chips" class="flex items-center gap-1.5 overflow-x-auto pb-1 select-none">
+                        </div>
                     </div>
 
                     <div class="flex-1 overflow-y-auto custom-scrollbar mt-2">
@@ -153,85 +261,103 @@
             </aside>
 
             <!-- PANEL KANAN: DETAIL LOKASI -->
-            <aside id="detail-panel" class="pointer-events-auto hidden absolute right-4 top-4 bottom-24 w-[340px] md:w-[380px] flex flex-col glass-panel rounded-2xl border border-slate-700/60 shadow-2xl overflow-hidden transition-all duration-300">
+            <aside id="detail-panel"
+                class="pointer-events-auto hidden absolute right-4 top-4 bottom-24 w-[340px] md:w-[380px] flex flex-col glass-panel rounded-2xl border border-slate-700/60 shadow-2xl overflow-hidden transition-all duration-300">
                 <div class="flex flex-col h-full p-4 overflow-hidden">
-                    
+
                     <!-- HANDLE MOBILE -->
-                    <div id="bottom-sheet-handle" class="w-full flex justify-center pb-2 pt-0.5 cursor-grab active:cursor-grabbing md:hidden">
+                    <div id="bottom-sheet-handle"
+                        class="w-full flex justify-center pb-2 pt-0.5 cursor-grab active:cursor-grabbing md:hidden">
                         <div class="w-10 h-1 bg-handle rounded-full"></div>
                     </div>
 
                     <!-- HEADER PANEL -->
                     <div class="pb-3 border-b border-border-light flex items-center justify-between mb-3 shrink-0">
-                        <button 
-                            type="button"
-                            onclick="tutupDetailPanel()" 
+                        <button type="button" onclick="tutupDetailPanel()"
                             class="flex items-center gap-1 text-[11px] text-muted hover:text-title transition-colors cursor-pointer">
                             <span class="material-symbols-outlined text-[16px]">close</span>
                             <span>Tutup Detail</span>
                         </button>
-                        <span id="badge-mode-aktif" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                        <span id="badge-mode-aktif"
+                            class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
                             MODE: EKSPLORASI
                         </span>
                     </div>
 
                     <!-- ISI KONTEN (SCROLLABLE) -->
                     <div id="detail-content" class="flex-1 overflow-y-auto custom-scrollbar">
-                        
+
                         <!-- VIEW 1: RINGKASAN DEFAULT -->
                         <div id="panel-ringkasan-view">
                             <h2 id="detail-nama" class="font-title text-[22px] leading-snug text-title"></h2>
-                            <p id="detail-tahun" class="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-muted font-medium"></p>
+                            <p id="detail-tahun"
+                                class="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-muted font-medium"></p>
 
                             <div id="detail-foto-wrapper" class="my-2 hidden">
-                                <img id="detail-foto" src="" alt="" class="w-full h-28 object-contain rounded-xl border border-border-panel/60 bg-badge/30 shadow-sm p-1">
+                                <img id="detail-foto" src="" alt=""
+                                    class="w-full h-28 object-contain rounded-xl border border-border-panel/60 bg-badge/30 shadow-sm p-1">
                             </div>
 
                             <hr class="my-2 border-border-light">
 
                             <div id="detail-metadata" class="my-1.5 space-y-1.5 text-left">
-                                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all" style="background-color: rgba(var(--accent-orange-rgb), 0.08); border-color: rgba(var(--accent-orange-rgb), 0.25);">
-                                    <span class="material-symbols-outlined text-[15px] shrink-0" style="color: var(--accent-orange);">schedule</span>
+                                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all"
+                                    style="background-color: rgba(var(--accent-orange-rgb), 0.08); border-color: rgba(var(--accent-orange-rgb), 0.25);">
+                                    <span class="material-symbols-outlined text-[15px] shrink-0"
+                                        style="color: var(--accent-orange);">schedule</span>
                                     <div class="min-w-0 flex-1 flex justify-between items-center gap-2">
-                                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0" style="color: var(--accent-orange);">Waktu</span>
-                                        <span id="detail-waktu" class="text-[11px] font-bold truncate" style="color: var(--text-primary);"></span>
+                                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0"
+                                            style="color: var(--accent-orange);">Waktu</span>
+                                        <span id="detail-waktu" class="text-[11px] font-bold truncate"
+                                            style="color: var(--text-primary);"></span>
                                     </div>
                                 </div>
 
-                                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all" style="background-color: var(--bg-active); border-color: rgba(31, 75, 58, 0.2);">
-                                    <span class="material-symbols-outlined text-[15px] shrink-0" style="color: var(--accent-primary);">category</span>
+                                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all"
+                                    style="background-color: var(--bg-active); border-color: rgba(31, 75, 58, 0.2);">
+                                    <span class="material-symbols-outlined text-[15px] shrink-0"
+                                        style="color: var(--accent-primary);">category</span>
                                     <div class="min-w-0 flex-1 flex justify-between items-center gap-2">
-                                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0" style="color: var(--text-title);">Kategori</span>
-                                        <span id="detail-kategori" class="text-[11px] font-bold truncate" style="color: var(--text-primary);"></span>
+                                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0"
+                                            style="color: var(--text-title);">Kategori</span>
+                                        <span id="detail-kategori" class="text-[11px] font-bold truncate"
+                                            style="color: var(--text-primary);"></span>
                                     </div>
                                 </div>
 
-                                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all" style="background-color: var(--bg-badge); border-color: var(--border-light);">
-                                    <span class="material-symbols-outlined text-[15px] shrink-0" style="color: var(--text-muted);">map</span>
+                                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all"
+                                    style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                                    <span class="material-symbols-outlined text-[15px] shrink-0"
+                                        style="color: var(--text-muted);">map</span>
                                     <div class="min-w-0 flex-1 flex justify-between items-center gap-2">
-                                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0" style="color: var(--text-muted);">Wilayah</span>
-                                        <span id="detail-wilayah" class="text-[11px] font-bold truncate" style="color: var(--text-primary);"></span>
+                                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0"
+                                            style="color: var(--text-muted);">Wilayah</span>
+                                        <span id="detail-wilayah" class="text-[11px] font-bold truncate"
+                                            style="color: var(--text-primary);"></span>
                                     </div>
                                 </div>
 
-                                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all" style="background-color: var(--bg-badge); border-color: var(--border-input);">
-                                    <span class="material-symbols-outlined text-[15px] shrink-0" style="color: var(--accent-primary);">location_on</span>
+                                <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all"
+                                    style="background-color: var(--bg-badge); border-color: var(--border-input);">
+                                    <span class="material-symbols-outlined text-[15px] shrink-0"
+                                        style="color: var(--accent-primary);">location_on</span>
                                     <div class="min-w-0 flex-1 flex justify-between items-center gap-2">
-                                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0" style="color: var(--text-title);">Lokasi</span>
-                                        <span id="detail-lokasi" class="text-[11px] font-bold truncate" style="color: var(--text-primary);"></span>
+                                        <span class="text-[9px] uppercase tracking-[0.12em] font-semibold shrink-0"
+                                            style="color: var(--text-title);">Lokasi</span>
+                                        <span id="detail-lokasi" class="text-[11px] font-bold truncate"
+                                            style="color: var(--text-primary);"></span>
                                     </div>
                                 </div>
                             </div>
 
                             <hr class="my-2 border-border-light">
 
-                            <p id="detail-deskripsi" class="text-[13px] leading-relaxed text-secondary text-justify"></p>
+                            <p id="detail-deskripsi" class="text-[13px] leading-relaxed text-secondary text-justify">
+                            </p>
 
                             <!-- TOMBOL BACA SUB-MATERI LENGKAP -->
                             <div id="wrapper-btn-submateri" class="mt-4 hidden">
-                                <button 
-                                    type="button"
-                                    id="btn-buka-submateri"
+                                <button type="button" id="btn-buka-submateri"
                                     class="w-full py-2 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[12px] font-medium flex items-center justify-center gap-2 transition-all cursor-pointer">
                                     <span class="material-symbols-outlined text-[18px]">menu_book</span>
                                     <span>Baca Sub-Materi Lengkap</span>
@@ -242,34 +368,41 @@
                         <!-- VIEW 2: SUB-MATERI NARASI (HIDDEN BY DEFAULT, EXPANDED 50:50) -->
                         <div id="panel-submateri-view" class="hidden space-y-4">
                             <!-- Navigasi Balik & Tag Kurikulum -->
-                            <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-border-light shrink-0">
-                                <button 
-                                    type="button"
-                                    onclick="tutupSubMateriView()"
+                            <div
+                                class="flex items-center justify-between gap-2 pb-2.5 border-b border-border-light shrink-0">
+                                <button type="button" onclick="tutupSubMateriView()"
                                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-medium transition-colors cursor-pointer">
                                     <span class="material-symbols-outlined text-[16px]">arrow_back</span>
                                     <span>Kembali ke Ringkasan</span>
                                 </button>
-                                <span id="submateri-tag-cerita" class="text-[10px] font-mono tracking-wider uppercase px-2.5 py-1 rounded-md bg-badge border border-border-light text-muted font-semibold">
+                                <span id="submateri-tag-cerita"
+                                    class="text-[10px] font-mono tracking-wider uppercase px-2.5 py-1 rounded-md bg-badge border border-border-light text-muted font-semibold">
                                     MODUL SKI
                                 </span>
                             </div>
 
                             <!-- Judul Sub-Materi & Periode -->
                             <div class="flex flex-col gap-0.5">
-                                <span id="submateri-periode" class="text-[11px] font-mono text-amber-400 font-semibold"></span>
-                                <h3 id="submateri-judul" class="font-title text-[22px] md:text-[26px] text-title leading-snug font-bold"></h3>
+                                <span id="submateri-periode"
+                                    class="text-[11px] font-mono text-amber-400 font-semibold"></span>
+                                <h3 id="submateri-judul"
+                                    class="font-title text-[22px] md:text-[26px] text-title leading-snug font-bold">
+                                </h3>
                             </div>
 
                             <!-- METADATA 2 KOLOM (KIRI) & GAMBAR FIXED (KANAN) -->
                             <div class="flex flex-col md:flex-row items-stretch gap-4 my-2">
                                 <!-- Kiri: Metadata Box -->
-                                <div id="submateri-metadata-box" class="flex-1 grid grid-cols-2 gap-y-3 gap-x-4 p-4 rounded-xl text-[11px] md:text-xs justify-center items-center shadow-sm" style="background-color: var(--bg-badge); border: 1px solid var(--border-panel); color: var(--text-primary);">
+                                <div id="submateri-metadata-box"
+                                    class="flex-1 grid grid-cols-2 gap-y-3 gap-x-4 p-4 rounded-xl text-[11px] md:text-xs justify-center items-center shadow-sm"
+                                    style="background-color: var(--bg-badge); border: 1px solid var(--border-panel); color: var(--text-primary);">
                                     <!-- Diisi secara dinamis oleh JS -->
                                 </div>
 
                                 <!-- Kanan: Gambar / Carousel Box (Fixed Size) -->
-                                <div id="submateri-foto-box" class="w-full md:w-[280px] lg:w-[320px] shrink-0 h-[180px] rounded-xl overflow-hidden relative group flex flex-col justify-between shadow-sm" style="border: 1px solid var(--border-panel); background-color: var(--bg-badge);">
+                                <div id="submateri-foto-box"
+                                    class="w-full md:w-[280px] lg:w-[320px] shrink-0 h-[180px] rounded-xl overflow-hidden relative group flex flex-col justify-between shadow-sm"
+                                    style="border: 1px solid var(--border-panel); background-color: var(--bg-badge);">
                                     <!-- Carousel diisi secara dinamis oleh JS -->
                                 </div>
                             </div>
@@ -277,7 +410,8 @@
                             <hr class="border-border-light">
 
                             <!-- Konten Uraian Lengkap -->
-                            <div id="submateri-konten" class="text-[13px] md:text-[14px] leading-relaxed text-secondary space-y-3 text-justify">
+                            <div id="submateri-konten"
+                                class="text-[13px] md:text-[14px] leading-relaxed text-secondary space-y-3 text-justify">
                                 <!-- Konten narasi disuntikkan dinamis via JS -->
                             </div>
                         </div>
@@ -286,7 +420,8 @@
                 </div>
             </aside>
             <!-- KOMPONEN TIMELINE FOOTER -->
-            <div id="timeline-container" class="pointer-events-auto hidden absolute bottom-0 left-0 w-full flex flex-col items-center">
+            <div id="timeline-container"
+                class="pointer-events-auto hidden absolute bottom-0 left-0 w-full flex flex-col items-center">
                 <div id="timeline-legend"></div>
 
                 <div id="timeline-indicator" class="relative mb-1">
@@ -316,22 +451,28 @@
         </div>
 
         <!-- LAYER 3: MODAL LAYER / OVERLAY (z-index: 50) -->
-        <div id="modal-layer" class="fixed inset-0 z-[2000] flex items-center justify-end pointer-events-none transition-all duration-300">
-            
+        <div id="modal-layer"
+            class="fixed inset-0 z-[2000] flex items-center justify-end pointer-events-none transition-all duration-300">
+
             <!-- Panel Welcome Melayang di Kanan (Pointer Events Aktif Khusus Panel) -->
-            <div id="welcome-panel" class="pointer-events-auto w-full md:w-[45%] lg:w-[38%] h-full bg-slate-900/95 text-slate-100 border-l border-slate-800 p-8 flex flex-col justify-between shadow-2xl relative overflow-y-auto custom-scrollbar">
-                
+            <div id="welcome-panel"
+                class="pointer-events-auto w-full md:w-[45%] lg:w-[38%] h-full bg-slate-900/95 text-slate-100 border-l border-slate-800 p-8 flex flex-col justify-between shadow-2xl relative overflow-y-auto custom-scrollbar">
+
                 <!-- Efek Gradien Halus Memudar ke Peta di Kiri -->
-                <div class="hidden md:block absolute -left-16 top-0 bottom-0 w-16 bg-gradient-to-r from-transparent to-slate-900/95 pointer-events-none"></div>
+                <div
+                    class="hidden md:block absolute -left-16 top-0 bottom-0 w-16 bg-gradient-to-r from-transparent to-slate-900/95 pointer-events-none">
+                </div>
 
                 <!-- Content Atas: Logo, Badge, Judul & Narasi -->
                 <div class="space-y-6 my-auto">
-                    
+
                     <!-- Logo & Badge Header -->
                     <div class="flex items-center gap-3">
-                        <img src="assets/logo/atlas-logo.jpg" alt="Logo Atlas" class="w-10 h-10 object-contain rounded-lg shadow-sm">
-                        
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
+                        <img src="assets/logo/atlas-logo.jpg" alt="Logo Atlas"
+                            class="w-10 h-10 object-contain rounded-lg shadow-sm">
+
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                             Atlas Sejarah Kebudayaan Islam
                         </div>
@@ -344,32 +485,40 @@
 
                     <!-- Deskripsi -->
                     <p class="text-sm text-slate-300 leading-relaxed font-light">
-                        Selamat datang di Atlas Interaktif. Media ini dirancang untuk memetakan secara spasial dan kronologis peristiwa penting, jalur perdagangan, serta titik masuknya Islam di Nusantara.
+                        Selamat datang di Atlas Interaktif. Media ini dirancang untuk memetakan secara spasial dan
+                        kronologis peristiwa penting, jalur perdagangan, serta titik masuknya Islam di Nusantara.
                     </p>
 
                     <!-- Box Panduan -->
-                    <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 text-xs text-slate-400 space-y-1">
+                    <div
+                        class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 text-xs text-slate-400 space-y-1">
                         <span class="font-semibold text-slate-200">Panduan Ringkas:</span>
-                        <p>Pilih mode di bawah ini untuk memulai penjelajahan peta secara bebas atau berdasarkan bab materi kurikulum.</p>
+                        <p>Pilih mode di bawah ini untuk memulai penjelajahan peta secara bebas atau berdasarkan bab
+                            materi kurikulum.</p>
                     </div>
                 </div>
 
                 <!-- Content Bawah: Pilihan Mode Aplikasi -->
                 <div class="pt-6 border-t border-slate-800/80 space-y-3">
-                    <button onclick="switchAppMode('EXPLORE')" class="w-full p-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-left transition-all duration-200 flex items-center justify-between group shadow-lg shadow-emerald-950/40">
+                    <button onclick="switchAppMode('EXPLORE')"
+                        class="w-full p-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-left transition-all duration-200 flex items-center justify-between group shadow-lg shadow-emerald-950/40">
                         <div>
                             <div class="text-sm font-semibold">Mode Eksplorasi Bebas</div>
-                            <div class="text-xs text-emerald-100/80">Jelajah titik lokasi dan timeline tanpa batasan bab</div>
+                            <div class="text-xs text-emerald-100/80">Jelajah titik lokasi dan timeline tanpa batasan bab
+                            </div>
                         </div>
-                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        <span
+                            class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
                     </button>
 
-                    <button onclick="switchAppMode('CURRICULUM')" class="w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-left transition-all duration-200 flex items-center justify-between group">
+                    <button onclick="switchAppMode('CURRICULUM')"
+                        class="w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-left transition-all duration-200 flex items-center justify-between group">
                         <div>
                             <div class="text-sm font-semibold">Materi SKI Kelas 12</div>
                             <div class="text-xs text-slate-400">Belajar terstruktur berdasarkan urutan bab</div>
                         </div>
-                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">school</span>
+                        <span
+                            class="material-symbols-outlined group-hover:translate-x-1 transition-transform">school</span>
                     </button>
                 </div>
 
@@ -377,76 +526,85 @@
         </div>
 
         <!-- LAYER 5: MODE TIMELINE NARRATIVE (Mengacu ke variables.css) -->
-        <div id="narrative-mode-container" class="hidden fixed inset-0 top-[56px] z-[1500] overflow-hidden" style="background-color: var(--bg-page); color: var(--text-primary);">
-            
+        <div id="narrative-mode-container" class="hidden fixed inset-0 top-[56px] z-[1500] overflow-hidden"
+            style="background-color: var(--bg-page); color: var(--text-primary);">
+
             <!-- 1. PETA UTAMA (BACKGROUND) -->
             <div id="narrative-map-wrapper" class="absolute inset-0 w-full h-full z-0">
                 <div id="narrative-map" class="w-full h-full"></div>
 
                 <!-- Filter Era Atas Kiri -->
                 <div class="absolute top-4 left-4 z-[1000] px-3 py-2 rounded-xl border shadow-xl flex items-center gap-2"
-                     style="background-color: var(--bg-panel); border-color: var(--border-light); backdrop-filter: blur(12px);">
-                    <span class="w-2.5 h-2.5 rounded-full animate-pulse" style="background-color: var(--accent-primary);"></span>
-                    <label for="filter-era-select" class="text-[11px] font-mono font-semibold uppercase" style="color: var(--text-title);">Era:</label>
-                    <select id="filter-era-select" onchange="filterNarrativeByEra(this.value)" 
-                            class="text-xs rounded-lg px-2 py-1 border focus:outline-none cursor-pointer"
-                            style="background-color: var(--bg-input); color: var(--text-primary); border-color: var(--border-input);">
+                    style="background-color: var(--bg-panel); border-color: var(--border-light); backdrop-filter: blur(12px);">
+                    <span class="w-2.5 h-2.5 rounded-full animate-pulse"
+                        style="background-color: var(--accent-primary);"></span>
+                    <label for="filter-era-select" class="text-[11px] font-mono font-semibold uppercase"
+                        style="color: var(--text-title);">Era:</label>
+                    <select id="filter-era-select" onchange="filterNarrativeByEra(this.value)"
+                        class="text-xs rounded-lg px-2 py-1 border focus:outline-none cursor-pointer"
+                        style="background-color: var(--bg-input); color: var(--text-primary); border-color: var(--border-input);">
                     </select>
                 </div>
 
                 <!-- Tombol Reopen Panel Materi -->
-                <button id="btn-reopen-panel" onclick="toggleNarrativePanel()" title="Tampilkan Panel Materi" 
-                        class="hidden absolute top-4 right-4 z-[1000] w-10 h-10 rounded-xl border flex items-center justify-center transition-all shadow-xl hover:scale-105 pointer-events-auto"
-                        style="background-color: var(--bg-panel); border-color: var(--border-light); color: var(--text-title); backdrop-filter: blur(12px);">
+                <button id="btn-reopen-panel" onclick="toggleNarrativePanel()" title="Tampilkan Panel Materi"
+                    class="hidden absolute top-4 right-4 z-[1000] w-10 h-10 rounded-xl border flex items-center justify-center transition-all shadow-xl hover:scale-105 pointer-events-auto"
+                    style="background-color: var(--bg-panel); border-color: var(--border-light); color: var(--text-title); backdrop-filter: blur(12px);">
                     <span class="material-symbols-outlined text-lg">menu_book</span>
                 </button>
 
                 <!-- Timeline Vertikal Melayang Kiri -->
-                <div id="narrative-timeline-list" class="absolute left-6 top-1/2 -translate-y-1/2 z-[1000] flex flex-col items-start pointer-events-auto max-h-[75vh] overflow-y-auto pr-2 no-scrollbar">
+                <div id="narrative-timeline-list"
+                    class="absolute left-6 top-1/2 -translate-y-1/2 z-[1000] flex flex-col items-start pointer-events-auto max-h-[75vh] overflow-y-auto pr-2 no-scrollbar">
                 </div>
             </div>
 
             <!-- 2. PANEL MATERI MELAYANG (50% KANAN) -->
-            <div id="narrative-floating-panel" 
-                 class="absolute top-0 right-0 bottom-0 w-full md:w-1/2 border-l shadow-2xl z-[1100] flex flex-col transition-all duration-300 ease-in-out"
-                 style="background-color: var(--bg-panel); border-color: var(--border-panel); backdrop-filter: blur(16px);">
-                
+            <div id="narrative-floating-panel"
+                class="absolute top-0 right-0 bottom-0 w-full md:w-1/2 border-l shadow-2xl z-[1100] flex flex-col transition-all duration-300 ease-in-out"
+                style="background-color: var(--bg-panel); border-color: var(--border-panel); backdrop-filter: blur(16px);">
+
                 <!-- Header Kanan dengan Tombol Close (X) -->
                 <div class="p-4 md:p-5 border-b flex items-center justify-between shrink-0 relative z-10"
-                     style="border-color: var(--border-light); background-color: var(--bg-era-header);">
+                    style="border-color: var(--border-light); background-color: var(--bg-era-header);">
                     <div>
-                        <span id="narrative-progress-text" class="text-[10px] font-mono uppercase tracking-widest block font-bold" style="color: var(--accent-orange);">
+                        <span id="narrative-progress-text"
+                            class="text-[10px] font-mono uppercase tracking-widest block font-bold"
+                            style="color: var(--accent-orange);">
                             Materi 1 dari 1
                         </span>
-                        <h2 id="narrative-topic-title" class="text-xs md:text-sm font-bold" style="color: var(--text-title);">
+                        <h2 id="narrative-topic-title" class="text-xs md:text-sm font-bold"
+                            style="color: var(--text-title);">
                             Jejak Sejarah SKI Kelas 12
                         </h2>
                     </div>
-                    
-                    <button onclick="toggleNarrativePanel()" title="Sembunyikan Panel Materi" 
-                            class="w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-md group"
-                            style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
-                        <span class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">close</span>
+
+                    <button onclick="toggleNarrativePanel()" title="Sembunyikan Panel Materi"
+                        class="w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-md group"
+                        style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
+                        <span
+                            class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">close</span>
                     </button>
                 </div>
 
                 <!-- AREA KONTEN UTAMA -->
-                <div id="narrative-content-body" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 custom-scrollbar relative z-10">
+                <div id="narrative-content-body"
+                    class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 custom-scrollbar relative z-10">
 
                     <!-- 1. METADATA & GAMBAR UTAMA (Split 50:50) -->
                     <div class="flex flex-col md:flex-row gap-4 items-stretch">
-                        
+
                         <!-- Kiri 50%: Kontainer Metadata -->
-                        <div id="narrative-metadata-container" 
+                        <div id="narrative-metadata-container"
                             class="w-full md:w-1/2 p-3.5 rounded-xl border flex flex-col justify-center space-y-2 text-xs shadow-sm"
                             style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-primary);">
                         </div>
 
                         <!-- Kanan 50%: Gambar Utama -->
-                        <div id="narrative-main-image-wrapper" 
+                        <div id="narrative-main-image-wrapper"
                             class="w-full md:w-1/2 min-h-[130px] rounded-xl overflow-hidden border shadow-sm relative group bg-black/5"
                             style="border-color: var(--border-panel);">
-                            <img id="narrative-main-image" src="" alt="Gambar Utama" 
+                            <img id="narrative-main-image" src="" alt="Gambar Utama"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         </div>
 
@@ -454,17 +612,22 @@
 
                     <!-- 2. DESKRIPSI UTAMA MATERI -->
                     <div class="space-y-1.5">
-                        <h3 class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-title);">Deskripsi Peristiwa</h3>
-                        <p id="narrative-description" class="text-xs md:text-sm leading-relaxed" style="color: var(--text-secondary);"></p>
+                        <h3 class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-title);">
+                            Deskripsi Peristiwa</h3>
+                        <p id="narrative-description" class="text-xs md:text-sm leading-relaxed"
+                            style="color: var(--text-secondary);"></p>
                     </div>
 
                     <!-- 3. GALERI GAMBAR RELEVAN -->
-                    <div id="narrative-gallery-section" class="hidden space-y-2.5 pt-3 border-t" style="border-color: var(--border-light);">
-                        <h4 class="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5" style="color: var(--text-title);">
-                            <span class="material-symbols-outlined text-sm" style="color: var(--accent-orange);">collections</span>
+                    <div id="narrative-gallery-section" class="hidden space-y-2.5 pt-3 border-t"
+                        style="border-color: var(--border-light);">
+                        <h4 class="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5"
+                            style="color: var(--text-title);">
+                            <span class="material-symbols-outlined text-sm"
+                                style="color: var(--accent-orange);">collections</span>
                             <span>Gambar Terkait</span>
                         </h4>
-                        
+
                         <div id="narrative-gallery-grid" class="flex flex-wrap gap-2"></div>
                     </div>
 
@@ -472,21 +635,22 @@
 
                 <!-- Footer Kanan untuk Navigasi Stepper -->
                 <div class="p-4 border-t flex items-center justify-between gap-3 shrink-0 relative z-10"
-                     style="border-color: var(--border-light); background-color: var(--bg-era-header);">
+                    style="border-color: var(--border-light); background-color: var(--bg-era-header);">
                     <button id="btn-narrative-prev" onclick="navigateNarrative(-1)"
-                            class="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                            style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
+                        class="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                        style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
                         <span>Sebelumnya</span>
                     </button>
-                    
-                    <span id="narrative-step-indicator" class="text-[11px] font-mono font-bold" style="color: var(--text-muted);">
+
+                    <span id="narrative-step-indicator" class="text-[11px] font-mono font-bold"
+                        style="color: var(--text-muted);">
                         - / -
                     </span>
-                    
+
                     <button id="btn-narrative-next" onclick="navigateNarrative(1)"
-                            class="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                            style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
+                        class="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                        style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
                         <span>Selanjutnya</span>
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </button>
@@ -494,6 +658,57 @@
             </div>
         </div>
     </main>
+
+    <!-- HELPER LOGIC JS MODAL DUMMY & DROPDOWN HEADER -->
+    <script>
+        function bukaModalPetunjuk() {
+            console.log("Modal Petunjuk dibuka");
+            // Logic membuka modal petunjuk nantinya...
+        }
+
+        function bukaModalKuis() {
+            console.log("Modal Kuis dibuka");
+            // Logic membuka modal kuis nantinya...
+        }
+
+        function bukaModalTentang() {
+            console.log("Modal Tentang dibuka");
+            // Logic membuka modal tentang nantinya...
+        }
+
+        function bukaModalGlosarium() {
+            console.log("Modal Glosarium dibuka");
+            // Logic membuka modal glosarium nantinya...
+        }
+
+        function toggleDesktopLainnyaDropdown(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById("dropdown-lainnya-menu");
+            if (menu) menu.classList.toggle("hidden");
+        }
+
+        function toggleMobileHeaderDropdown(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById("mobile-header-menu");
+            if (menu) menu.classList.toggle("hidden");
+        }
+
+        // Event listener global untuk menutup dropdown saat klik di luar area
+        document.addEventListener("click", (e) => {
+            const dropdownLainnya = document.getElementById("dropdown-lainnya-wrapper");
+            const dropdownMobile = document.getElementById("mobile-header-dropdown-wrapper");
+
+            if (dropdownLainnya && !dropdownLainnya.contains(e.target)) {
+                const menu = document.getElementById("dropdown-lainnya-menu");
+                if (menu) menu.classList.add("hidden");
+            }
+
+            if (dropdownMobile && !dropdownMobile.contains(e.target)) {
+                const menu = document.getElementById("mobile-header-menu");
+                if (menu) menu.classList.add("hidden");
+            }
+        });
+    </script>
 
     <!-- SKRIP DEPENDENSI -->
     <script src="js/theme.js"></script>
@@ -503,7 +718,7 @@
     <script src="js/dataWilayah.js"></script>
     <script src="js/dataObjekAtlas.js"></script>
     <script src="js/timeline-data.js"></script>
-    <script src="js/map.js"></script> 
+    <script src="js/map.js"></script>
     <script src="js/timelineRuler.js"></script>
     <script src="js/timeline.js"></script>
     <script src="js/loader.js"></script>
@@ -511,4 +726,5 @@
     <script src="js/narrative.js"></script>
     <script src="js/datakurikulum.js"></script>
 </body>
+
 </html>
