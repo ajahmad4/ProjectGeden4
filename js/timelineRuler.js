@@ -3,41 +3,42 @@
    TIME RULER SYSTEM (ALL-IN-ONE)
 ========================================================== */
 
-// 1. FUNGSI PEMBANTU UTAMA (Diletakkan di paling atas)
-function clearRuler(){
-    const container = document.getElementById("timeline-ruler-content");
-    if(!container) return null;
-    container.innerHTML = "";
-    return container;
+// Cache DOM references for 60fps performance
+let _elRuler = null;
+let _elIndicator = null;
+let _elRulerContent = null;
+let _elLegend = null;
+
+function getRulerElements() {
+    if (!_elRuler) _elRuler = document.getElementById("timeline-ruler");
+    if (!_elIndicator) _elIndicator = document.getElementById("timeline-current");
+    if (!_elRulerContent) _elRulerContent = document.getElementById("timeline-ruler-content");
+    if (!_elLegend) _elLegend = document.getElementById("timeline-legend");
+    return { ruler: _elRuler, indicator: _elIndicator, content: _elRulerContent, legend: _elLegend };
+}
+
+// 1. FUNGSI PEMBANTU UTAMA
+function clearRuler() {
+    const { content } = getRulerElements();
+    if (!content) return null;
+    content.innerHTML = "";
+    return content;
 }
 
 function translateFromYear(year) {
-    const viewport = document.getElementById("timeline-ruler");
-    const indicator = document.getElementById("timeline-current");
-
+    const { ruler: viewport, indicator } = getRulerElements();
     if (!viewport || !indicator) return 0;
 
-    const indicatorCenter =
-        indicator.getBoundingClientRect().left +
-        (indicator.offsetWidth / 2);
-
-    const viewportLeft =
-        viewport.getBoundingClientRect().left;
-
-    const center =
-        indicatorCenter - viewportLeft;
-
-    const yearPosition =
-        (year - timeline.minYear) *
-        timeline.pixelPerYear;
+    const indicatorCenter = indicator.getBoundingClientRect().left + (indicator.offsetWidth / 2);
+    const viewportLeft = viewport.getBoundingClientRect().left;
+    const center = indicatorCenter - viewportLeft;
+    const yearPosition = (year - timeline.minYear) * timeline.pixelPerYear;
 
     return center - yearPosition;
 }
 
-function yearToPixel(year){
-    return (
-        year - timeline.minYear
-    ) * timeline.pixelPerYear;
+function yearToPixel(year) {
+    return (year - timeline.minYear) * timeline.pixelPerYear;
 }
 
 function createLine(width) {
@@ -76,10 +77,11 @@ function buildEraBackgrounds(container) {
     const oldWrapper = container.querySelector('.eras-background-wrapper');
     if (oldWrapper) oldWrapper.remove();
 
+    if (typeof TIMELINE_ERAS === 'undefined' || !Array.isArray(TIMELINE_ERAS)) return;
+
     const wrapper = document.createElement('div');
     wrapper.className = 'eras-background-wrapper';
 
-    // MEMBACA DARI: TIMELINE_ERAS yang berada di timeline-data.js
     TIMELINE_ERAS.forEach(era => {
         const leftX = yearToPixel(era.start);
         const rightX = yearToPixel(era.end);
@@ -87,12 +89,9 @@ function buildEraBackgrounds(container) {
 
         if (width > 0) {
             const eraBlock = document.createElement('div');
-            // Menambahkan kelas dinamis era.id
             eraBlock.className = `era-block ${era.id}`;
             eraBlock.style.left = `${leftX}px`;
             eraBlock.style.width = `${width}px`;
-            
-            // Mengirimkan variabel warna dinamis ke CSS
             eraBlock.style.setProperty("--era-color-rgb", era.colorRgb);
 
             const labelContainer = document.createElement('div');
@@ -122,17 +121,18 @@ function buildRuler() {
     const totalWidth = yearToPixel(timeline.maxYear);
     container.style.width = totalWidth + "px";
 
-    // 1. Gambar Era Terlebih Dahulu (Agar berada di belakang garis penggaris)
+    // 1. Gambar Era Terlebih Dahulu (latar belakang)
     buildEraBackgrounds(container);
 
     // 2. Gambar Garis utama penggaris
     container.appendChild(createLine(totalWidth));
 
-    // 3. Gambar Tick + Label Tahun
+    // 3. Gambar Tick + Label Tahun menggunakan DocumentFragment untuk performa tinggi
+    const fragment = document.createDocumentFragment();
     for (let year = timeline.minYear; year <= timeline.maxYear; year += timeline.interval) {
-        const x = yearToPixel(year);
-        container.appendChild(createTick(year, x));
+        fragment.appendChild(createTick(year, yearToPixel(year)));
     }
+    container.appendChild(fragment);
 
     // 4. Bangun Legend Shortcut
     buildLegend();
@@ -143,38 +143,35 @@ function buildRuler() {
 // =========================================================================
 
 function buildLegend() {
-    const container = document.getElementById("timeline-legend");
-    if (!container) return;
+    const { legend: container } = getRulerElements();
+    if (!container || typeof TIMELINE_ERAS === 'undefined') return;
 
-    container.innerHTML = ""; // Bersihkan dulu sebelum rebuild
+    container.innerHTML = "";
 
+    const fragment = document.createDocumentFragment();
     TIMELINE_ERAS.forEach(era => {
         const dot = document.createElement("button");
         dot.className = "legend-dot";
         dot.setAttribute("data-tooltip", era.name);
         dot.setAttribute("aria-label", "Pergi ke " + era.name);
-        dot.title = era.name; // fallback tooltip untuk non-CSS
-
-        // Warna titik diambil langsung dari colorRgb era
+        dot.title = era.name;
         dot.style.setProperty("--dot-color", era.colorRgb);
 
-        // Klik: Geser timeline ke tahun awal era dengan animasi halus
         dot.addEventListener("click", () => {
             if (typeof animateTimelineYear === "function") {
                 animateTimelineYear(era.start);
             }
         });
 
-        container.appendChild(dot);
+        fragment.appendChild(dot);
     });
+    container.appendChild(fragment);
 }
 
 function moveRuler(year) {
-    const content = document.getElementById("timeline-ruler-content");
+    const { content } = getRulerElements();
     if (!content) return;
 
     timeline.currentTranslate = translateFromYear(year);
     content.style.transform = `translate3d(${timeline.currentTranslate}px, 0, 0)`;
-    
-    // Sinkronisasi geseran otomatis ditangani browser karena era berada di dalam "content"
 }

@@ -24,10 +24,18 @@ let currentCategoryFilter = 'all';
 // 2. INISIALISASI & BUILDER CARD
 // ==========================================
 
+let isDataInitialized = false;
+const eraMap = {};
+
 function inisialisasiData() {
+    if (isDataInitialized) return;
     if (typeof dataMarker !== 'undefined') dataMarker.forEach(m => markerMap[m.id] = m);
     if (typeof dataJalur !== 'undefined') dataJalur.forEach(j => jalurMap[j.id] = j);
     if (typeof dataWilayah !== 'undefined') dataWilayah.forEach(w => wilayahMap[w.id] = w);
+    if (typeof TIMELINE_ERAS !== 'undefined' && Array.isArray(TIMELINE_ERAS)) {
+        TIMELINE_ERAS.forEach(e => { eraMap[e.id] = e.name || e.nama || ''; });
+    }
+    isDataInitialized = true;
 }
 
 // Eksekusi segera secara sinkron
@@ -35,8 +43,7 @@ inisialisasiData();
 
 function buatCardHTML(objek) {
     const iconName = typeof getMaterialIcon === 'function' ? getMaterialIcon(objek.kategori) : 'place';
-    const eraObjek = (typeof TIMELINE_ERAS !== 'undefined') ? TIMELINE_ERAS.find(e => e.id === objek.era) : null;
-    const namaEra = eraObjek ? (eraObjek.name || eraObjek.nama || '') : '';
+    const namaEra = eraMap[objek.era] || '';
 
     return `
         <div
@@ -461,26 +468,6 @@ function tutupDetailPanel() {
     }
 }
 
-function resetTampilanDefault() {
-    const detailPanel = document.getElementById('detail-panel');
-
-    if (detailPanel) {
-        detailPanel.classList.add('hidden');
-    }
-
-    document.querySelectorAll('.leaflet-right').forEach(el => {
-        el.classList.remove('geser-kiri');
-    });
-
-    if (typeof map !== 'undefined' && map) {
-        map.flyTo([1.0, 115.0], 5, {
-            animate: true,
-            duration: 1.5,
-            easeLinearity: 0.25
-        });
-    }
-}
-
 // ==========================================
 // 5. SWITCH APP MODE & INITIALIZER
 // ==========================================
@@ -603,11 +590,15 @@ document.addEventListener("DOMContentLoaded", function () {
         updateEraHeader(tahunAwal);
     }
 
-    // Event Listener Pencarian
+    // Event Listener Pencarian (dengan debounce 150ms untuk performa pengetikan mulus)
     const searchInput = document.getElementById("search-input");
     if (searchInput) {
+        let searchTimer = null;
         searchInput.addEventListener("input", function () {
-            muatLokasiAplikasi();
+            if (searchTimer) clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                muatLokasiAplikasi();
+            }, 150);
         });
     }
 });
@@ -780,59 +771,6 @@ function resetMapViewState() {
 // ==========================================
 // 8. DETAIL PANEL & INTEGRASI KURIKULUM
 // ==========================================
-
-function showInitialNarrativePlaceholder() {
-    const container = document.getElementById('narrative-content-body');
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="flex flex-col items-center justify-center h-full py-16 text-center space-y-3">
-            <div class="p-4 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 animate-pulse">
-                <span class="material-symbols-outlined text-3xl">touch_app</span>
-            </div>
-            <h3 class="text-base font-semibold text-slate-200">Pilih Objek Sejarah</h3>
-            <p class="text-xs text-slate-400 max-w-xs leading-relaxed">
-                Silakan klik salah satu titik peristiwa atau materi pada timeline sebelah kiri untuk menampilkan detail konten dan lokasi peta.
-            </p>
-        </div>
-    `;
-
-    const progressEl = document.getElementById('narrative-progress-text');
-    if (progressEl) progressEl.textContent = `Pilih materi pada daftar`;
-
-    const stepEl = document.getElementById('narrative-step-indicator');
-    if (stepEl) stepEl.textContent = `- / ${(typeof filteredNarrativeList !== 'undefined') ? filteredNarrativeList.length : 0}`;
-
-    const btnPrev = document.getElementById('btn-narrative-prev');
-    if (btnPrev) btnPrev.disabled = true;
-
-    const btnNext = document.getElementById('btn-narrative-next');
-    if (btnNext) btnNext.disabled = true;
-}
-
-function renderCarousel(objek) {
-    const rawImages = objek.galeri || objek.gambar || (objek.foto ? [objek.foto] : []);
-
-    if (!rawImages || rawImages.length === 0) {
-        return `<div class="p-4 text-center text-xs text-slate-500">Gambar belum tersedia</div>`;
-    }
-
-    const imagesHtml = rawImages.map((img, index) => {
-        const src = typeof img === 'string' ? img : (img.url || img);
-        const caption = typeof img === 'object' && img.caption ? img.caption : (objek.caption || objek.nama || '');
-
-        return `
-      <div class="carousel-slide ${index === 0 ? 'active' : ''}">
-        <img src="${src}" alt="${caption}" onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';">
-        <div class="carousel-caption">
-          <p><strong>${caption}</strong></p>
-        </div>
-      </div>
-    `;
-    }).join('');
-
-    return `<div class="carousel-container">${imagesHtml}</div>`;
-}
 
 let savedMapCenterBeforeExpand = null;
 let savedMapZoomBeforeExpand = null;

@@ -192,10 +192,17 @@ function dragTimeline(deltaX) {
 // 5. ANIMASI TRANSISI (EASING ANIMATION)
 // =========================================================================
 
+let timelineAnimFrameId = null;
+
 // Menggerakkan timeline ke tahun tujuan secara halus dengan efek easing cubic-out
 function animateTimelineYear(targetYear, callback = null, shouldReload = true) {
     targetYear = Math.round(targetYear);
     targetYear = Math.max(timeline.minYear, Math.min(timeline.maxYear, targetYear));
+
+    if (timelineAnimFrameId) {
+        cancelAnimationFrame(timelineAnimFrameId);
+        timelineAnimFrameId = null;
+    }
 
     const startYear = timeline.currentYear;
     if (startYear === targetYear) {
@@ -223,8 +230,9 @@ function animateTimelineYear(targetYear, callback = null, shouldReload = true) {
         notifyTimelineChanged();
 
         if (t < 1) {
-            requestAnimationFrame(frame);
+            timelineAnimFrameId = requestAnimationFrame(frame);
         } else {
+            timelineAnimFrameId = null;
             timeline.currentYear = targetYear;
             if (typeof translateFromYear === 'function') {
                 timeline.currentTranslate = translateFromYear(targetYear);
@@ -247,7 +255,7 @@ function animateTimelineYear(targetYear, callback = null, shouldReload = true) {
             if (callback) callback();
         }
     }
-    requestAnimationFrame(frame);
+    timelineAnimFrameId = requestAnimationFrame(frame);
 }
 
 // =========================================================================
@@ -292,56 +300,16 @@ function updateTimelineInterval() {
     }
 }
 
-function syncTimelineUI(year) {
-    const minYear = (typeof TIMELINE_CONFIG !== 'undefined') ? TIMELINE_CONFIG.minYear : 570;
-    const maxYear = (typeof TIMELINE_CONFIG !== 'undefined') ? TIMELINE_CONFIG.maxYear : 2000;
-
-    const indicator = document.getElementById('timeline-indicator'); // elemen segitiga oranye
-    const timelineRuler = document.getElementById('timeline-ruler');
-    const scrollContainer = document.getElementById('timeline-scroll-container') || (timelineRuler ? timelineRuler.parentElement : null);
-
-    if (!indicator || !timelineRuler) return;
-
-    // 1. Hitung persentase posisi (0% - 100%)
-    const clampedYear = Math.max(minYear, Math.min(maxYear, year));
-    const percentage = ((clampedYear - minYear) / (maxYear - minYear)) * 100;
-
-    // 2. Set posisi horizontal segitiga indikator
-    indicator.style.left = `${percentage}%`;
-
-    // 3. Gulung (scroll) container agar titik tahun aktif pas berada di tengah
-    if (scrollContainer) {
-        const totalWidth = scrollContainer.scrollWidth;
-        const visibleWidth = scrollContainer.clientWidth;
-        const targetScroll = (totalWidth * (percentage / 100)) - (visibleWidth / 2);
-        
-        scrollContainer.scrollTo({
-            left: Math.max(0, targetScroll),
-            behavior: 'smooth'
-        });
-    }
-}
-
 (function setupTimelineObserver() {
     const timelineContainer = document.getElementById('timeline-container');
     if (!timelineContainer) return;
 
-    let isFirstRender = true;
-
     const observer = new ResizeObserver((entries) => {
         for (let entry of entries) {
-            // Jalankan kalkulasi hanya saat kontainer benar-benar sudah punya lebar (terlihat di layar)
             if (entry.contentRect.width > 0) {
-                // Ambil tahun aktif saat ini dari input atau variabel global
-                const currentYear = timeline.currentYear || parseInt(document.getElementById('timeline-current')?.value || "570");
-
-                // Panggil fungsi pembaruan posisi timeline milikmu
-                if (typeof updateTimelineUI === 'function') {
-                    updateTimelineUI(currentYear);
-                } else if (typeof setTimelineYear === 'function') {
+                const currentYear = timeline.currentYear || parseInt(document.getElementById('timeline-current')?.value || "570", 10);
+                if (typeof setTimelineYear === 'function') {
                     setTimelineYear(currentYear);
-                } else if (typeof syncTimelineUI === 'function') {
-                    syncTimelineUI(currentYear);
                 }
             }
         }

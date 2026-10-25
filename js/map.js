@@ -125,27 +125,24 @@ window.updateMapTheme = function(theme) {
  * @param {string} kategori - Jenis identitas data geografis ('masjid', 'kerajaan', 'pelabuhan')
  * @returns {object} Instansiasi dari L.divIcon sebagai penanda kustom Leaflet
  */
-function buatIkonSejarah(kategori) {
-    // Menarik data nama string ikon resmi dari pustaka fungsi di js/utils.js
-    const namaIkon = getMaterialIcon(kategori);
+// Palet warna diferensiasi visual per kategori historis (Lookup Map O(1))
+const WARNA_KATEGORI = {
+    masjid: "#1f4b3a",      // Hijau tua   — pusat ibadah
+    kerajaan: "#8a6d3b",    // Emas-coklat — pusat kekuasaan
+    pelabuhan: "#547792",   // Biru-abu    — jalur maritim
+    kota: "#687076",        // Abu netral  — pusat kota
+    tokoh: "#5c4a8a",       // Ungu        — figur historis
+    kenabian: "#2e7d32",    // Hijau cerah — peristiwa kenabian
+    dakwah: "#00695c",      // Teal        — penyebaran ajaran
+    mukjizat: "#6a1b9a",    // Ungu tua    — peristiwa mukjizat
+    politik: "#1565c0",     // Biru tua    — peristiwa politik
+    militer: "#b71c1c",     // Merah tua   — peristiwa militer
+    perjanjian: "#e65100"   // Oranye      — perjanjian/pakta
+};
 
-    // Palet warna diferensiasi visual per kategori historis
-    // Menggunakan switch untuk scalability (menggantikan if-else berantai)
-    let warnaLatar;
-    switch (kategori) {
-        case "masjid":      warnaLatar = "#1f4b3a"; break; // Hijau tua  — pusat ibadah
-        case "kerajaan":    warnaLatar = "#8a6d3b"; break; // Emas-coklat — pusat kekuasaan
-        case "pelabuhan":   warnaLatar = "#547792"; break; // Biru-abu   — jalur maritim
-        case "kota":        warnaLatar = "#687076"; break; // Abu netral — pusat kota
-        case "tokoh":       warnaLatar = "#5c4a8a"; break; // Ungu       — figur historis
-        case "kenabian":    warnaLatar = "#2e7d32"; break; // Hijau cerah — peristiwa kenabian
-        case "dakwah":      warnaLatar = "#00695c"; break; // Teal       — penyebaran ajaran
-        case "mukjizat":    warnaLatar = "#6a1b9a"; break; // Ungu tua   — peristiwa mukjizat
-        case "politik":     warnaLatar = "#1565c0"; break; // Biru tua   — peristiwa politik
-        case "militer":     warnaLatar = "#b71c1c"; break; // Merah tua  — peristiwa militer
-        case "perjanjian":  warnaLatar = "#e65100"; break; // Oranye     — perjanjian/pakta
-        default:            warnaLatar = "#5d6d7e"; break; // Abu-biru   — kategori umum
-    }
+function buatIkonSejarah(kategori) {
+    const namaIkon = getMaterialIcon(kategori);
+    const warnaLatar = WARNA_KATEGORI[kategori] || "#5d6d7e"; // Fallback abu-biru
 
     // Komposisi DOM HTML marker kustom dengan ikon & warna dinamis
     return L.divIcon({
@@ -158,9 +155,9 @@ function buatIkonSejarah(kategori) {
             </span>
         </div>
         `,
-        className: 'bg-transparent', // Hapus kotak bawaan native CSS Leaflet
-        iconSize: [44, 46], // Dimensi pembungkus ikon
-        iconAnchor: [22, 46] // Ujung pin tepat pada koordinat peta
+        className: 'bg-transparent',
+        iconSize: [44, 46],
+        iconAnchor: [22, 46]
     });
 }
 
