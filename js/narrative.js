@@ -1,145 +1,25 @@
+/**
+ * MODUL KURIKULUM SEJARAH KEBUDAYAAN ISLAM (SKI)
+ * Menghubungkan kurikulum terstruktur (Kelas -> Bab -> Sub-Materi)
+ * dengan visualisasi spasial peta Leaflet, metadata kontekstual, dan carousel media.
+ */
+
 // ==========================================
-// 1. DEKLARASI VARIABEL GLOBAL
+// 1. STATE & VARIABEL GLOBAL
 // ==========================================
 if (typeof window.narrativeMap === 'undefined') {
     window.narrativeMap = null;
 }
-var currentNarrativeIndex = 0;
-var filteredNarrativeList = []; 
-var narrativeDataList = narrativeDataList || []; 
-var narrativeMapMarkers = narrativeMapMarkers || [];
+
+let currentCurriculumClass = "12";
+let currentChapterId = null;
+let currentSubMateriIndex = 0;
+let narrativeMapMarkers = [];
+let currentCarouselIndex = 0;
+let currentSubMateriImages = [];
 
 // ==========================================
-// 2. INISIALISASI MODE NARASI
-// ==========================================
-
-function getObjekCoordinates(item) {
-    if (!item) return null;
-    if (item.lat && item.lng) return [item.lat, item.lng];
-    if (item.relasi && item.relasi.markers && item.relasi.markers.length > 0) {
-        const primaryMarkerId = item.relasi.markers[0];
-        if (typeof markerMap !== 'undefined' && markerMap[primaryMarkerId]) {
-            return markerMap[primaryMarkerId].koordinat;
-        }
-    }
-    return null;
-}
-
-// ==========================================
-// 3. FUNGSI FILTER BERDASARKAN ERA
-// ==========================================
-function filterNarrativeByEra(selectedEraId) {
-    if (!narrativeDataList || narrativeDataList.length === 0) {
-        if (typeof dataObjekAtlas !== 'undefined' && dataObjekAtlas.length > 0) {
-            narrativeDataList = dataObjekAtlas;
-        } else {
-            console.warn("Data atlas tidak ditemukan!");
-            return;
-        }
-    }
-
-    if (!selectedEraId || selectedEraId === 'ALL') {
-        filteredNarrativeList = [...narrativeDataList];
-    } else {
-        const targetEraObj = (typeof TIMELINE_ERAS !== 'undefined') 
-            ? TIMELINE_ERAS.find(e => e.id === selectedEraId) 
-            : null;
-
-        filteredNarrativeList = narrativeDataList.filter(item => {
-            if (item.era === selectedEraId || item.eraId === selectedEraId) {
-                return true;
-            }
-
-            if (item.tahun && targetEraObj) {
-                const yr = parseInt(item.tahun, 10);
-                if (!isNaN(yr) && yr >= targetEraObj.start && yr <= targetEraObj.end) {
-                    return true;
-                }
-            }
-
-            return false;
-        });
-    }
-
-    currentNarrativeIndex = -1;
-    
-    // SEMBUNYIKAN PANEL MATERI & TOMBOL REOPEN KETIKA ERA BERUBAH
-    const floatingPanel = document.getElementById('narrative-floating-panel');
-    if (floatingPanel) floatingPanel.classList.add('hidden');
-
-    const reopenBtnEra = document.getElementById('btn-reopen-panel');
-    if (reopenBtnEra) reopenBtnEra.classList.add('hidden');
-
-    // Reset stepper
-    const stepElEra = document.getElementById('narrative-step-indicator');
-    if (stepElEra) stepElEra.textContent = `- / ${filteredNarrativeList.length}`;
-    const btnPrevEra = document.getElementById('btn-narrative-prev');
-    if (btnPrevEra) btnPrevEra.disabled = true;
-    const btnNextEra = document.getElementById('btn-narrative-next');
-    if (btnNextEra) btnNextEra.disabled = true;
-    const progressElEra = document.getElementById('narrative-progress-text');
-    if (progressElEra) progressElEra.textContent = 'Pilih materi pada daftar';
-
-    if (filteredNarrativeList.length === 0) {
-        const listContainer = document.getElementById('narrative-timeline-list');
-        if (listContainer) {
-            listContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">Tidak ada data di era ini</div>`;
-        }
-    } else {
-        renderNarrativeTimeline();
-    }
-}
-
-// ==========================================
-// 4. RENDER TIMELINE VERTIKAL KIRI (MELAYANG DAN MULTILINE)
-// ==========================================
-function renderNarrativeTimeline() {
-    const listContainer = document.getElementById('narrative-timeline-list');
-    if (!listContainer) return;
-
-    const currentList = (filteredNarrativeList && filteredNarrativeList.length > 0) 
-        ? filteredNarrativeList 
-        : narrativeDataList;
-
-    if (!currentList || currentList.length === 0) {
-        listContainer.innerHTML = `<div class="text-xs p-2 rounded-lg border" style="color: var(--text-muted); background: var(--bg-panel); border-color: var(--border-light);">Data belum dimuat</div>`;
-        return;
-    }
-
-    listContainer.innerHTML = currentList.map((item, idx) => {
-        const isActive = idx === currentNarrativeIndex;
-        const yearText = item.tahun ? `${item.tahun} M` : (item.periode || `${idx + 1}`);
-        const titleText = item.nama || item.title || 'Objek Sejarah';
-
-        return `
-            <button onclick="loadNarrativeStep(${idx})" class="timeline-item group flex items-start gap-2.5 my-2 transition-all outline-none text-left max-w-[260px] p-1.5 rounded-lg">
-                <!-- Titik Marker -->
-                <div class="w-3.5 h-3.5 mt-0.5 rounded-full border-2 shrink-0 transition-all duration-200"
-                     style="${isActive 
-                        ? 'background-color: var(--accent-orange); border-color: var(--bg-panel-solid); transform: scale(1.25); box-shadow: 0 0 10px rgba(var(--accent-orange-rgb), 0.6);' 
-                        : 'background-color: var(--bg-badge); border-color: var(--timeline-tick);'}">
-                </div>
-                
-                <!-- Teks & Tahun -->
-                <div class="text-xs font-mono transition-all duration-200">
-                    <!-- TAHUN -->
-                    <span class="block font-bold text-[10px] transition-colors" 
-                          style="color: ${isActive ? 'var(--accent-orange)' : 'var(--text-title)'};">
-                        ${yearText}
-                    </span>
-                    <!-- JUDUL -->
-                    <span class="block text-xs leading-snug line-clamp-2 transition-colors ${isActive ? 'font-bold' : 'font-medium'}"
-                          style="color: ${isActive ? 'var(--accent-orange)' : 'var(--text-primary)'};">
-                        ${titleText}
-                    </span>
-                </div>
-            </button>
-        `;
-    }).join('');
-}
-
-// ==========================================
-// 5. TOGGLE HIDE/SHOW PANEL MATERI KANAN
+// 2. TOGGLE HIDE/SHOW PANEL MATERI KANAN
 // ==========================================
 function toggleNarrativePanel() {
     const floatingPanel = document.getElementById('narrative-floating-panel');
@@ -148,481 +28,450 @@ function toggleNarrativePanel() {
     if (!floatingPanel) return;
 
     if (floatingPanel.classList.contains('hidden')) {
-        // Tampilkan Panel Materi Melayang (Menutupi 50% kanan)
+        // Tampilkan panel materi kanan
         floatingPanel.classList.remove('hidden');
         if (reopenBtn) reopenBtn.classList.add('hidden');
+
+        if (window.narrativeMap) {
+            setTimeout(() => window.narrativeMap.invalidateSize(), 300);
+        }
     } else {
-        // Sembunyikan Panel Materi (Peta Fullscreen Utuh Terlihat Semua)
+        // Sembunyikan panel materi (Peta Fullscreen 100%)
         floatingPanel.classList.add('hidden');
         if (reopenBtn) reopenBtn.classList.remove('hidden');
+
+        if (window.narrativeMap) {
+            setTimeout(() => window.narrativeMap.invalidateSize(), 300);
+        }
     }
 }
 
 // ==========================================
-// 6. RENDER DETAIL KONTEN NARASI (WITH CAROUSEL)
+// 3. EVENT HANDLER FILTER KELAS & BAB
 // ==========================================
-function loadNarrativeStep(index) {
-    const activeList = (filteredNarrativeList && filteredNarrativeList.length > 0) 
-        ? filteredNarrativeList 
-        : narrativeDataList;
+function onCurriculumClassChange(kelasVal) {
+    currentCurriculumClass = String(kelasVal);
+    populateChapterDropdown(currentCurriculumClass);
+}
 
-    if (!activeList || index < 0 || index >= activeList.length) return;
-    currentNarrativeIndex = index;
+function onCurriculumChapterChange(chapterId) {
+    currentChapterId = chapterId;
+    currentSubMateriIndex = 0;
+    renderSubMateriChips();
+    loadActiveSubMateri();
+}
 
+function selectSubMateri(index) {
+    currentSubMateriIndex = index;
+    renderSubMateriChips();
+    loadActiveSubMateri();
+}
+
+function navigateCurriculum(direction) {
+    const chapter = getCurrentChapter();
+    if (!chapter || !chapter.subMateri || chapter.subMateri.length === 0) return;
+
+    const newIndex = currentSubMateriIndex + direction;
+    if (newIndex >= 0 && newIndex < chapter.subMateri.length) {
+        selectSubMateri(newIndex);
+    }
+}
+
+// Helper: Mengambil data bab yang sedang aktif
+function getCurrentChapter() {
+    if (typeof dataKurikulum === 'undefined' || !Array.isArray(dataKurikulum)) return null;
+    return dataKurikulum.find(c => c.id === currentChapterId) ||
+           dataKurikulum.find(c => String(c.kelas) === String(currentCurriculumClass)) ||
+           dataKurikulum[0] || null;
+}
+
+// ==========================================
+// 4. POPULATE DROPDOWNS & CHIPS
+// ==========================================
+function populateChapterDropdown(kelasVal) {
+    const chapterSelect = document.getElementById('curriculum-chapter-select');
+    if (!chapterSelect || typeof dataKurikulum === 'undefined') return;
+
+    const filteredChapters = dataKurikulum.filter(c => String(c.kelas) === String(kelasVal));
+
+    if (filteredChapters.length === 0) {
+        chapterSelect.innerHTML = `<option value="">Tidak ada bab tersedia</option>`;
+        currentChapterId = null;
+        renderSubMateriChips();
+        return;
+    }
+
+    chapterSelect.innerHTML = filteredChapters.map(c => `
+        <option value="${c.id}">${c.judulBab}</option>
+    `).join('');
+
+    currentChapterId = filteredChapters[0].id;
+    currentSubMateriIndex = 0;
+
+    renderSubMateriChips();
+    loadActiveSubMateri();
+}
+
+function renderSubMateriChips() {
+    const container = document.getElementById('curriculum-submateri-chips');
+    if (!container) return;
+
+    const chapter = getCurrentChapter();
+    if (!chapter || !chapter.subMateri || chapter.subMateri.length === 0) {
+        container.innerHTML = `<span class="text-[11px] text-muted">Belum ada sub-materi</span>`;
+        return;
+    }
+
+    container.innerHTML = chapter.subMateri.map((sub, idx) => {
+        const isAktif = (idx === currentSubMateriIndex);
+        return `
+            <button type="button" onclick="selectSubMateri(${idx})"
+                class="px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1 shrink-0 border transition-all cursor-pointer ${
+                    isAktif
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm font-semibold'
+                        : 'bg-badge text-muted border-border-light hover:bg-active hover:text-title'
+                }">
+                <span class="w-1.5 h-1.5 rounded-full ${isAktif ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}"></span>
+                <span class="truncate max-w-[160px] md:max-w-[200px]">${sub.nomor || (idx + 1)}. ${sub.judul}</span>
+            </button>
+        `;
+    }).join('');
+
+    // Pastikan chip yang aktif terlihat (scroll into view halus)
+    const activeChip = container.children[currentSubMateriIndex];
+    if (activeChip && typeof activeChip.scrollIntoView === 'function') {
+        activeChip.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+    }
+}
+
+// ==========================================
+// 5. RENDER KONTEN SUB-MATERI AKTIF & INTEGRASI PETA
+// ==========================================
+function loadActiveSubMateri() {
+    const chapter = getCurrentChapter();
+    if (!chapter || !chapter.subMateri || chapter.subMateri.length === 0) return;
+
+    if (currentSubMateriIndex < 0) currentSubMateriIndex = 0;
+    if (currentSubMateriIndex >= chapter.subMateri.length) currentSubMateriIndex = chapter.subMateri.length - 1;
+
+    const sub = chapter.subMateri[currentSubMateriIndex];
+    const totalSub = chapter.subMateri.length;
+
+    // Pastikan panel materi terbuka
     const floatingPanel = document.getElementById('narrative-floating-panel');
-    if (floatingPanel) {
-        floatingPanel.classList.remove('hidden');
-    }
+    if (floatingPanel) floatingPanel.classList.remove('hidden');
 
-    const data = activeList[index];
+    const reopenBtn = document.getElementById('btn-reopen-panel');
+    if (reopenBtn) reopenBtn.classList.add('hidden');
 
-    // 1. UPDATE HEADER STATIS (AGAR JUDUL TIDAK TERGESER SAAT SCROLL)
-    const topicTitleEl = document.getElementById('narrative-topic-title');
-    if (topicTitleEl) {
-        topicTitleEl.textContent = data.nama || data.title || 'Situs Sejarah';
-    }
+    // 1. Update Progress & Stepper Controls
+    const progressEl = document.getElementById('narrative-progress-text');
+    if (progressEl) progressEl.textContent = `Materi ${currentSubMateriIndex + 1} dari ${totalSub}`;
 
+    const stepEl = document.getElementById('narrative-step-indicator');
+    if (stepEl) stepEl.textContent = `${currentSubMateriIndex + 1} / ${totalSub}`;
+
+    const btnPrev = document.getElementById('btn-narrative-prev');
+    if (btnPrev) btnPrev.disabled = (currentSubMateriIndex === 0);
+
+    const btnNext = document.getElementById('btn-narrative-next');
+    if (btnNext) btnNext.disabled = (currentSubMateriIndex === totalSub - 1);
+
+    // 2. Setup Galeri Gambar
+    currentSubMateriImages = Array.isArray(sub.galeri) ? sub.galeri : (sub.gambar ? (Array.isArray(sub.gambar) ? sub.gambar : [sub.gambar]) : []);
+    currentCarouselIndex = 0;
+
+    const validImages = currentSubMateriImages.map(img => {
+        if (!img) return null;
+        if (typeof img === 'string') return { url: img, caption: sub.judul };
+        if (typeof img === 'object' && img.url) return { url: img.url, caption: img.caption || sub.judul };
+        return null;
+    }).filter(Boolean);
+
+    // 3. Render Body Konten Panel Kanan
     const container = document.getElementById('narrative-content-body');
     if (!container) return;
 
-    const tipePeristiwa = data.kategori || data.tipe || 'Kerajaan Islam';
-    const tahunText = data.tahun ? `${data.tahun} M` : '-';
-    const periodeText = data.periode || (data.tahun ? `Abad ke-${Math.ceil(data.tahun / 100)} M` : '-');
-    const kategoriText = data.kategori ? (data.kategori.charAt(0).toUpperCase() + data.kategori.slice(1)) : (data.tipe || '-');
-    const lokasiText = data.lokasi || '-';
-    const wilayahText = data.wilayah || '-';
-    const tokohText = Array.isArray(data.tokoh) ? data.tokoh.join(', ') : (data.tokoh || '-');
-    const namaJudul = data.nama || data.title || 'Situs Sejarah';
-
-    const kronologiText = data.kronologi || data.deskripsi || 'Kronologi peristiwa sejarah belum diuraikan.';
-    
-    // Penanganan Gambar Carousel (mendukung galeri, gambar, images, foto)
-    let imageList = [];
-    if (Array.isArray(data.galeri) && data.galeri.length > 0) {
-        imageList = data.galeri;
-    } else if (Array.isArray(data.gambar) && data.gambar.length > 0) {
-        imageList = data.gambar;
-    } else if (Array.isArray(data.images) && data.images.length > 0) {
-        imageList = data.images;
-    } else if (data.foto || data.image) {
-        imageList = [data.foto || data.image];
-    }
-
-    const validImages = imageList.map(img => {
-        if (!img) return null;
-        if (typeof img === 'string') return { url: img, caption: (Array.isArray(data.caption) ? data.caption[0] : data.caption) || namaJudul };
-        if (typeof img === 'object' && img.url) return { url: img.url, caption: img.caption || namaJudul };
-        return null;
-    }).filter(Boolean);
-    
-    // Reset Index Carousel saat langkah diganti
-    currentCarouselIndex = 0;
+    const meta = sub.metadata || {};
+    const wilayahVal = meta.wilayah || '-';
+    const periodeVal = meta.periode || '-';
+    const fokusVal = meta.fokus || '-';
+    const tokohVal = meta.tokoh || '-';
 
     container.innerHTML = `
-        <!-- 1. TIPE PERISTIWA & TAHUN -->
-        <div class="flex items-center justify-between gap-2 pb-2 border-b shrink-0" style="border-color: var(--border-light);">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider" style="background-color: var(--bg-badge); color: var(--accent-primary); border: 1px solid var(--border-light);">
-                <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--accent-primary);"></span>
-                ${tipePeristiwa}
-            </span>
-            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-md flex items-center gap-1" style="background-color: var(--bg-badge); color: var(--text-title); border: 1px solid var(--border-light);">
-                ⏱️ <strong>${tahunText}</strong>
-            </span>
+        <!-- JUDUL & KODE SUB-MATERI -->
+        <div class="space-y-1">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider"
+                      style="background-color: var(--bg-badge); color: var(--accent-orange); border: 1px solid var(--border-light);">
+                    <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--accent-orange);"></span>
+                    Sub-Materi ${sub.nomor || (currentSubMateriIndex + 1)}
+                </span>
+                <span class="text-[11px] text-muted truncate">${chapter.judulBab}</span>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold tracking-tight pt-1 leading-snug" style="color: var(--text-title);">
+                ${sub.judul}
+            </h3>
         </div>
-
-        <!-- JUDUL UTAMA MATERI (Gunakan --text-title agar Hijau Tua Tegas) -->
-        <h3 class="text-xl md:text-2xl font-bold tracking-tight pt-2" style="color: var(--text-title);">
-            ${namaJudul}
-        </h3>
 
         <!-- 2. METADATA 2 KOLOM (KIRI) & GAMBAR FULL COVER (KANAN) -->
         <div class="flex flex-col md:flex-row items-stretch gap-4 my-2">
             
-            <!-- Metadata 2 Kolom (Tahun, Periode, Kategori, Lokasi, Wilayah, Tokoh) -->
-            <div class="flex-1 grid grid-cols-2 gap-y-3 gap-x-4 p-4 rounded-xl text-[11px] md:text-xs justify-center items-center shadow-sm" style="background-color: var(--bg-badge); border: 1px solid var(--border-panel); color: var(--text-primary);">
+            <!-- Metadata Box 2 Kolom -->
+            <div class="flex-1 grid grid-cols-2 gap-y-2.5 gap-x-3.5 p-3.5 rounded-xl text-[11px] md:text-xs justify-center items-center shadow-sm"
+                 style="background-color: var(--bg-badge); border: 1px solid var(--border-panel); color: var(--text-primary);">
+                
                 <div class="flex items-start gap-2">
                     <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">calendar_today</span>
                     <div class="min-w-0">
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Tahun</span>
-                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${tahunText}">${tahunText}</span>
+                        <span class="block text-[9px] uppercase font-bold" style="color: var(--text-muted);">Periode</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${periodeVal}">${periodeVal}</span>
                     </div>
                 </div>
 
                 <div class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">timelapse</span>
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">explore</span>
                     <div class="min-w-0">
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Periode</span>
-                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${periodeText}">${periodeText}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">category</span>
-                    <div class="min-w-0">
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Kategori</span>
-                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${kategoriText}">${kategoriText}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">place</span>
-                    <div class="min-w-0">
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Lokasi</span>
-                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${lokasiText}">${lokasiText}</span>
+                        <span class="block text-[9px] uppercase font-bold" style="color: var(--text-muted);">Fokus Kajian</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${fokusVal}">${fokusVal}</span>
                     </div>
                 </div>
 
                 <div class="flex items-start gap-2">
                     <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">location_on</span>
                     <div class="min-w-0">
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Wilayah</span>
-                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${wilayahText}">${wilayahText}</span>
+                        <span class="block text-[9px] uppercase font-bold" style="color: var(--text-muted);">Wilayah / Situs</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${wilayahVal}">${wilayahVal}</span>
                     </div>
                 </div>
 
                 <div class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">person</span>
+                    <span class="material-symbols-outlined text-base shrink-0 mt-0.5" style="color: var(--accent-primary);">groups</span>
                     <div class="min-w-0">
-                        <span class="block text-[10px] uppercase font-bold" style="color: var(--text-muted);">Tokoh</span>
-                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${tokohText}">${tokohText}</span>
+                        <span class="block text-[9px] uppercase font-bold" style="color: var(--text-muted);">Tokoh Terkait</span>
+                        <span class="font-medium truncate block" style="color: var(--text-primary);" title="${tokohVal}">${tokohVal}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Carousel Gambar Materi Aktif di Kanan (Full Fit tanpa ruang hitam) -->
-            <div class="w-full md:w-[280px] lg:w-[320px] shrink-0 h-[180px] rounded-xl overflow-hidden relative group flex flex-col justify-between shadow-sm" style="border: 1px solid var(--border-panel); background-color: var(--bg-badge);">
+            <!-- Carousel Gambar Materi Aktif di Kanan -->
+            <div class="w-full md:w-[260px] lg:w-[290px] shrink-0 h-[175px] rounded-xl overflow-hidden relative group flex flex-col justify-between shadow-sm"
+                 style="border: 1px solid var(--border-panel); background-color: var(--bg-badge);">
                 ${validImages.length > 0 ? `
                     <div class="relative w-full flex-1 overflow-hidden min-h-0">
                         ${validImages.map((imgObj, idx) => `
                             <img src="${imgObj.url}" 
-                                 alt="${namaJudul} - ${idx + 1}" 
-                                 data-caption="${imgObj.caption || `${namaJudul} (${idx + 1}/${validImages.length})`}"
+                                 alt="${sub.judul} - ${idx + 1}" 
+                                 data-caption="${imgObj.caption || `${sub.judul} (${idx + 1}/${validImages.length})`}"
                                  onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';"
                                  class="narrative-carousel-slide w-full h-full object-cover transition-all duration-300 ${idx !== 0 ? 'hidden' : ''}">
                         `).join('')}
 
                         <!-- Navigasi Panah Carousel -->
                         ${validImages.length > 1 ? `
-                            <button onclick="changeNarrativeImage(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-md z-10 cursor-pointer" style="background-color: var(--bg-panel-solid); color: var(--text-title); border: 1px solid var(--border-light);">
-                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            <button type="button" onclick="changeNarrativeImage(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-md z-10 cursor-pointer" style="background-color: var(--bg-panel-solid); color: var(--text-title); border: 1px solid var(--border-light);">
+                                <span class="material-symbols-outlined text-xs">chevron_left</span>
                             </button>
-                            <button onclick="changeNarrativeImage(1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-md z-10 cursor-pointer" style="background-color: var(--bg-panel-solid); color: var(--text-title); border: 1px solid var(--border-light);">
-                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            <button type="button" onclick="changeNarrativeImage(1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-md z-10 cursor-pointer" style="background-color: var(--bg-panel-solid); color: var(--text-title); border: 1px solid var(--border-light);">
+                                <span class="material-symbols-outlined text-xs">chevron_right</span>
                             </button>
 
                             <!-- Dots Indikator -->
                             <div class="absolute top-2 inset-x-0 flex justify-center gap-1 z-10">
                                 ${validImages.map((_, idx) => `
-                                    <button onclick="setNarrativeImage(${idx})" class="narrative-carousel-dot h-1.5 rounded-full transition-all duration-300 ${idx === 0 ? 'w-4' : 'w-1.5'}" style="background-color: ${idx === 0 ? 'var(--accent-primary)' : 'var(--border-light)'};"></button>
+                                    <button type="button" onclick="setNarrativeImage(${idx})" class="narrative-carousel-dot h-1.5 rounded-full transition-all duration-300 ${idx === 0 ? 'w-4' : 'w-1.5'}" style="background-color: ${idx === 0 ? 'var(--accent-primary)' : 'var(--border-light)'};"></button>
                                 `).join('')}
                             </div>
                         ` : ''}
                     </div>
 
                     <!-- Caption Gambar -->
-                    <div id="narrative-carousel-caption" class="h-[32px] p-1.5 text-[10px] italic text-center border-t truncate shrink-0 flex items-center justify-center" style="background-color: var(--bg-panel-solid); color: var(--text-muted); border-color: var(--border-light);">
-                        📷 ${validImages[0]?.caption || `${namaJudul} (1/${validImages.length})`}
+                    <div id="narrative-carousel-caption" class="h-[30px] p-1 text-[10px] italic text-center border-t truncate shrink-0 flex items-center justify-center" style="background-color: var(--bg-panel-solid); color: var(--text-muted); border-color: var(--border-light);">
+                        📷 ${validImages[0]?.caption || `${sub.judul} (1/${validImages.length})`}
                     </div>
                 ` : `
                     <div class="w-full h-full flex flex-col items-center justify-center p-4 text-center text-xs" style="color: var(--text-muted);">
                         <span class="material-symbols-outlined text-2xl mb-1">image_not_supported</span>
-                        <span>Gambar belum tersedia</span>
+                        <span>Gambar media belum tersedia</span>
                     </div>
                 `}
             </div>
         </div>
 
-        <!-- 3. KRONOLOGI / MATERI UTAMA -->
-        <div class="space-y-1.5 pt-2">
-            <h4 class="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5" style="color: var(--text-muted);">
-                <span class="w-1 h-3 rounded-full" style="background-color: var(--accent-primary);"></span> Uraian / Kronologi Sejarah
-            </h4>
-            <div class="text-xs md:text-sm leading-relaxed space-y-2 text-justify" style="color: var(--text-secondary);">
-                ${kronologiText.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('')}
-            </div>
+        <hr class="my-1" style="border-color: var(--border-light);">
+
+        <!-- 3. URAIAN LENGKAP KONTEN PEMBELAJARAN SKI -->
+        <div class="space-y-2 pt-1 text-xs md:text-sm leading-relaxed text-secondary text-justify">
+            ${sub.konten || '<p>Materi sedang dalam proses penyusunan modul.</p>'}
         </div>
     `;
 
+    // 4. Sinkronisasi Spasial Peta (Leaflet)
+    sinkronisasiPetaKurikulum(sub);
+}
+
+// ==========================================
+// 6. SINKRONISASI PETA DENGAN RELASI MATERI
+// ==========================================
+function sinkronisasiPetaKurikulum(sub) {
+    if (!window.narrativeMap) return;
+
+    // Bersihkan marker, jalur, dan wilayah lama dari peta narasi
+    if (Array.isArray(narrativeMapMarkers)) {
+        narrativeMapMarkers.forEach(layer => {
+            if (layer && typeof window.narrativeMap.removeLayer === 'function') {
+                window.narrativeMap.removeLayer(layer);
+            }
+        });
+    }
+    narrativeMapMarkers = [];
+
+    const relasi = sub.relasiPeta || {};
     let markerUtama = null;
+    const navBounds = L.latLngBounds();
+    let hasPoint = false;
 
-    // Bersihkan marker lama di map narasi
-    if (window.narrativeMap) {
-        if (typeof narrativeMapMarkers !== 'undefined' && Array.isArray(narrativeMapMarkers)) {
-            narrativeMapMarkers.forEach(m => {
-                if (m && typeof window.narrativeMap.removeLayer === 'function') {
-                    window.narrativeMap.removeLayer(m);
-                }
-            });
-        }
-        narrativeMapMarkers = [];
-
-        if (data.relasi) {
-            // 1. Render wilayah (polygons)
-            if (data.relasi.wilayah && typeof wilayahMap !== 'undefined') {
-                data.relasi.wilayah.forEach(wilayahId => {
-                    const wilayah = wilayahMap[wilayahId];
-                    if (wilayah) {
-                        const polygon = L.polygon(wilayah.koordinat, {
-                            color:       wilayah.warna,
-                            fillColor:   wilayah.warna,
-                            fillOpacity: 0.18,
-                            weight:      2
-                        });
-                        polygon.addTo(window.narrativeMap);
-                        narrativeMapMarkers.push(polygon);
-                    }
+    // 1. Render Poligon Wilayah
+    if (relasi.wilayah && typeof wilayahMap !== 'undefined') {
+        relasi.wilayah.forEach(wId => {
+            const wData = wilayahMap[wId];
+            if (wData && wData.koordinat) {
+                const polygon = L.polygon(wData.koordinat, {
+                    color: wData.warna || '#d36b1e',
+                    fillColor: wData.warna || '#d36b1e',
+                    fillOpacity: 0.22,
+                    weight: 2
                 });
-            }
+                polygon.bindPopup(`
+                    <div class="p-1">
+                        <strong class="text-xs" style="color:var(--text-title);">${wData.nama}</strong>
+                        <p class="text-[10px] text-muted">${wData.deskripsi || ''}</p>
+                    </div>
+                `);
+                polygon.addTo(window.narrativeMap);
+                narrativeMapMarkers.push(polygon);
 
-            // 2. Render jalur (polylines)
-            if (data.relasi.jalur && typeof jalurMap !== 'undefined') {
-                data.relasi.jalur.forEach(jalurId => {
-                    const jalur = jalurMap[jalurId];
-                    if (jalur) {
-                        const polyline = L.polyline(jalur.koordinat, {
-                            color:        jalur.warna,
-                            weight:       5,
-                            opacity:      0.9,
-                            dashArray:    "10 6",
-                            smoothFactor: 1,
-                            lineJoin:     "round",
-                            lineCap:      "round"
-                        });
-                        polyline.addTo(window.narrativeMap);
-                        narrativeMapMarkers.push(polyline);
-                    }
-                });
+                wData.koordinat.forEach(coord => navBounds.extend(coord));
+                hasPoint = true;
             }
-
-            // 3. Render markers (points)
-            if (data.relasi.markers && typeof markerMap !== 'undefined') {
-                data.relasi.markers.forEach(markerId => {
-                    const dataTitik = markerMap[markerId];
-                    if (dataTitik) {
-                        const markerIcon = typeof buatIkonSejarah === 'function' 
-                            ? buatIkonSejarah(data.kategori) 
-                            : new L.Icon.Default();
-                        const marker = L.marker(dataTitik.koordinat, { icon: markerIcon });
-                        
-                        marker.bindPopup(`
-                            <div class="popup-narasi p-1">
-                                <h4 class="font-bold text-xs" style="color: var(--text-title);">${data.nama}</h4>
-                                <p class="text-[10px] text-muted">${dataTitik.nama || ''}</p>
-                            </div>
-                        `, { autoPan: false });
-                        
-                        marker.addTo(window.narrativeMap);
-                        narrativeMapMarkers.push(marker);
-                        
-                        // Catat marker pertama sebagai target fokus utama
-                        if (markerId === data.relasi.markers[0]) {
-                            markerUtama = marker;
-                        }
-                    }
-                });
-            }
-        }
+        });
     }
 
-    // Hide reopen button
-    const reopenBtn = document.getElementById('btn-reopen-panel');
-    if (reopenBtn) reopenBtn.classList.add('hidden');
+    // 2. Render Polyline Jalur Pelayaran / Dakwah
+    if (relasi.jalur && typeof jalurMap !== 'undefined') {
+        relasi.jalur.forEach(jId => {
+            const jData = jalurMap[jId];
+            if (jData && jData.koordinat) {
+                const polyline = L.polyline(jData.koordinat, {
+                    color: jData.warna || '#D36B1E',
+                    weight: 4,
+                    opacity: 0.9,
+                    dashArray: "10 6",
+                    smoothFactor: 1,
+                    lineJoin: "round",
+                    lineCap: "round"
+                });
+                polyline.bindPopup(`
+                    <div class="p-1">
+                        <strong class="text-xs" style="color:var(--text-title);">${jData.nama}</strong>
+                        <p class="text-[10px] text-muted">${jData.deskripsi || ''}</p>
+                    </div>
+                `);
+                polyline.addTo(window.narrativeMap);
+                narrativeMapMarkers.push(polyline);
 
-    // Navigasi Peta: Gunakan animasi flyTo halus seperti di Mode Eksplorasi
-    // dengan pergeseran 25% ke kiri layar agar marker berada tepat di tengah area bebas (tidak tertutup panel materi kanan)
-    if (window.narrativeMap) {
+                jData.koordinat.forEach(coord => navBounds.extend(coord));
+                hasPoint = true;
+            }
+        });
+    }
+
+    // 3. Render Marker Titik
+    if (relasi.markers && typeof markerMap !== 'undefined') {
+        relasi.markers.forEach((mId, idx) => {
+            const mData = markerMap[mId];
+            if (mData && mData.koordinat) {
+                const markerIcon = typeof buatIkonSejarah === 'function'
+                    ? buatIkonSejarah(mData.kategori || 'kota')
+                    : new L.Icon.Default();
+
+                const marker = L.marker(mData.koordinat, { icon: markerIcon });
+                marker.bindPopup(`
+                    <div class="p-1 min-w-[140px]">
+                        <span class="text-[9px] uppercase font-bold block" style="color:var(--accent-orange);">${sub.nomor || ''} ${sub.judul}</span>
+                        <strong class="text-xs block" style="color:var(--text-title);">${mData.nama}</strong>
+                    </div>
+                `, { autoPan: false });
+
+                marker.addTo(window.narrativeMap);
+                narrativeMapMarkers.push(marker);
+
+                navBounds.extend(mData.koordinat);
+                hasPoint = true;
+
+                if (idx === 0) markerUtama = marker;
+            }
+        });
+    }
+
+    // 4. Navigasi Kamera Halus (FlyTo dengan Kompensasi 25% Sisi Kiri Layar)
+    if (hasPoint) {
         window.narrativeMap.invalidateSize();
 
-        const navBounds = L.latLngBounds();
-        let hasNavPoint = false;
+        const sw = navBounds.getSouthWest();
+        const ne = navBounds.getNorthEast();
+        const isSinglePoint = (sw.lat === ne.lat && sw.lng === ne.lng);
 
-        // Kumpulkan semua titik dari relasi data
-        if (data.relasi) {
-            if (data.relasi.markers) {
-                data.relasi.markers.forEach(id => {
-                    if (markerMap[id]) { navBounds.extend(markerMap[id].koordinat); hasNavPoint = true; }
-                });
-            }
-            if (data.relasi.jalur) {
-                data.relasi.jalur.forEach(id => {
-                    if (jalurMap[id] && jalurMap[id].koordinat) {
-                        jalurMap[id].koordinat.forEach(c => navBounds.extend(c));
-                        hasNavPoint = true;
-                    }
-                });
-            }
-            if (data.relasi.wilayah) {
-                data.relasi.wilayah.forEach(id => {
-                    if (wilayahMap[id] && wilayahMap[id].koordinat) {
-                        wilayahMap[id].koordinat.forEach(c => navBounds.extend(c));
-                        hasNavPoint = true;
-                    }
-                });
-            }
+        let centerCoord = isSinglePoint ? sw : navBounds.getCenter();
+        let targetZoom = isSinglePoint ? 8 : 7;
+
+        if (!isSinglePoint) {
+            const calculatedZoom = window.narrativeMap.getBoundsZoom(navBounds, false, [60, 60]);
+            targetZoom = Math.min(Math.max(calculatedZoom, 5), 11);
         }
 
-        // Fallback ke koordinat tunggal jika relasi kosong
-        if (!hasNavPoint) {
-            const coords = getObjekCoordinates(data);
-            if (coords) { navBounds.extend(coords); hasNavPoint = true; }
+        const isDesktop = window.innerWidth > 768;
+        const floatingPanel = document.getElementById('narrative-floating-panel');
+        const isPanelOpen = !floatingPanel || !floatingPanel.classList.contains('hidden');
+
+        const mapWidth = window.narrativeMap.getSize().x || window.innerWidth;
+        const shiftX = (isDesktop && isPanelOpen) ? (mapWidth * 0.25) : 0;
+
+        const targetPoint = window.narrativeMap.project(centerCoord, targetZoom);
+        const offsetPoint = L.point(targetPoint.x + shiftX, targetPoint.y);
+        const offsetLatLng = window.narrativeMap.unproject(offsetPoint, targetZoom);
+
+        if (window.narrativeMap._narrativePopupHandler) {
+            window.narrativeMap.off('moveend', window.narrativeMap._narrativePopupHandler);
+            window.narrativeMap._narrativePopupHandler = null;
         }
 
-        if (hasNavPoint) {
-            const sw = navBounds.getSouthWest();
-            const ne = navBounds.getNorthEast();
-            const isSinglePoint = (sw.lat === ne.lat && sw.lng === ne.lng);
-
-            let centerCoord = isSinglePoint ? sw : navBounds.getCenter();
-            let targetZoom = isSinglePoint ? 9 : 8;
-
-            if (!isSinglePoint) {
-                const calculatedZoom = window.narrativeMap.getBoundsZoom(navBounds, false, [60, 60]);
-                targetZoom = Math.min(Math.max(calculatedZoom, 6), 10);
-            }
-
-            const isDesktop = window.innerWidth > 768;
-            const floatingPanel = document.getElementById('narrative-floating-panel');
-            const isPanelOpen = !floatingPanel || !floatingPanel.classList.contains('hidden');
-
-            const mapWidth = window.narrativeMap.getSize().x || window.innerWidth;
-            const shiftX = (isDesktop && isPanelOpen) ? (mapWidth * 0.25) : 0;
-
-            const targetPoint = window.narrativeMap.project(centerCoord, targetZoom);
-            const offsetPoint = L.point(targetPoint.x + shiftX, targetPoint.y);
-            const offsetLatLng = window.narrativeMap.unproject(offsetPoint, targetZoom);
-
-            // Bersihkan timer/listener popup sebelumnya jika ada
-            if (window.narrativeMap._narrativePopupHandler) {
-                window.narrativeMap.off('moveend', window.narrativeMap._narrativePopupHandler);
+        if (markerUtama) {
+            window.narrativeMap._narrativePopupHandler = function () {
+                markerUtama.openPopup();
                 window.narrativeMap._narrativePopupHandler = null;
-            }
-
-            // Buka popup setelah animasi terbang mendarat dengan anggun
-            if (markerUtama) {
-                window.narrativeMap._narrativePopupHandler = function() {
-                    markerUtama.openPopup();
-                    window.narrativeMap._narrativePopupHandler = null;
-                };
-                window.narrativeMap.once('moveend', window.narrativeMap._narrativePopupHandler);
-            }
-
-            // Eksekusi flyTo mulus (durasi 1.5s dengan easing standar Leaflet)
-            window.narrativeMap.flyTo(offsetLatLng, targetZoom, {
-                animate: true,
-                duration: 1.5,
-                easeLinearity: 0.25
-            });
+            };
+            window.narrativeMap.once('moveend', window.narrativeMap._narrativePopupHandler);
         }
-    }
 
-    // Re-render daftar timeline untuk memperbarui status 'isActive'
-    renderNarrativeTimeline();
-
-    // Update Text Progress & Navigasi
-    const progressEl = document.getElementById('narrative-progress-text');
-    if (progressEl) progressEl.textContent = `Materi ${index + 1} dari ${activeList.length}`;
-
-    const stepEl = document.getElementById('narrative-step-indicator');
-    if (stepEl) stepEl.textContent = `${index + 1} / ${activeList.length}`;
-
-    const btnPrev = document.getElementById('btn-narrative-prev');
-    if (btnPrev) btnPrev.disabled = (index === 0);
-
-    const btnNext = document.getElementById('btn-narrative-next');
-    if (btnNext) btnNext.disabled = (index === activeList.length - 1);
-}
-
-// ==========================================
-// 7. NAVIGASI STEPPER & UTILITY RENDER
-// ==========================================
-function navigateNarrative(direction) {
-    const activeList = (filteredNarrativeList && filteredNarrativeList.length > 0) 
-        ? filteredNarrativeList 
-        : narrativeDataList;
-
-    const newIndex = currentNarrativeIndex + direction;
-    if (newIndex >= 0 && newIndex < activeList.length) {
-        loadNarrativeStep(newIndex);
-    }
-}
-
-function populateEraDropdown() {
-    const selectEl = document.getElementById('filter-era-select');
-    if (!selectEl) return;
-
-    // Pastikan TIMELINE_ERAS tersedia dari timeline-data.js
-    if (typeof TIMELINE_ERAS !== 'undefined' && Array.isArray(TIMELINE_ERAS)) {
-        let optionsHtml = `<option value="ALL">Semua Era Sejarah</option>`;
-        
-        TIMELINE_ERAS.forEach(era => {
-            const rangeText = (era.start && era.end) ? ` (${era.start}–${era.end} M)` : '';
-            optionsHtml += `<option value="${era.id}">${era.nama || era.name}${rangeText}</option>`;
+        window.narrativeMap.flyTo(offsetLatLng, targetZoom, {
+            animate: true,
+            duration: 1.4,
+            easeLinearity: 0.25
         });
-
-        selectEl.innerHTML = optionsHtml;
-    } else {
-        console.warn("[Narrative] Variable TIMELINE_ERAS tidak ditemukan di timeline-data.js.");
-    }
-}
-
-function initNarrativeMode(externalData) {
-    // Integrasikan dropdown era otomatis dari timeline-data.js
-    populateEraDropdown();
-
-    if (externalData && Array.isArray(externalData) && externalData.length > 0) {
-        narrativeDataList = externalData;
-    } else if (typeof dataObjekAtlas !== 'undefined' && dataObjekAtlas.length > 0) {
-        narrativeDataList = dataObjekAtlas;
-    }
-
-    filteredNarrativeList = [...narrativeDataList];
-    currentNarrativeIndex = -1; // -1 artinya belum ada yang dipilih
-    
-    if (!window.narrativeMap && typeof L !== 'undefined' && typeof initNarrativeMap === 'function') {
-        initNarrativeMap();
-    }
-
-    // 1. SEMBUNYIKAN PANEL MATERI — baru tampil setelah event dipilih
-    const floatingPanel = document.getElementById('narrative-floating-panel');
-    if (floatingPanel) {
-        floatingPanel.classList.add('hidden');
-    }
-
-    // Sembunyikan tombol reopen, tampilkan hanya setelah panel ditutup manual
-    const reopenBtn = document.getElementById('btn-reopen-panel');
-    if (reopenBtn) {
-        reopenBtn.classList.add('hidden');
-    }
-
-    // Reset stepper indicator
-    const stepEl = document.getElementById('narrative-step-indicator');
-    if (stepEl) stepEl.textContent = `- / ${narrativeDataList.length}`;
-    const btnPrev = document.getElementById('btn-narrative-prev');
-    if (btnPrev) btnPrev.disabled = true;
-    const btnNext = document.getElementById('btn-narrative-next');
-    if (btnNext) btnNext.disabled = true;
-    const progressEl = document.getElementById('narrative-progress-text');
-    if (progressEl) progressEl.textContent = 'Pilih materi pada daftar';
-
-    // 2. Render hanya timeline melayang di kiri
-    if (filteredNarrativeList.length > 0) {
-        renderNarrativeTimeline();
     }
 }
 
 // ==========================================
-// FUNGSIONALITAS CAROUSEL GAMBAR NARASI
+// 7. CAROUSEL GAMBAR KONTEN
 // ==========================================
-let currentCarouselIndex = 0;
-
 function changeNarrativeImage(direction) {
     const images = document.querySelectorAll('.narrative-carousel-slide');
     const dots = document.querySelectorAll('.narrative-carousel-dot');
     const captionEl = document.getElementById('narrative-carousel-caption');
-    
+
     if (!images || images.length <= 1) return;
 
-    // Sembunyikan slide aktif saat ini
     images[currentCarouselIndex].classList.add('hidden');
     if (dots[currentCarouselIndex]) {
         dots[currentCarouselIndex].style.backgroundColor = 'var(--border-light)';
@@ -630,10 +479,8 @@ function changeNarrativeImage(direction) {
         dots[currentCarouselIndex].classList.add('w-1.5');
     }
 
-    // Hitung indeks baru
     currentCarouselIndex = (currentCarouselIndex + direction + images.length) % images.length;
 
-    // Tampilkan slide baru
     images[currentCarouselIndex].classList.remove('hidden');
     if (dots[currentCarouselIndex]) {
         dots[currentCarouselIndex].style.backgroundColor = 'var(--accent-primary)';
@@ -643,16 +490,44 @@ function changeNarrativeImage(direction) {
 
     if (captionEl) {
         const activeImg = images[currentCarouselIndex];
-        captionEl.textContent = `📷 ${activeImg.getAttribute('data-caption') || 'Gambar Sejarah'}`;
+        captionEl.textContent = `📷 ${activeImg.getAttribute('data-caption') || 'Dokumentasi Sejarah'}`;
     }
 }
 
 function setNarrativeImage(targetIndex) {
     const images = document.querySelectorAll('.narrative-carousel-slide');
     if (!images || targetIndex < 0 || targetIndex >= images.length) return;
-    
+
     const diff = targetIndex - currentCarouselIndex;
     if (diff !== 0) {
         changeNarrativeImage(diff);
     }
 }
+
+// ==========================================
+// 8. INISIALISASI MODE KURIKULUM
+// ==========================================
+function initNarrativeMode() {
+    if (!window.narrativeMap && typeof L !== 'undefined' && typeof initNarrativeMap === 'function') {
+        initNarrativeMap();
+    }
+
+    // Set nilai default dropdown kelas
+    const classSelect = document.getElementById('curriculum-class-select');
+    if (classSelect) {
+        classSelect.value = currentCurriculumClass || "12";
+    }
+
+    // Populate bab dan load sub-materi
+    populateChapterDropdown(currentCurriculumClass || "12");
+}
+
+// Ekspor ke window global untuk event inline HTML
+window.onCurriculumClassChange = onCurriculumClassChange;
+window.onCurriculumChapterChange = onCurriculumChapterChange;
+window.selectSubMateri = selectSubMateri;
+window.navigateCurriculum = navigateCurriculum;
+window.toggleNarrativePanel = toggleNarrativePanel;
+window.changeNarrativeImage = changeNarrativeImage;
+window.setNarrativeImage = setNarrativeImage;
+window.initNarrativeMode = initNarrativeMode;

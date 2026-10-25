@@ -3,89 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atlas SKI — Converter Excel ke JSON/JS</title>
+    <title>Atlas SKI — Converter & Sinkronisasi Database Excel</title>
     
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet"/>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
+            background-color: #0b1120;
+            color: #f1f5f9;
         }
         .font-title {
             font-family: 'EB Garamond', serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col p-4 md:p-8">
 
     <!-- HEADER TOPBAR -->
-    <header class="w-full max-w-5xl mx-auto flex items-center justify-between py-4 mb-8 border-b border-slate-800">
+    <header class="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between py-4 mb-8 border-b border-slate-800 gap-4">
         <div class="flex items-center gap-3">
-            <div class="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
-                <span class="material-symbols-outlined text-2xl">table_convert</span>
+            <div class="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 shadow-lg shadow-emerald-950/30">
+                <span class="material-symbols-outlined text-3xl">table_convert</span>
             </div>
             <div>
-                <h1 class="font-title text-2xl md:text-3xl font-bold text-emerald-400">Converter Excel ➔ Atlas SKI Data</h1>
-                <p class="text-xs text-slate-400">Ubah File Excel (.xlsx) menjadi JavaScript Data siap pakai untuk Atlas SKI</p>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-title text-2xl md:text-3xl font-bold text-white tracking-wide">Converter Database Atlas SKI</h1>
+                    <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v2.0 Sinkron</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Manajemen dua arah: Ekspor data aktif ke Excel (.xlsx) atau Unggah Excel untuk memperbarui modul JavaScript</p>
             </div>
         </div>
-        <div>
-            <a href="index.html" class="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-emerald-400 bg-slate-800 hover:bg-slate-700 px-3.5 py-2 rounded-lg border border-slate-700 transition-all">
+        <div class="flex items-center gap-2.5">
+            <button onclick="exportCurrentDatabaseToExcel()" class="flex items-center gap-1.5 text-xs font-semibold text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-3.5 py-2.5 rounded-xl border border-emerald-500/30 transition-all cursor-pointer shadow-sm">
+                <span class="material-symbols-outlined text-sm">file_download</span>
+                <span>Ekspor ke Excel</span>
+            </button>
+            <a href="index.html" class="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3.5 py-2.5 rounded-xl border border-slate-700 transition-all">
                 <span class="material-symbols-outlined text-sm">arrow_back</span>
                 <span>Kembali ke Atlas</span>
             </a>
         </div>
     </header>
 
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="w-full max-w-5xl mx-auto flex-1 space-y-6">
+    <!-- MAIN CONTAINER -->
+    <main class="w-full max-w-6xl mx-auto flex-1 space-y-8">
 
-        <!-- STEP 1 & 2 GRID CARD -->
+        <!-- STEP 1 & 2 ACTIONS GRID -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            <!-- CARD 1: DOWNLOAD TEMPLATE EXCEL -->
-            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <!-- CARD 1: DOWNLOAD EXCEL (EKSPOR ATAU TEMPLATE) -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-all shadow-xl">
                 <div class="space-y-3">
                     <div class="flex items-center gap-2 text-emerald-400">
                         <span class="material-symbols-outlined">download_for_offline</span>
-                        <h2 class="font-semibold text-base">Langkah 1: Unduh Template Excel</h2>
+                        <h2 class="font-semibold text-base text-slate-100">Langkah 1: Siapkan / Ambil File Excel</h2>
                     </div>
                     <p class="text-xs text-slate-400 leading-relaxed">
-                        Unduh struktur file Excel standar (`Template_Database_Atlas_SKI.xlsx`) yang sudah memiliki 5 Sheet lengkap: <code class="text-emerald-300 font-mono">ObjekAtlas</code>, <code class="text-emerald-300 font-mono">Markers</code>, <code class="text-emerald-300 font-mono">Jalur</code>, <code class="text-emerald-300 font-mono">Wilayah</code>, dan <code class="text-emerald-300 font-mono">Kurikulum</code>.
+                        Anda dapat mengunduh seluruh data yang sedang aktif di website ini langsung ke format Excel, atau mengunduh template standar 5 Sheet: <code class="text-emerald-300 font-mono">Kurikulum</code>, <code class="text-emerald-300 font-mono">ObjekAtlas</code>, <code class="text-emerald-300 font-mono">Markers</code>, <code class="text-emerald-300 font-mono">Jalur</code>, dan <code class="text-emerald-300 font-mono">Wilayah</code>.
                     </p>
                 </div>
 
-                <div class="pt-6">
-                    <button onclick="downloadExcelTemplate()" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs px-4 py-3 rounded-xl shadow-lg shadow-emerald-950/40 transition-all cursor-pointer">
-                        <span class="material-symbols-outlined text-lg">file_download</span>
-                        <span>Download Template Excel (.xlsx)</span>
+                <div class="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button onclick="exportCurrentDatabaseToExcel()" class="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs px-4 py-3 rounded-xl shadow-lg shadow-emerald-950/40 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-base">cloud_download</span>
+                        <span>Ekspor Database Aktif (.xlsx)</span>
+                    </button>
+                    <button onclick="downloadExcelTemplate()" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs px-4 py-3 rounded-xl border border-slate-700 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-base">description</span>
+                        <span>Unduh Template Contoh</span>
                     </button>
                 </div>
             </div>
 
             <!-- CARD 2: UPLOAD FILE EXCEL -->
-            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-all">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-all shadow-xl">
                 <div class="space-y-3">
                     <div class="flex items-center gap-2 text-emerald-400">
                         <span class="material-symbols-outlined">upload_file</span>
-                        <h2 class="font-semibold text-base">Langkah 2: Unggah File Excel Anda</h2>
+                        <h2 class="font-semibold text-base text-slate-100">Langkah 2: Unggah File Excel Anda</h2>
                     </div>
                     <p class="text-xs text-slate-400 leading-relaxed">
-                        Drag & drop atau pilih file Excel yang telah Anda isi. Sistem akan otomatis memproses dan menguji validitas relasi data.
+                        Tarik & lepaskan file Excel hasil editan Anda ke dalam kotak di bawah ini. Sistem akan mengonversi dan memvalidasi keutuhan relasi antar 5 komponen secara otomatis.
                     </p>
                 </div>
 
                 <div class="pt-4">
-                    <label id="drop-zone" for="excel-input" class="w-full border-2 border-dashed border-slate-700 hover:border-emerald-500/60 bg-slate-950/40 hover:bg-emerald-500/5 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all">
+                    <label id="drop-zone" for="excel-input" class="w-full border-2 border-dashed border-slate-700 hover:border-emerald-500/60 bg-slate-950/60 hover:bg-emerald-500/5 rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer transition-all">
                         <span class="material-symbols-outlined text-3xl text-emerald-400 mb-1">cloud_upload</span>
-                        <span class="text-xs font-medium text-slate-300">Pilih atau Tarik File Excel di Sini</span>
-                        <span class="text-[10px] text-slate-500 mt-0.5">Format pendukung: .xlsx, .xls</span>
+                        <span class="text-xs font-medium text-slate-200">Pilih atau Tarik File Excel di Sini</span>
+                        <span class="text-[10px] text-slate-500 mt-0.5">Mendukung format: .xlsx, .xls</span>
                         <input id="excel-input" type="file" accept=".xlsx, .xls" class="hidden" onchange="handleFileSelect(event)">
                     </label>
                 </div>
@@ -93,117 +119,356 @@
 
         </div>
 
-        <!-- SECTION RESULTS & VALIDATION LOGS -->
-        <div id="result-section" class="hidden space-y-6">
+        <!-- SECTION OUTPUT VISUAL: STATS, VALIDATION & PREVIEWS -->
+        <div id="result-section" class="space-y-6">
 
-            <!-- STATS SUMMARY CARD -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-emerald-400">analytics</span>
-                        <h3 class="font-semibold text-sm text-slate-200">Hasil Parsing Excel</h3>
+            <!-- STATS SUMMARY CARDS -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-emerald-400 text-xl">analytics</span>
+                        <h3 class="font-semibold text-sm text-slate-200">Ringkasan Komponen Data Atlas SKI</h3>
                     </div>
-                    <span id="file-name-badge" class="text-[11px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        File Loaded
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span id="file-name-badge" class="text-[11px] font-mono px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                            Database Aktif Dimuat
+                        </span>
+                        <button onclick="downloadAllAsZip()" class="flex items-center gap-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl shadow-md transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">folder_zip</span>
+                            <span>Unduh Semua JS (.zip)</span>
+                        </button>
+                    </div>
                 </div>
 
+                <!-- 5 CARDS STATS -->
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
-                        <span class="block text-xl font-bold text-emerald-400" id="stat-objek">0</span>
-                        <span class="text-[10px] uppercase font-semibold text-slate-400">Objek Atlas</span>
+                    <div class="p-4 bg-slate-950/70 border border-slate-800/80 rounded-xl text-center">
+                        <span class="block text-2xl font-bold text-emerald-400" id="stat-kurikulum">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Modul Kurikulum</span>
+                        <span class="block text-[10px] text-slate-500 mt-0.5" id="stat-kurikulum-detail">0 Bab / 0 Sub</span>
                     </div>
-                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
-                        <span class="block text-xl font-bold text-emerald-400" id="stat-markers">0</span>
-                        <span class="text-[10px] uppercase font-semibold text-slate-400">Markers</span>
+                    <div class="p-4 bg-slate-950/70 border border-slate-800/80 rounded-xl text-center">
+                        <span class="block text-2xl font-bold text-amber-400" id="stat-objek">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Objek Atlas</span>
+                        <span class="block text-[10px] text-slate-500 mt-0.5">Peristiwa & Tokoh</span>
                     </div>
-                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
-                        <span class="block text-xl font-bold text-emerald-400" id="stat-jalur">0</span>
-                        <span class="text-[10px] uppercase font-semibold text-slate-400">Jalur</span>
+                    <div class="p-4 bg-slate-950/70 border border-slate-800/80 rounded-xl text-center">
+                        <span class="block text-2xl font-bold text-cyan-400" id="stat-markers">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Markers Peta</span>
+                        <span class="block text-[10px] text-slate-500 mt-0.5">Titik Lokasi Spasial</span>
                     </div>
-                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
-                        <span class="block text-xl font-bold text-emerald-400" id="stat-wilayah">0</span>
-                        <span class="text-[10px] uppercase font-semibold text-slate-400">Wilayah</span>
+                    <div class="p-4 bg-slate-950/70 border border-slate-800/80 rounded-xl text-center">
+                        <span class="block text-2xl font-bold text-purple-400" id="stat-jalur">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Jalur Rute</span>
+                        <span class="block text-[10px] text-slate-500 mt-0.5">Polyline Perjalanan</span>
                     </div>
-                    <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
-                        <span class="block text-xl font-bold text-emerald-400" id="stat-kurikulum">0</span>
-                        <span class="text-[10px] uppercase font-semibold text-slate-400">Kurikulum</span>
+                    <div class="p-4 bg-slate-950/70 border border-slate-800/80 rounded-xl text-center">
+                        <span class="block text-2xl font-bold text-orange-400" id="stat-wilayah">0</span>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Wilayah Kekuasaan</span>
+                        <span class="block text-[10px] text-slate-500 mt-0.5">Polygon Teritori</span>
                     </div>
                 </div>
 
                 <!-- VALIDATION LOGS BOX -->
-                <div id="log-box-container" class="space-y-2 pt-2">
-                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Catatan Validasi Data</h4>
-                    <div id="log-box" class="p-3 bg-slate-950 rounded-xl border border-slate-800 max-h-40 overflow-y-auto font-mono text-[11px] space-y-1 text-slate-300">
+                <div class="pt-2">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-sm text-slate-400">verified</span>
+                            <span>Catatan Validasi Integritas Relasi</span>
+                        </h4>
+                        <span id="validation-status-pill" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            Valid
+                        </span>
+                    </div>
+                    <div id="log-box" class="p-3 bg-slate-950 rounded-xl border border-slate-800 max-h-32 overflow-y-auto font-mono text-[11px] space-y-1 text-slate-300 custom-scrollbar">
                     </div>
                 </div>
             </div>
 
-            <!-- EXPORT ACTION CARD -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-                <div class="flex items-center gap-2 text-emerald-400 border-b border-slate-800 pb-3">
-                    <span class="material-symbols-outlined">folder_zip</span>
-                    <h3 class="font-semibold text-sm text-slate-200">Unduh File JavaScript (.js) Siap Pakai</h3>
-                </div>
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    Klik tombol di bawah ini untuk mengunduh masing-masing file `.js`. Timpa file hasil unduhan ke dalam folder <code class="text-emerald-300 font-mono">js/</code> pada proyek Atlas SKI Anda.
-                </p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
-                    <button onclick="exportDataObjekAtlasJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
-                        <div class="text-left">
-                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">dataObjekAtlas.js</span>
-                            <span class="text-[10px] text-slate-400">Master Peristiwa/Tokoh</span>
-                        </div>
-                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+            <!-- COMPONENT PREVIEW TABS CONTAINER -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl">
+                <!-- TAB NAVIGATION BUTTONS -->
+                <div class="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-4">
+                    <button onclick="switchTab('kurikulum')" id="tab-btn-kurikulum" class="tab-btn flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-emerald-600 text-white transition-all">
+                        <span class="material-symbols-outlined text-base">school</span>
+                        <span>Modul Kurikulum (<span id="tab-count-kurikulum">0</span>)</span>
                     </button>
-
-                    <button onclick="exportDataMarkerJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
-                        <div class="text-left">
-                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">dataMarker.js</span>
-                            <span class="text-[10px] text-slate-400">Titik Spasial Peta</span>
-                        </div>
-                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+                    <button onclick="switchTab('objek')" id="tab-btn-objek" class="tab-btn flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-base">history_edu</span>
+                        <span>Objek Atlas (<span id="tab-count-objek">0</span>)</span>
                     </button>
-
-                    <button onclick="exportDataJalurJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
-                        <div class="text-left">
-                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">dataJalur.js</span>
-                            <span class="text-[10px] text-slate-400">Polyline Rute</span>
-                        </div>
-                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+                    <button onclick="switchTab('markers')" id="tab-btn-markers" class="tab-btn flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-base">pin_drop</span>
+                        <span>Markers (<span id="tab-count-markers">0</span>)</span>
                     </button>
-
-                    <button onclick="exportDataWilayahJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
-                        <div class="text-left">
-                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">dataWilayah.js</span>
-                            <span class="text-[10px] text-slate-400">Polygon Area Kekuasaan</span>
-                        </div>
-                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+                    <button onclick="switchTab('jalur')" id="tab-btn-jalur" class="tab-btn flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-base">route</span>
+                        <span>Jalur (<span id="tab-count-jalur">0</span>)</span>
                     </button>
-
-                    <button onclick="exportDataKurikulumJS()" class="flex items-center justify-between p-3 bg-slate-800 hover:bg-emerald-600/20 hover:border-emerald-500/40 border border-slate-700 rounded-xl transition-all cursor-pointer group">
-                        <div class="text-left">
-                            <span class="block text-xs font-semibold text-slate-200 group-hover:text-emerald-400">datakurikulum.js</span>
-                            <span class="text-[10px] text-slate-400">Modul Narasi SKI</span>
-                        </div>
-                        <span class="material-symbols-outlined text-slate-400 group-hover:text-emerald-400 text-lg">download</span>
+                    <button onclick="switchTab('wilayah')" id="tab-btn-wilayah" class="tab-btn flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-base">layers</span>
+                        <span>Wilayah (<span id="tab-count-wilayah">0</span>)</span>
+                    </button>
+                    <button onclick="switchTab('export')" id="tab-btn-export" class="tab-btn flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition-all ml-auto">
+                        <span class="material-symbols-outlined text-base">file_download</span>
+                        <span>Unduh File JS</span>
                     </button>
                 </div>
+
+                <!-- TAB 1: KURIKULUM -->
+                <div id="tab-content-kurikulum" class="tab-pane space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400 font-medium">Filter Kelas:</span>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="filterKurikulumClass('all')" id="btn-filter-k-all" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">Semua</button>
+                                <button onclick="filterKurikulumClass('12')" id="btn-filter-k-12" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">Kelas 12</button>
+                                <button onclick="filterKurikulumClass('11')" id="btn-filter-k-11" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">Kelas 11</button>
+                                <button onclick="filterKurikulumClass('10')" id="btn-filter-k-10" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">Kelas 10</button>
+                            </div>
+                        </div>
+                        <div class="relative w-full sm:w-64">
+                            <span class="material-symbols-outlined absolute left-2.5 top-2 text-slate-500 text-sm">search</span>
+                            <input type="text" id="search-kurikulum" oninput="renderKurikulumPreview()" placeholder="Cari materi, tokoh, bab..." class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+
+                    <!-- CONTAINER CARD BAB & SUB-MATERI -->
+                    <div id="kurikulum-cards-container" class="space-y-4 max-h-[600px] overflow-y-auto pr-1 custom-scrollbar">
+                    </div>
+                </div>
+
+                <!-- TAB 2: OBJEK ATLAS -->
+                <div id="tab-content-objek" class="tab-pane hidden space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                        <div class="relative w-full sm:w-72">
+                            <span class="material-symbols-outlined absolute left-2.5 top-2 text-slate-500 text-sm">search</span>
+                            <input type="text" id="search-objek" oninput="renderObjekAtlasPreview()" placeholder="Cari nama peristiwa, lokasi, era..." class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <span class="text-xs text-slate-400" id="objek-count-label">Menampilkan 0 item</span>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-800 rounded-xl custom-scrollbar max-h-[550px]">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 sticky top-0 border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3">ID / Nama Peristiwa</th>
+                                    <th class="p-3">Tahun / Periode</th>
+                                    <th class="p-3">Kategori & Era</th>
+                                    <th class="p-3">Lokasi & Wilayah</th>
+                                    <th class="p-3">Relasi Spasial</th>
+                                </tr>
+                            </thead>
+                            <tbody id="objek-table-body" class="divide-y divide-slate-800/60">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 3: MARKERS -->
+                <div id="tab-content-markers" class="tab-pane hidden space-y-4">
+                    <div class="overflow-x-auto border border-slate-800 rounded-xl custom-scrollbar max-h-[550px]">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 sticky top-0 border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3 w-40">ID Marker</th>
+                                    <th class="p-3">Nama Lokasi</th>
+                                    <th class="p-3">Latitude</th>
+                                    <th class="p-3">Longitude</th>
+                                    <th class="p-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="markers-table-body" class="divide-y divide-slate-800/60">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 4: JALUR -->
+                <div id="tab-content-jalur" class="tab-pane hidden space-y-4">
+                    <div class="overflow-x-auto border border-slate-800 rounded-xl custom-scrollbar max-h-[550px]">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 sticky top-0 border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3 w-36">ID Jalur</th>
+                                    <th class="p-3">Nama Jalur</th>
+                                    <th class="p-3">Tipe</th>
+                                    <th class="p-3">Warna</th>
+                                    <th class="p-3">Rentang Tahun</th>
+                                    <th class="p-3">Jumlah Titik</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jalur-table-body" class="divide-y divide-slate-800/60">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 5: WILAYAH -->
+                <div id="tab-content-wilayah" class="tab-pane hidden space-y-4">
+                    <div class="overflow-x-auto border border-slate-800 rounded-xl custom-scrollbar max-h-[550px]">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 sticky top-0 border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3 w-36">ID Wilayah</th>
+                                    <th class="p-3">Nama Wilayah</th>
+                                    <th class="p-3">Warna</th>
+                                    <th class="p-3">Rentang Tahun</th>
+                                    <th class="p-3">Jumlah Titik Batas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wilayah-table-body" class="divide-y divide-slate-800/60">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 6: UNDUH & SALIN KODE JS -->
+                <div id="tab-content-export" class="tab-pane hidden space-y-6">
+                    <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-emerald-400 text-2xl">archive</span>
+                            <div>
+                                <h4 class="text-xs font-bold text-emerald-300">Paket Bundle Semua File JavaScript</h4>
+                                <p class="text-[11px] text-slate-400">Unduh seluruh 5 file JS sekaligus dalam 1 arsip ZIP siap timpa ke folder <code class="font-mono text-emerald-300">js/</code></p>
+                            </div>
+                        </div>
+                        <button onclick="downloadAllAsZip()" class="flex items-center gap-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-lg transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-sm">download</span>
+                            <span>Download Semua (.zip)</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Card Kurikulum -->
+                        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono text-xs font-bold text-emerald-400">datakurikulum.js</span>
+                                    <span class="text-[10px] text-slate-500 uppercase">Modul SKI</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Hierarki Kelas, Bab, Sub-Materi, metadata, dan uraian teks materi.</p>
+                            </div>
+                            <div class="flex items-center gap-2 pt-2">
+                                <button onclick="exportDataKurikulumJS()" class="flex-1 flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-emerald-600/30 text-xs font-medium py-2 rounded-lg border border-slate-700 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">download</span>
+                                    <span>Unduh File</span>
+                                </button>
+                                <button onclick="copyCodeToClipboard('dataKurikulum')" class="px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 rounded-lg border border-slate-700 transition-all cursor-pointer" title="Salin Kode">
+                                    <span class="material-symbols-outlined text-sm">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card ObjekAtlas -->
+                        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono text-xs font-bold text-amber-400">dataObjekAtlas.js</span>
+                                    <span class="text-[10px] text-slate-500 uppercase">Master Data</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Seluruh data peristiwa sejarah, tokoh, era, dan relasi spasial.</p>
+                            </div>
+                            <div class="flex items-center gap-2 pt-2">
+                                <button onclick="exportDataObjekAtlasJS()" class="flex-1 flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-amber-600/30 text-xs font-medium py-2 rounded-lg border border-slate-700 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">download</span>
+                                    <span>Unduh File</span>
+                                </button>
+                                <button onclick="copyCodeToClipboard('dataObjekAtlas')" class="px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 rounded-lg border border-slate-700 transition-all cursor-pointer" title="Salin Kode">
+                                    <span class="material-symbols-outlined text-sm">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card Markers -->
+                        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono text-xs font-bold text-cyan-400">dataMarker.js</span>
+                                    <span class="text-[10px] text-slate-500 uppercase">Titik Peta</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Daftar koordinat latitude & longitude titik lokasi di peta Leaflet.</p>
+                            </div>
+                            <div class="flex items-center gap-2 pt-2">
+                                <button onclick="exportDataMarkerJS()" class="flex-1 flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-cyan-600/30 text-xs font-medium py-2 rounded-lg border border-slate-700 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">download</span>
+                                    <span>Unduh File</span>
+                                </button>
+                                <button onclick="copyCodeToClipboard('dataMarker')" class="px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 rounded-lg border border-slate-700 transition-all cursor-pointer" title="Salin Kode">
+                                    <span class="material-symbols-outlined text-sm">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card Jalur -->
+                        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono text-xs font-bold text-purple-400">dataJalur.js</span>
+                                    <span class="text-[10px] text-slate-500 uppercase">Polyline</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Rute ekspedisi militer, hijrah, dakwah, dan perdagangan laut.</p>
+                            </div>
+                            <div class="flex items-center gap-2 pt-2">
+                                <button onclick="exportDataJalurJS()" class="flex-1 flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-purple-600/30 text-xs font-medium py-2 rounded-lg border border-slate-700 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">download</span>
+                                    <span>Unduh File</span>
+                                </button>
+                                <button onclick="copyCodeToClipboard('dataJalur')" class="px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 rounded-lg border border-slate-700 transition-all cursor-pointer" title="Salin Kode">
+                                    <span class="material-symbols-outlined text-sm">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card Wilayah -->
+                        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono text-xs font-bold text-orange-400">dataWilayah.js</span>
+                                    <span class="text-[10px] text-slate-500 uppercase">Polygon</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Area perbatasan dan jangkauan kedaulatan kesultanan atau dinasti.</p>
+                            </div>
+                            <div class="flex items-center gap-2 pt-2">
+                                <button onclick="exportDataWilayahJS()" class="flex-1 flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-orange-600/30 text-xs font-medium py-2 rounded-lg border border-slate-700 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">download</span>
+                                    <span>Unduh File</span>
+                                </button>
+                                <button onclick="copyCodeToClipboard('dataWilayah')" class="px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 rounded-lg border border-slate-700 transition-all cursor-pointer" title="Salin Kode">
+                                    <span class="material-symbols-outlined text-sm">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
 
     </main>
 
-    <footer class="w-full max-w-5xl mx-auto py-6 mt-8 border-t border-slate-800 text-center text-xs text-slate-500">
-        Atlas Sejarah Kebudayaan Islam — Internal Content Converter Tool
+    <footer class="w-full max-w-6xl mx-auto py-6 mt-8 border-t border-slate-800 text-center text-xs text-slate-500">
+        Atlas Sejarah Kebudayaan Islam — Converter Engine v2.0 Terintegrasi
     </footer>
 
-    <!-- SCRIPT UTAMA LOGIKA CONVERTER -->
+    <!-- LOAD DATABASE EKSIS (Agar bisa langsung ekspor atau diinspeksi) -->
+    <script src="js/dataMarker.js"></script>
+    <script src="js/dataJalur.js"></script>
+    <script src="js/dataWilayah.js"></script>
+    <script src="js/dataObjekAtlas.js"></script>
+    <script src="js/datakurikulum.js"></script>
     <script src="js/converter-logic.js"></script>
 
     <script>
+        let currentFilterClass = 'all';
+
+        // Load awal data saat halaman dibuka
+        window.addEventListener('DOMContentLoaded', () => {
+            initConverterFromExistingData();
+            updateAllVisuals();
+        });
+
         function handleFileSelect(event) {
             const files = event.target.files;
             if (files.length > 0) {
@@ -212,33 +477,326 @@
         }
 
         function processUploadedFile(file) {
-            document.getElementById('file-name-badge').textContent = file.name;
+            document.getElementById('file-name-badge').textContent = `File: ${file.name}`;
             
             processExcelFile(file, function(data) {
-                document.getElementById('result-section').classList.remove('hidden');
+                updateAllVisuals();
+            });
+        }
 
-                // Render Counter Stats
-                document.getElementById('stat-objek').textContent = data.dataObjekAtlas.length;
-                document.getElementById('stat-markers').textContent = data.dataMarker.length;
-                document.getElementById('stat-jalur').textContent = data.dataJalur.length;
-                document.getElementById('stat-wilayah').textContent = data.dataWilayah.length;
-                document.getElementById('stat-kurikulum').textContent = data.dataKurikulum.length;
+        function updateAllVisuals() {
+            // Update Stat Numbers
+            const totalSubMateri = (parsedData.dataKurikulum || []).reduce((acc, c) => acc + (c.subMateri ? c.subMateri.length : 0), 0);
+            const totalBab = (parsedData.dataKurikulum || []).length;
 
-                // Render Logs & Errors
-                const logBox = document.getElementById('log-box');
-                logBox.innerHTML = '';
+            document.getElementById('stat-kurikulum').textContent = totalSubMateri;
+            document.getElementById('stat-kurikulum-detail').textContent = `${totalBab} Bab / ${totalSubMateri} Sub-Materi`;
+            document.getElementById('stat-objek').textContent = parsedData.dataObjekAtlas.length;
+            document.getElementById('stat-markers').textContent = parsedData.dataMarker.length;
+            document.getElementById('stat-jalur').textContent = parsedData.dataJalur.length;
+            document.getElementById('stat-wilayah').textContent = parsedData.dataWilayah.length;
 
-                if (data.errors.length === 0 && data.logs.length === 0) {
-                    logBox.innerHTML = `<div class="text-emerald-400">✓ Seluruh data berhasil diparse sempurna tanpa kesalahan relasi!</div>`;
-                } else {
-                    data.errors.forEach(err => {
-                        logBox.innerHTML += `<div class="text-rose-400 font-semibold">❌ ${err}</div>`;
-                    });
-                    data.logs.forEach(info => {
-                        logBox.innerHTML += `<div class="text-amber-400">⚠️ ${info}</div>`;
-                    });
+            document.getElementById('tab-count-kurikulum').textContent = totalSubMateri;
+            document.getElementById('tab-count-objek').textContent = parsedData.dataObjekAtlas.length;
+            document.getElementById('tab-count-markers').textContent = parsedData.dataMarker.length;
+            document.getElementById('tab-count-jalur').textContent = parsedData.dataJalur.length;
+            document.getElementById('tab-count-wilayah').textContent = parsedData.dataWilayah.length;
+
+            // Render Logs & Status
+            const logBox = document.getElementById('log-box');
+            const statusPill = document.getElementById('validation-status-pill');
+            logBox.innerHTML = '';
+
+            if (parsedData.errors.length === 0 && parsedData.logs.length === 0) {
+                logBox.innerHTML = `<div class="text-emerald-400">✓ Seluruh relasi Marker, Jalur, dan Wilayah terhubung sempurna tanpa error.</div>`;
+                statusPill.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                statusPill.textContent = "Valid";
+            } else {
+                parsedData.errors.forEach(err => {
+                    logBox.innerHTML += `<div class="text-rose-400 font-semibold">❌ ${err}</div>`;
+                });
+                parsedData.logs.forEach(info => {
+                    logBox.innerHTML += `<div class="text-amber-400">⚠️ ${info}</div>`;
+                });
+                statusPill.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20";
+                statusPill.textContent = `${parsedData.errors.length} Masalah`;
+            }
+
+            // Render Preview Komponen
+            renderKurikulumPreview();
+            renderObjekAtlasPreview();
+            renderMarkersPreview();
+            renderJalurPreview();
+            renderWilayahPreview();
+        }
+
+        // ==========================================
+        // TAB SWITCHING
+        // ==========================================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition-all";
+            });
+
+            const activePane = document.getElementById(`tab-content-${tabName}`);
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            if (activePane) activePane.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.className = "tab-btn flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-emerald-600 text-white transition-all shadow-md";
+            }
+        }
+
+        // ==========================================
+        // RENDER PREVIEW KURIKULUM
+        // ==========================================
+        function filterKurikulumClass(kelas) {
+            currentFilterClass = kelas;
+            ['all', '12', '11', '10'].forEach(k => {
+                const btn = document.getElementById(`btn-filter-k-${k}`);
+                if (btn) {
+                    if (k === kelas) {
+                        btn.className = "text-xs px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30";
+                    } else {
+                        btn.className = "text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200";
+                    }
                 }
             });
+            renderKurikulumPreview();
+        }
+
+        function renderKurikulumPreview() {
+            const container = document.getElementById('kurikulum-cards-container');
+            if (!container) return;
+            const query = (document.getElementById('search-kurikulum')?.value || '').toLowerCase().trim();
+
+            let filteredChapters = (parsedData.dataKurikulum || []).filter(chap => {
+                if (currentFilterClass !== 'all' && String(chap.kelas) !== String(currentFilterClass)) {
+                    return false;
+                }
+                return true;
+            });
+
+            if (filteredChapters.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs">Tidak ada data kurikulum yang cocok dengan filter.</div>`;
+                return;
+            }
+
+            let html = '';
+            filteredChapters.forEach((chap, cIdx) => {
+                const subMatching = (chap.subMateri || []).filter(sub => {
+                    if (!query) return true;
+                    return sub.judul.toLowerCase().includes(query) ||
+                           chap.judulBab.toLowerCase().includes(query) ||
+                           (sub.metadata?.wilayah || '').toLowerCase().includes(query) ||
+                           (sub.metadata?.tokoh || '').toLowerCase().includes(query);
+                });
+
+                if (query && subMatching.length === 0) return;
+
+                html += `
+                    <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold">
+                                    Kelas ${chap.kelas}
+                                </span>
+                                <h4 class="font-bold text-sm text-slate-100">${chap.judulBab}</h4>
+                            </div>
+                            <span class="text-[11px] text-slate-500">${subMatching.length} Sub-Materi</span>
+                        </div>
+                        <p class="text-xs text-slate-400 italic">${chap.deskripsiBab || 'Tidak ada deskripsi bab'}</p>
+
+                        <div class="grid grid-cols-1 gap-2.5 pt-1">
+                            ${subMatching.map(sub => `
+                                <div class="bg-slate-900/90 border border-slate-800/80 rounded-lg p-3 space-y-2 hover:border-slate-700 transition-all">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div>
+                                            <span class="font-mono text-emerald-400 text-xs font-bold mr-1.5">[${sub.nomor || '1.1'}]</span>
+                                            <span class="text-xs font-semibold text-slate-200">${sub.judul}</span>
+                                        </div>
+                                        <span class="font-mono text-[10px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                                            ${sub.id}
+                                        </span>
+                                    </div>
+
+                                    <!-- METADATA BADGES -->
+                                    <div class="flex flex-wrap items-center gap-1.5 text-[10px]">
+                                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/60">
+                                            📍 ${sub.metadata?.wilayah || '-'}
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/60">
+                                            ⏳ ${sub.metadata?.periode || '-'}
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/60">
+                                            👤 ${sub.metadata?.tokoh || '-'}
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                            🎯 ${sub.metadata?.fokus || '-'}
+                                        </span>
+                                    </div>
+
+                                    <!-- RELASI SPASIAL -->
+                                    <div class="flex flex-wrap items-center gap-1.5 text-[10px]">
+                                        <span class="text-slate-500">Relasi:</span>
+                                        ${(sub.relasiPeta?.markers || []).map(m => `<span class="bg-cyan-950/60 text-cyan-300 border border-cyan-800/50 px-1.5 py-0.5 rounded font-mono">📍 ${m}</span>`).join('') || '<span class="text-slate-600">-</span>'}
+                                        ${(sub.relasiPeta?.jalur || []).map(j => `<span class="bg-purple-950/60 text-purple-300 border border-purple-800/50 px-1.5 py-0.5 rounded font-mono">🗺️ ${j}</span>`).join('')}
+                                        ${(sub.relasiPeta?.wilayah || []).map(w => `<span class="bg-orange-950/60 text-orange-300 border border-orange-800/50 px-1.5 py-0.5 rounded font-mono">🌐 ${w}</span>`).join('')}
+                                    </div>
+
+                                    <!-- GALERI COUNT & COLLAPSE KONTEN -->
+                                    <div class="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px] text-slate-500">
+                                        <span>📷 ${sub.galeri ? sub.galeri.length : 0} Gambar Galeri</span>
+                                        <details class="cursor-pointer">
+                                            <summary class="text-emerald-400 hover:underline">Lihat Cuplikan Konten HTML</summary>
+                                            <div class="mt-2 p-2.5 bg-slate-950 rounded text-slate-300 font-mono text-[10px] max-h-32 overflow-y-auto custom-scrollbar border border-slate-800">
+                                                ${escapeHtml(sub.konten || '(Tidak ada uraian materi)')}
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // RENDER PREVIEW OBJEK ATLAS
+        // ==========================================
+        function renderObjekAtlasPreview() {
+            const tbody = document.getElementById('objek-table-body');
+            if (!tbody) return;
+            const query = (document.getElementById('search-objek')?.value || '').toLowerCase().trim();
+
+            const filtered = (parsedData.dataObjekAtlas || []).filter(item => {
+                if (!query) return true;
+                return item.nama.toLowerCase().includes(query) ||
+                       item.id.toLowerCase().includes(query) ||
+                       (item.lokasi || '').toLowerCase().includes(query) ||
+                       (item.wilayah || '').toLowerCase().includes(query) ||
+                       (item.era || '').toLowerCase().includes(query);
+            });
+
+            document.getElementById('objek-count-label').textContent = `Menampilkan ${filtered.length} dari ${parsedData.dataObjekAtlas.length} objek`;
+
+            tbody.innerHTML = filtered.map(item => `
+                <tr class="hover:bg-slate-900/50 transition-colors">
+                    <td class="p-3">
+                        <span class="block font-semibold text-slate-100">${item.nama}</span>
+                        <span class="font-mono text-[10px] text-slate-500">${item.id}</span>
+                    </td>
+                    <td class="p-3">
+                        <span class="font-medium text-emerald-400">${item.tahun || '-'}</span>
+                        <span class="block text-[10px] text-slate-400">${item.periode || ''}</span>
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            ${item.kategori || 'peristiwa'}
+                        </span>
+                        <span class="block text-[10px] text-slate-500 mt-1">${item.era || '-'}</span>
+                    </td>
+                    <td class="p-3">
+                        <span class="block text-slate-300">${item.lokasi || '-'}</span>
+                        <span class="text-[10px] text-slate-500">${item.wilayah || '-'}</span>
+                    </td>
+                    <td class="p-3 space-y-1">
+                        <div class="flex flex-wrap gap-1 text-[10px]">
+                            ${(item.relasi?.markers || []).map(m => `<span class="bg-cyan-950/60 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-800/40 font-mono">📍 ${m}</span>`).join('') || '<span class="text-slate-600">-</span>'}
+                            ${(item.relasi?.jalur || []).map(j => `<span class="bg-purple-950/60 text-purple-300 px-1.5 py-0.5 rounded border border-purple-800/40 font-mono">🗺️ ${j}</span>`).join('')}
+                            ${(item.relasi?.wilayah || []).map(w => `<span class="bg-orange-950/60 text-orange-300 px-1.5 py-0.5 rounded border border-orange-800/40 font-mono">🌐 ${w}</span>`).join('')}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==========================================
+        // RENDER PREVIEW MARKERS
+        // ==========================================
+        function renderMarkersPreview() {
+            const tbody = document.getElementById('markers-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = (parsedData.dataMarker || []).map(m => `
+                <tr class="hover:bg-slate-900/50 transition-colors">
+                    <td class="p-3 font-mono text-cyan-400 font-semibold">${m.id}</td>
+                    <td class="p-3 font-medium text-slate-200">${m.nama}</td>
+                    <td class="p-3 font-mono text-slate-400">${m.koordinat ? m.koordinat[0] : '-'}</td>
+                    <td class="p-3 font-mono text-slate-400">${m.koordinat ? m.koordinat[1] : '-'}</td>
+                    <td class="p-3">
+                        <a href="https://www.google.com/maps?q=${m.koordinat ? m.koordinat[0] : 0},${m.koordinat ? m.koordinat[1] : 0}" target="_blank" class="text-[10px] text-emerald-400 hover:underline flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs">open_in_new</span>
+                            <span>Google Maps</span>
+                        </a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==========================================
+        // RENDER PREVIEW JALUR
+        // ==========================================
+        function renderJalurPreview() {
+            const tbody = document.getElementById('jalur-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = (parsedData.dataJalur || []).map(j => `
+                <tr class="hover:bg-slate-900/50 transition-colors">
+                    <td class="p-3 font-mono text-purple-400 font-semibold">${j.id}</td>
+                    <td class="p-3">
+                        <span class="font-medium text-slate-200 block">${j.nama}</span>
+                        <span class="text-[10px] text-slate-500">${j.deskripsi || '-'}</span>
+                    </td>
+                    <td class="p-3 text-slate-300 uppercase text-[10px] font-semibold">${j.tipe || 'peristiwa'}</td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full border border-slate-700" style="background-color: ${j.warna || '#008080'}"></span>
+                            <span class="font-mono text-[10px] text-slate-400">${j.warna || '#008080'}</span>
+                        </div>
+                    </td>
+                    <td class="p-3 font-mono text-slate-300 text-xs">${j.tahunMulai} – ${j.tahunSelesai}</td>
+                    <td class="p-3 font-mono text-xs text-slate-400">${(j.koordinat || []).length} Titik</td>
+                </tr>
+            `).join('');
+        }
+
+        // ==========================================
+        // RENDER PREVIEW WILAYAH
+        // ==========================================
+        function renderWilayahPreview() {
+            const tbody = document.getElementById('wilayah-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = (parsedData.dataWilayah || []).map(w => `
+                <tr class="hover:bg-slate-900/50 transition-colors">
+                    <td class="p-3 font-mono text-orange-400 font-semibold">${w.id}</td>
+                    <td class="p-3">
+                        <span class="font-medium text-slate-200 block">${w.nama}</span>
+                        <span class="text-[10px] text-slate-500">${w.deskripsi || '-'}</span>
+                    </td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full border border-slate-700" style="background-color: ${w.warna || '#d36b1e'}"></span>
+                            <span class="font-mono text-[10px] text-slate-400">${w.warna || '#d36b1e'}</span>
+                        </div>
+                    </td>
+                    <td class="p-3 font-mono text-slate-300 text-xs">${w.tahunMulai} – ${w.tahunSelesai}</td>
+                    <td class="p-3 font-mono text-xs text-slate-400">${(w.koordinat || []).length} Titik Batas</td>
+                </tr>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
 
         // Drag & Drop Handling
@@ -248,6 +806,16 @@
                 e.preventDefault();
                 e.stopPropagation();
             }, false);
+        });
+
+        dropZone.addEventListener('dragover', () => {
+            dropZone.classList.add('border-emerald-500', 'bg-emerald-500/10');
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('border-emerald-500', 'bg-emerald-500/10');
+            });
         });
 
         dropZone.addEventListener('drop', function(e) {

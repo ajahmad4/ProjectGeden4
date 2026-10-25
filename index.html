@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atlas Sejarah Kebudayaan Islam Interaktif</title>
     <meta name="description"
-        content="Atlas peta interaktif sejarah kebudayaan Islam — jelajahi titik-titik historis, jalur dakwah, dan wilayah kekuasaan Islam dari abad ke-6 hingga era modern. Media pembelajaran SKI Kelas 12.">
+        content="Atlas peta interaktif sejarah kebudayaan Islam — jelajahi titik-titik historis, jalur dakwah, dan wilayah kekuasaan Islam dari abad ke-6 hingga era modern. Media pembelajaran SKI.">
 
     <link
         href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap"
@@ -496,7 +496,7 @@
                     <button onclick="switchAppMode('CURRICULUM')"
                         class="w-full p-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-left transition-all duration-200 flex items-center justify-between group">
                         <div>
-                            <div class="text-sm font-semibold">Materi SKI Kelas 12</div>
+                            <div class="text-sm font-semibold">Materi Kurikulum SKI</div>
                             <div class="text-xs text-slate-400">Belajar terstruktur berdasarkan urutan bab</div>
                         </div>
                         <span
@@ -507,38 +507,22 @@
             </div>
         </div>
 
-        <!-- LAYER 5: MODE TIMELINE NARRATIVE (Mengacu ke variables.css) -->
+        <!-- LAYER 5: MODE TIMELINE KURIKULUM (Mengacu ke variables.css) -->
         <div id="narrative-mode-container" class="hidden fixed inset-0 top-[56px] z-[1500] overflow-hidden"
             style="background-color: var(--bg-page); color: var(--text-primary);">
 
-            <!-- 1. PETA UTAMA (BACKGROUND) -->
+            <!-- 1. PETA UTAMA (BACKGROUND - PURE MAP) -->
             <div id="narrative-map-wrapper" class="absolute inset-0 w-full h-full z-0">
                 <div id="narrative-map" class="w-full h-full"></div>
 
-                <!-- Filter Era Atas Kiri -->
-                <div class="absolute top-4 left-4 z-[1000] px-3 py-2 rounded-xl border shadow-xl flex items-center gap-2"
-                    style="background-color: var(--bg-panel); border-color: var(--border-light); backdrop-filter: blur(12px);">
-                    <span class="w-2.5 h-2.5 rounded-full animate-pulse"
-                        style="background-color: var(--accent-primary);"></span>
-                    <label for="filter-era-select" class="text-[11px] font-mono font-semibold uppercase"
-                        style="color: var(--text-title);">Era:</label>
-                    <select id="filter-era-select" onchange="filterNarrativeByEra(this.value)"
-                        class="text-xs rounded-lg px-2 py-1 border focus:outline-none cursor-pointer"
-                        style="background-color: var(--bg-input); color: var(--text-primary); border-color: var(--border-input);">
-                    </select>
-                </div>
-
-                <!-- Tombol Reopen Panel Materi -->
+                <!-- Tombol Buka Kembali Panel Materi (Hanya saat panel disembunyikan) -->
                 <button id="btn-reopen-panel" onclick="toggleNarrativePanel()" title="Tampilkan Panel Materi"
-                    class="hidden absolute top-4 right-4 z-[1000] w-10 h-10 rounded-xl border flex items-center justify-center transition-all shadow-xl hover:scale-105 pointer-events-auto"
+                    class="hidden absolute top-4 right-4 z-[1000] px-3.5 py-2 rounded-xl border flex items-center gap-2 transition-all shadow-xl hover:scale-105 pointer-events-auto cursor-pointer"
                     style="background-color: var(--bg-panel); border-color: var(--border-light); color: var(--text-title); backdrop-filter: blur(12px);">
-                    <span class="material-symbols-outlined text-lg">menu_book</span>
+                    <span class="material-symbols-outlined text-lg"
+                        style="color: var(--accent-orange);">menu_book</span>
+                    <span class="text-xs font-semibold">Buka Materi</span>
                 </button>
-
-                <!-- Timeline Vertikal Melayang Kiri -->
-                <div id="narrative-timeline-list"
-                    class="absolute left-6 top-1/2 -translate-y-1/2 z-[1000] flex flex-col items-start pointer-events-auto max-h-[75vh] overflow-y-auto pr-2 no-scrollbar">
-                </div>
             </div>
 
             <!-- 2. PANEL MATERI MELAYANG (50% KANAN) -->
@@ -546,79 +530,69 @@
                 class="absolute top-0 right-0 bottom-0 w-full md:w-1/2 border-l shadow-2xl z-[1100] flex flex-col transition-all duration-300 ease-in-out"
                 style="background-color: var(--bg-panel); border-color: var(--border-panel); backdrop-filter: blur(16px);">
 
-                <!-- Header Kanan dengan Tombol Close (X) -->
-                <div class="p-4 md:p-5 border-b flex items-center justify-between shrink-0 relative z-10"
+                <!-- Header Kanan: Filter Kelas, Bab, Sub-Materi & Tombol Close -->
+                <div class="p-3.5 md:p-4 border-b flex flex-col gap-2.5 shrink-0 relative z-10"
                     style="border-color: var(--border-light); background-color: var(--bg-era-header);">
-                    <div>
+
+                    <!-- Baris 1: Filter Kelas & Bab + Tombol Close -->
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                            <!-- Filter Kelas -->
+                            <div class="flex items-center gap-1 shrink-0">
+                                <span class="material-symbols-outlined text-[16px]"
+                                    style="color: var(--accent-primary);">school</span>
+                                <select id="curriculum-class-select" onchange="onCurriculumClassChange(this.value)"
+                                    class="text-xs font-semibold rounded-lg px-2 py-1 border focus:outline-none cursor-pointer"
+                                    style="background-color: var(--bg-input); color: var(--text-title); border-color: var(--border-input);">
+                                    <option value="12">Kelas 12 MA</option>
+                                    <option value="11">Kelas 11 MA</option>
+                                    <option value="10">Kelas 10 MA</option>
+                                </select>
+                            </div>
+
+                            <!-- Filter Bab -->
+                            <div class="flex-1 min-w-0">
+                                <select id="curriculum-chapter-select" onchange="onCurriculumChapterChange(this.value)"
+                                    class="w-full text-xs font-medium rounded-lg px-2 py-1 border focus:outline-none cursor-pointer truncate"
+                                    style="background-color: var(--bg-input); color: var(--text-primary); border-color: var(--border-input);">
+                                    <!-- Diisi dinamis via JS -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Tutup Panel (X) -->
+                        <button onclick="toggleNarrativePanel()" title="Sembunyikan Panel Materi"
+                            class="w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-sm hover:scale-105 shrink-0 cursor-pointer"
+                            style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
+                            <span class="material-symbols-outlined text-lg">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Baris 2: Sub-Materi Tabs / Pills (Scroll Horizontal Halus) -->
+                    <div class="flex items-center justify-between gap-2 pt-0.5">
+                        <div id="curriculum-submateri-chips"
+                            class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1 min-w-0">
+                            <!-- Diisi dinamis via JS (Button pills sub-materi) -->
+                        </div>
+
                         <span id="narrative-progress-text"
-                            class="text-[10px] font-mono uppercase tracking-widest block font-bold"
+                            class="text-[10px] font-mono uppercase tracking-wider block font-bold shrink-0"
                             style="color: var(--accent-orange);">
-                            Materi 1 dari 1
+                            1 / 1
                         </span>
-                        <h2 id="narrative-topic-title" class="text-xs md:text-sm font-bold"
-                            style="color: var(--text-title);">
-                            Jejak Sejarah SKI Kelas 12
-                        </h2>
                     </div>
-
-                    <button onclick="toggleNarrativePanel()" title="Sembunyikan Panel Materi"
-                        class="w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-md group"
-                        style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
-                        <span
-                            class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">close</span>
-                    </button>
                 </div>
 
-                <!-- AREA KONTEN UTAMA -->
+                <!-- AREA KONTEN UTAMA SUB-MATERI (SCROLLABLE) -->
                 <div id="narrative-content-body"
-                    class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 custom-scrollbar relative z-10">
-
-                    <!-- 1. METADATA & GAMBAR UTAMA (Split 50:50) -->
-                    <div class="flex flex-col md:flex-row gap-4 items-stretch">
-
-                        <!-- Kiri 50%: Kontainer Metadata -->
-                        <div id="narrative-metadata-container"
-                            class="w-full md:w-1/2 p-3.5 rounded-xl border flex flex-col justify-center space-y-2 text-xs shadow-sm"
-                            style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-primary);">
-                        </div>
-
-                        <!-- Kanan 50%: Gambar Utama -->
-                        <div id="narrative-main-image-wrapper"
-                            class="w-full md:w-1/2 min-h-[130px] rounded-xl overflow-hidden border shadow-sm relative group bg-black/5"
-                            style="border-color: var(--border-panel);">
-                            <img id="narrative-main-image" src="" alt="Gambar Utama"
-                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        </div>
-
-                    </div>
-
-                    <!-- 2. DESKRIPSI UTAMA MATERI -->
-                    <div class="space-y-1.5">
-                        <h3 class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-title);">
-                            Deskripsi Peristiwa</h3>
-                        <p id="narrative-description" class="text-xs md:text-sm leading-relaxed"
-                            style="color: var(--text-secondary);"></p>
-                    </div>
-
-                    <!-- 3. GALERI GAMBAR RELEVAN -->
-                    <div id="narrative-gallery-section" class="hidden space-y-2.5 pt-3 border-t"
-                        style="border-color: var(--border-light);">
-                        <h4 class="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                            style="color: var(--text-title);">
-                            <span class="material-symbols-outlined text-sm"
-                                style="color: var(--accent-orange);">collections</span>
-                            <span>Gambar Terkait</span>
-                        </h4>
-
-                        <div id="narrative-gallery-grid" class="flex flex-wrap gap-2"></div>
-                    </div>
-
+                    class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar relative z-10">
+                    <!-- Konten dinamis disuntikkan via loadCurriculumSubMateri() di narrative.js -->
                 </div>
 
-                <!-- Footer Kanan untuk Navigasi Stepper -->
-                <div class="p-4 border-t flex items-center justify-between gap-3 shrink-0 relative z-10"
+                <!-- Footer Kanan untuk Navigasi Stepper Antar Sub-Materi -->
+                <div class="p-3.5 md:p-4 border-t flex items-center justify-between gap-3 shrink-0 relative z-10"
                     style="border-color: var(--border-light); background-color: var(--bg-era-header);">
-                    <button id="btn-narrative-prev" onclick="navigateNarrative(-1)"
+                    <button id="btn-narrative-prev" onclick="navigateCurriculum(-1)"
                         class="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
@@ -630,7 +604,7 @@
                         - / -
                     </span>
 
-                    <button id="btn-narrative-next" onclick="navigateNarrative(1)"
+                    <button id="btn-narrative-next" onclick="navigateCurriculum(1)"
                         class="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
                         <span>Selanjutnya</span>
@@ -699,6 +673,7 @@
     <script src="js/dataJalur.js"></script>
     <script src="js/dataWilayah.js"></script>
     <script src="js/dataObjekAtlas.js"></script>
+    <script src="js/datakurikulum.js"></script>
     <script src="js/timeline-data.js"></script>
     <script src="js/map.js"></script>
     <script src="js/timelineRuler.js"></script>
@@ -706,7 +681,6 @@
     <script src="js/loader.js"></script>
     <script src="js/mobile-ui.js"></script>
     <script src="js/narrative.js"></script>
-    <script src="js/datakurikulum.js"></script>
 </body>
 
 </html>

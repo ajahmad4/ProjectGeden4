@@ -776,38 +776,44 @@ let savedMapCenterBeforeExpand = null;
 let savedMapZoomBeforeExpand = null;
 
 function bukaSubMateriDariNarasi(storyId, stepIndex, objek) {
-    if (typeof dataKurikulum === 'undefined') return;
-
-    let cerita = dataKurikulum.find(c => c.id === storyId);
-    let stepData;
-
     const namaObjek = objek ? (objek.nama || 'Objek Sejarah') : 'Detail Peristiwa';
     const deskripsiObjek = objek ? (objek.deskripsi || objek.kronologi || 'Kronologi lengkap peristiwa sedang dalam proses penyusunan.') : 'Kronologi lengkap peristiwa sedang dalam proses penyusunan.';
 
-    if (!cerita) {
-        cerita = {
-            id: storyId,
-            judulCerita: `Modul SKI: ${namaObjek}`,
-            steps: [
-                {
-                    judul: `${namaObjek}`,
-                    konten: `
-                        <h4 class="text-sm font-bold text-title mb-1.5">Pendahuluan</h4>
-                        <p class="text-secondary leading-relaxed mb-4">Materi ini menyajikan kajian mendalam mengenai <strong>${namaObjek}</strong> dalam konteks Sejarah Kebudayaan Islam, menganalisis faktor latar belakang, proses perkembangan, serta dampak kultural dan peradaban yang ditimbulkan.</p>
-                        <h4 class="text-sm font-bold text-title mb-1.5">Kronologi & Dinamika Peristiwa</h4>
-                        <p class="text-secondary leading-relaxed mb-4">${deskripsiObjek}</p>
-                    `
-                }
-            ]
-        };
-        stepData = cerita.steps[0];
-    } else {
-        stepData = cerita.steps[stepIndex] || cerita.steps[0];
-    }
+    let judulCerita = "MODUL KURIKULUM SKI";
+    let stepJudul = namaObjek;
+    let stepKonten = `
+        <h4 class="text-sm font-bold text-title mb-1.5">Pendahuluan</h4>
+        <p class="text-secondary leading-relaxed mb-4">Materi ini menyajikan kajian mendalam mengenai <strong>${namaObjek}</strong> dalam konteks Sejarah Kebudayaan Islam, menganalisis faktor latar belakang, proses perkembangan, serta dampak kultural dan peradaban yang ditimbulkan.</p>
+        <h4 class="text-sm font-bold text-title mb-1.5">Kronologi & Dinamika Peristiwa</h4>
+        <p class="text-secondary leading-relaxed mb-4">${deskripsiObjek}</p>
+    `;
 
-    if (!stepData) {
-        alert("Sub-materi belum tersedia untuk titik ini.");
-        return;
+    // Hubungkan otomatis dengan dataKurikulum jika ada ID atau marker yang cocok
+    if (typeof dataKurikulum !== 'undefined' && Array.isArray(dataKurikulum)) {
+        for (const bab of dataKurikulum) {
+            if (bab.id === storyId) {
+                const sub = bab.subMateri ? (bab.subMateri[stepIndex || 0] || bab.subMateri[0]) : null;
+                if (sub) {
+                    judulCerita = `${bab.namaKelas || ('Kelas ' + bab.kelas)}: ${bab.judulBab}`;
+                    stepJudul = sub.judul;
+                    stepKonten = sub.konten;
+                    break;
+                }
+            }
+            if (bab.subMateri) {
+                const match = bab.subMateri.find(s =>
+                    s.id === storyId ||
+                    (s.relasiPeta && s.relasiPeta.markers && objek && objek.relasi && objek.relasi.markers &&
+                        objek.relasi.markers.some(m => s.relasiPeta.markers.includes(m)))
+                );
+                if (match) {
+                    judulCerita = `${bab.namaKelas || ('Kelas ' + bab.kelas)}: ${bab.judulBab}`;
+                    stepJudul = match.judul;
+                    stepKonten = match.konten;
+                    break;
+                }
+            }
+        }
     }
 
     // 1. Perbarui Elemen Header & Konten
