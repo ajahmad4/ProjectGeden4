@@ -72,7 +72,7 @@
     <!-- LAYER 4: HEADER TOPBAR (z-index: 100)      -->
     <!-- ========================================== -->
     <header
-        class="fixed top-0 left-0 w-full h-[56px] z-[100] flex items-center justify-between px-4 md:px-7 bg-page/95 backdrop-blur-md border-b border-border-light">
+        class="fixed top-0 left-0 w-full h-[56px] z-[2500] flex items-center justify-between px-4 md:px-7 bg-page/95 backdrop-blur-md border-b border-border-light">
         <div class="flex items-center gap-3 md:gap-4">
             <img src="assets/logo/atlas-logo.jpg" alt="Logo Atlas" class="w-9 h-9 object-contain select-none">
 
@@ -103,9 +103,9 @@
             </div>
 
             <!-- 1. BUTTON PILL MODUL SKI (Desktop Only) -->
-            <button onclick="window.open('assets/materi/modul-ski.pdf', '_blank')"
+            <button onclick="bukaModulSkiPDF()"
                 class="hidden md:flex items-center gap-1.5 px-3 py-[5px] rounded-full bg-badge border border-border-input text-muted hover:text-title hover:underline underline-offset-2 text-[10px] tracking-[0.14em] uppercase font-medium select-none cursor-pointer transition-colors"
-                title="Buka Modul Materi SKI (PDF)">
+                title="Buka Modul Materi SKI">
                 <span>📄 Modul Materi SKI</span>
             </button>
 
@@ -171,7 +171,7 @@
                 <div id="mobile-header-menu"
                     class="hidden absolute right-0 mt-2 min-w-[220px] bg-panel-solid border border-border-panel rounded-xl shadow-2xl py-2 z-[200] flex flex-col text-xs">
                     <button
-                        onclick="window.open('assets/materi/modul-ski.pdf', '_blank'); toggleMobileHeaderDropdown();"
+                        onclick="bukaModulSkiPDF(); toggleMobileHeaderDropdown();"
                         class="w-full text-left px-4 py-2.5 text-primary hover:bg-active flex items-center gap-3 transition-colors cursor-pointer">
                         <span class="text-base">📄</span>
                         <span class="font-medium">Modul Materi SKI</span>
@@ -544,9 +544,17 @@
                                 <select id="curriculum-class-select" onchange="onCurriculumClassChange(this.value)"
                                     class="text-xs font-semibold rounded-lg px-2 py-1 border focus:outline-none cursor-pointer"
                                     style="background-color: var(--bg-input); color: var(--text-title); border-color: var(--border-input);">
-                                    <option value="12">Kelas 12 MA</option>
-                                    <option value="11">Kelas 11 MA</option>
-                                    <option value="10">Kelas 10 MA</option>
+                                    <option value="">-- Pilih Jenjang / Kelas --</option>
+                                    <optgroup label="Tingkat Madrasah Tsanawiyah (MTs)">
+                                        <option value="7">Kelas 7 MTs</option>
+                                        <option value="8">Kelas 8 MTs</option>
+                                        <option value="9">Kelas 9 MTs</option>
+                                    </optgroup>
+                                    <optgroup label="Tingkat Madrasah Aliyah (MA)">
+                                        <option value="10">Kelas 10 MA</option>
+                                        <option value="11">Kelas 11 MA</option>
+                                        <option value="12">Kelas 12 MA</option>
+                                    </optgroup>
                                 </select>
                             </div>
 
@@ -554,8 +562,8 @@
                             <div class="flex-1 min-w-0">
                                 <select id="curriculum-chapter-select" onchange="onCurriculumChapterChange(this.value)"
                                     class="w-full text-xs font-medium rounded-lg px-2 py-1 border focus:outline-none cursor-pointer truncate"
-                                    style="background-color: var(--bg-input); color: var(--text-primary); border-color: var(--border-input);">
-                                    <!-- Diisi dinamis via JS -->
+                                    style="background-color: var(--bg-input); color: var(--text-primary); border-color: var(--border-input);" disabled>
+                                    <option value="">-- Pilih Bab Pembelajaran --</option>
                                 </select>
                             </div>
                         </div>
@@ -615,28 +623,509 @@
         </div>
     </main>
 
-    <!-- HELPER LOGIC JS MODAL DUMMY & DROPDOWN HEADER -->
+    <!-- ========================================== -->
+    <!-- LAYER 5: UNIVERSAL MODAL SYSTEM (z-index: 3500) -->
+    <!-- ========================================== -->
+    <div id="universal-modal-overlay"
+        class="hidden fixed inset-0 z-[3500] flex items-center justify-center p-3 md:p-6 bg-black/60 backdrop-blur-sm transition-opacity duration-200">
+        <div id="universal-modal-card"
+            class="w-full max-w-2xl max-h-[88vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border animate-in fade-in zoom-in-95 duration-150"
+            style="background-color: var(--bg-panel-solid); border-color: var(--border-panel); color: var(--text-primary);">
+
+            <!-- Modal Header -->
+            <div class="px-5 py-4 border-b flex items-center justify-between shrink-0"
+                style="border-color: var(--border-light); background-color: var(--bg-era-header);">
+                <div class="flex items-center gap-2.5">
+                    <span id="universal-modal-icon" class="text-xl">ℹ️</span>
+                    <h3 id="universal-modal-title" class="font-bold text-base md:text-lg"
+                        style="color: var(--text-title);">
+                        Judul Modal
+                    </h3>
+                </div>
+                <button onclick="tutupUniversalModal()"
+                    class="w-8 h-8 rounded-full border flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer"
+                    style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-title);"
+                    title="Tutup (Esc)">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div id="universal-modal-body"
+                class="p-5 md:p-6 overflow-y-auto space-y-4 custom-scrollbar text-xs md:text-sm leading-relaxed"
+                style="color: var(--text-secondary);">
+                <!-- Konten dinamis disuntikkan via JS -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div id="universal-modal-footer" class="px-5 py-3 border-t flex items-center justify-between shrink-0"
+                style="border-color: var(--border-light); background-color: var(--bg-era-header);">
+                <span id="universal-modal-footnote" class="text-[11px] text-muted italic">Atlas Sejarah Kebudayaan
+                    Islam</span>
+                <button onclick="tutupUniversalModal()"
+                    class="px-4 py-1.5 rounded-lg border text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                    style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIKA MODAL UNIVERSAL & DROPDOWN HEADER -->
     <script>
+        // Controller Modal Universal
+        function bukaUniversalModal(judul, icon, bodyHtml, footnote = 'Atlas Sejarah Kebudayaan Islam') {
+            const overlay = document.getElementById('universal-modal-overlay');
+            const titleEl = document.getElementById('universal-modal-title');
+            const iconEl = document.getElementById('universal-modal-icon');
+            const bodyEl = document.getElementById('universal-modal-body');
+            const footnoteEl = document.getElementById('universal-modal-footnote');
+
+            if (!overlay || !bodyEl) return;
+
+            if (titleEl) titleEl.textContent = judul;
+            if (iconEl) iconEl.textContent = icon;
+            if (footnoteEl) footnoteEl.textContent = footnote;
+            bodyEl.innerHTML = bodyHtml;
+
+            overlay.classList.remove('hidden');
+        }
+
+        function tutupUniversalModal() {
+            const overlay = document.getElementById('universal-modal-overlay');
+            if (overlay) overlay.classList.add('hidden');
+        }
+
+        // 1. MODAL PETUNJUK PENGGUNAAN
         function bukaModalPetunjuk() {
-            console.log("Modal Petunjuk dibuka");
-            // Logic membuka modal petunjuk nantinya...
+            const html = `
+                <div class="space-y-4">
+                    <div class="p-3.5 rounded-xl border flex items-start gap-3" style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                        <span class="material-symbols-outlined text-2xl text-emerald-400 shrink-0 mt-0.5">explore</span>
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-title text-sm">1. Mode Eksplorasi Bebas</h4>
+                            <p class="leading-relaxed text-secondary">
+                                Geser <strong>penggaris timeline tahun</strong> di bawah peta (mulai tahun 570 M hingga era modern) untuk melihat pergeseran kekuasaan Islam. Klik penanda di peta untuk melihat ringkasan singkat, atau gunakan kolom pencarian dan filter kategori di panel kiri.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl border flex items-start gap-3" style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                        <span class="material-symbols-outlined text-2xl text-emerald-400 shrink-0 mt-0.5">school</span>
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-title text-sm">2. Mode Kurikulum SKI Terpadu</h4>
+                            <p class="leading-relaxed text-secondary">
+                                Pelajari materi SKI secara runut dari <strong>Jenjang MTs (Kelas 7, 8, 9)</strong> hingga <strong>Jenjang MA (Kelas 10, 11, 12)</strong>. Peta akan otomatis menyesuaikan wilayah bab yang dipelajari. Di bawah uraian teks terdapat <strong>Quick Links</strong> untuk langsung melompat (FlyTo) ke objek lokasi/rute terkait di peta.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl border flex items-start gap-3" style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                        <span class="material-symbols-outlined text-2xl text-emerald-400 shrink-0 mt-0.5">tune</span>
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-title text-sm">3. Navigasi Peta & Layer</h4>
+                            <p class="leading-relaxed text-secondary">
+                                Klik judul <strong>"Atlas Sejarah Kebudayaan Islam"</strong> di sudut kiri atas kapan pun untuk mereset posisi pandang peta. Gunakan panel layer di sudut kanan atas peta untuk menampilkan atau menyembunyikan situs masjid, kerajaan, dan jalur pelayaran.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            bukaUniversalModal('Petunjuk Penggunaan Atlas', '❓', html, 'Panduan Interaksi Atlas SKI');
         }
 
-        function bukaModalKuis() {
-            console.log("Modal Kuis dibuka");
-            // Logic membuka modal kuis nantinya...
-        }
-
-        function bukaModalTentang() {
-            console.log("Modal Tentang dibuka");
-            // Logic membuka modal tentang nantinya...
-        }
+        // 2. MODAL GLOSARIUM SKI
+        const GLOSARIUM_DATA = [
+            { istilah: "Amul Huzni", arti: "Tahun kesedihan (619 M) saat wafatnya istri tercinta Rasulullah, Sayyidah Khadijah RA, dan paman beliau, Abu Thalib yang menjadi pelindung dakwah.", era: "Era Kenabian" },
+            { istilah: "Bai'at 'Aqabah", arti: "Perjanjian kesetiaan dan perlindungan antara Rasulullah SAW dan delegasi penduduk Yatsrib yang menjadi gerbang utama peristiwa Hijrah.", era: "Era Kenabian" },
+            { istilah: "Baitul Hikmah", arti: "Pusat penerjemahan, observatorium astronomi, dan perpustakaan agung peradaban dunia yang didirikan Khalifah Harun Ar-Rasyid di Baghdad.", era: "Dinasti Abbasiyah" },
+            { istilah: "Diwan", arti: "Departemen atau lembaga birokrasi pemerintahan dan administrasi keuangan negara yang dibentuk sejak masa Khalifah Umar bin Khattab RA.", era: "Khulafaur Rasyidin" },
+            { istilah: "Fansur (Barus)", arti: "Pelabuhan niaga maritim kuno di pesisir barat Sumatera penghasil kapur barus berkualitas tinggi, pintu masuk saudagar Arab sejak abad ke-7 M.", era: "Nusantara" },
+            { istilah: "Hijrah", arti: "Perpindahan strategis Rasulullah SAW dan kaum Muslimin dari Mekkah ke Madinah (622 M), penanda tahun awal penanggalan Hijriyah.", era: "Era Kenabian" },
+            { istilah: "Kafilah", arti: "Rombongan musafir atau pedagang yang bepergian melintasi padang pasir bersama-sama dengan unta untuk keamanan dari bahaya perampokan.", era: "Pra-Islam & Kenabian" },
+            { istilah: "Piagam Madinah", arti: "Konstitusi tertulis pertama dunia tahun 622 M yang menyatukan masyarakat majemuk Madinah dengan jaminan kebebasan beragama dan toleransi.", era: "Era Kenabian" },
+            { istilah: "Saka Tatal", arti: "Tiang utama Masjid Agung Demak yang disusun secara artistik dari serpihan-serpihan kayu tatal oleh Sunan Kalijaga sebagai simbol persatuan umat.", era: "Wali Songo" },
+            { istilah: "Ta-Shih", arti: "Sebutan dalam kronik Tiongkok Kuno (Dinasti Tang) untuk menyebut saudagar Muslim Arab dan permukiman mereka di pesisir barat Nusantara.", era: "Umayyah & Nusantara" },
+            { istilah: "Wali Songo", arti: "Sembilan tokoh ulama karismatik penyebar Islam di Pulau Jawa pada abad ke-14 hingga 16 M melalui pendekatan akulturasi budaya yang damai.", era: "Nusantara" }
+        ];
 
         function bukaModalGlosarium() {
-            console.log("Modal Glosarium dibuka");
-            // Logic membuka modal glosarium nantinya...
+            const html = `
+                <div class="space-y-3">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-muted">search</span>
+                        <input type="text" id="glosarium-search-input" oninput="filterGlosarium(this.value)"
+                               placeholder="Ketik untuk mencari istilah SKI (misal: Hijrah, Diwan, Barus)..."
+                               class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border focus:outline-none"
+                               style="background-color: var(--bg-input); border-color: var(--border-input); color: var(--text-title);">
+                    </div>
+
+                    <div id="glosarium-list-container" class="space-y-2 max-h-[50vh] overflow-y-auto custom-scrollbar pr-1">
+                        ${renderGlosariumItems(GLOSARIUM_DATA)}
+                    </div>
+                </div>
+            `;
+            bukaUniversalModal('Glosarium Istilah Sejarah Kebudayaan Islam', '📖', html, 'Kamus Istilah Sejarah SKI');
         }
 
+        function renderGlosariumItems(items) {
+            if (items.length === 0) {
+                return `<div class="p-4 text-center text-xs text-muted">Istilah tidak ditemukan.</div>`;
+            }
+            return items.map(item => `
+                <div class="p-3 rounded-xl border transition-all hover:bg-active" style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <h4 class="font-bold text-title text-xs md:text-sm" style="color: var(--accent-primary);">${item.istilah}</h4>
+                        <span class="text-[9px] px-2 py-0.5 rounded-full border text-muted uppercase font-mono" style="border-color: var(--border-panel);">${item.era}</span>
+                    </div>
+                    <p class="text-[11px] md:text-xs leading-relaxed text-secondary">${item.arti}</p>
+                </div>
+            `).join('');
+        }
+
+        function filterGlosarium(keyword) {
+            const query = (keyword || '').toLowerCase().trim();
+            const container = document.getElementById('glosarium-list-container');
+            if (!container) return;
+
+            const filtered = GLOSARIUM_DATA.filter(g =>
+                g.istilah.toLowerCase().includes(query) ||
+                g.arti.toLowerCase().includes(query) ||
+                g.era.toLowerCase().includes(query)
+            );
+            container.innerHTML = renderGlosariumItems(filtered);
+        }
+
+        // 3. MODAL TENTANG APLIKASI
+        function bukaModalTentang() {
+            const html = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3.5 p-4 rounded-xl border" style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                        <img src="assets/logo/atlas-logo.jpg" alt="Logo" class="w-12 h-12 object-contain rounded-lg shrink-0">
+                        <div>
+                            <h4 class="font-bold text-title text-sm md:text-base">Atlas Sejarah Kebudayaan Islam</h4>
+                            <p class="text-[11px] text-muted">Media Pembelajaran Digital Interaktif Berbasis Spasial & Kronologis</p>
+                            <span class="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-semibold">Versi 4.2 Pro</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-xs leading-relaxed text-secondary">
+                        <p>
+                            Aplikasi ini dirancang sebagai media visualisasi spasial-kronologis interaktif untuk mendukung proses belajar mengajar mata pelajaran <strong>Sejarah Kebudayaan Islam (SKI)</strong> di lingkungan Madrasah Tsanawiyah (MTs), Madrasah Aliyah (MA), dan sekolah Islam.
+                        </p>
+                        <p>
+                            Menghubungkan runtutan peristiwa historis dunia Islam sejak era kenabian di Jazirah Arab, ekspansi peradaban ke Afrika, Eropa (Andalusia), dan Asia, hingga jalur perdagangan maritim dan masuknya Islam ke Nusantara.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1 text-xs">
+                        <div class="p-3 rounded-xl border" style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                            <span class="font-bold text-title block mb-1">📚 Rujukan Materi</span>
+                            <span class="text-[11px] text-muted block">Buku Teks SKI MTs & MA (Kelas 7–12) Kementerian Agama RI & Atlas Sejarah Islam.</span>
+                        </div>
+                        <div class="p-3 rounded-xl border" style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                            <span class="font-bold text-title block mb-1">🗺️ Engine Spasial</span>
+                            <span class="text-[11px] text-muted block">Leaflet JS Engine & Data Pemetaan Ubin Terbuka OpenStreetMap.</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            bukaUniversalModal('Tentang Atlas Sejarah SKI', 'ℹ️', html, 'Pendidikan Kebudayaan Islam');
+        }
+
+        // 4. MODAL KUIS INTERAKTIF
+        const KUIS_DATA = {
+            "7": [
+                {
+                    q: "Wahyu perdana Al-Qur'an (Surat Al-'Alaq: 1-5) diterima Nabi Muhammad SAW saat berkontemplasi (tahannuts) di...",
+                    options: ["Gua Tsur", "Gua Hira", "Masjid Quba", "Padang Arafah"],
+                    correct: 1,
+                    exp: "Nabi Muhammad SAW menerima wahyu pertama di Gua Hira di puncak Jabal Nur pada bulan Ramadhan 610 M."
+                },
+                {
+                    q: "Konstitusi tertulis pertama di dunia yang disusun Nabi Muhammad SAW untuk menyatukan masyarakat majemuk di Madinah adalah...",
+                    options: ["Perjanjian Hudaibiyah", "Piagam Madinah", "Bai'at Aqabah", "Hilful Fudhul"],
+                    correct: 1,
+                    exp: "Piagam Madinah menjamin kesetaraan hak, kebebasan beragama, dan kewajiban pertahanan kota Madinah."
+                }
+            ],
+            "8": [
+                {
+                    q: "Ibukota pusat kekhalifahan Daulah Umayyah pertama kali didirikan oleh Muawiyah bin Abi Sufyan di kota...",
+                    options: ["Baghdad", "Damaskus", "Kordoba", "Kufah"],
+                    correct: 1,
+                    exp: "Daulah Umayyah memusatkan roda pemerintahannya di Damaskus (Suriah) sebelum ekspansi ke berbagai wilayah."
+                },
+                {
+                    q: "Lembaga agung penerjemahan naskah kuno dan observatorium sains di Baghdad era Dinasti Abbasiyah dikenal dengan nama...",
+                    options: ["Al-Azhar", "Baitul Hikmah", "Qarawiyyin", "Darul Hikam"],
+                    correct: 1,
+                    exp: "Baitul Hikmah di Baghdad didirikan oleh Khalifah Harun Ar-Rasyid dan berkembang pesat di masa Khalifah Al-Ma'mun."
+                }
+            ],
+            "9": [
+                {
+                    q: "Bukti arkeologis awal kehadiran pemukiman saudagar Arab muslim di pantai barat Sumatera pada abad ke-7 M berada di kota...",
+                    options: ["Demak", "Barus (Fansur)", "Tuban", "Gresik"],
+                    correct: 1,
+                    exp: "Pelabuhan kuno Barus di Tapanuli Tengah memiliki makam kuno Mahligai dan Papan Tinggi bertarikh hijriah awal."
+                },
+                {
+                    q: "Kesultanan Islam pertama di Pulau Jawa yang didirikan oleh Raden Patah dengan bimbingan dewan Walisongo adalah...",
+                    options: ["Kesultanan Banten", "Kesultanan Demak", "Kesultanan Cirebon", "Kesultanan Mataram"],
+                    correct: 1,
+                    exp: "Kesultanan Demak didirikan pada penghujung abad ke-15 M sebagai pelopor kerajaan Islam di Jawa."
+                }
+            ],
+            "10": [
+                {
+                    q: "Peristiwa penyerangan Ka'bah oleh pasukan gajah Abrahah terjadi pada tahun kelahiran Rasulullah SAW, yaitu pada tahun...",
+                    options: ["570 M", "610 M", "622 M", "632 M"],
+                    correct: 0,
+                    exp: "Tahun Gajah bertepatan dengan tahun kelahiran Nabi Muhammad SAW yaitu pada 570 M."
+                },
+                {
+                    q: "Lembaga administrasi negara dan birokrasi perbendaharaan (Diwan) pertama kali dibentuk secara sistematis pada masa khalifah...",
+                    options: ["Abu Bakar Ash-Shiddiq", "Umar bin Khattab", "Utsman bin Affan", "Ali bin Abi Thalib"],
+                    correct: 1,
+                    exp: "Khalifah Umar bin Khattab RA mendirikan Diwan untuk mengelola perbendaharaan negara dan gaji militer."
+                }
+            ],
+            "11": [
+                {
+                    q: "Panglima Islam yang berhasil menyeberangi selat menuju Semenanjung Iberia (Spanyol) pada tahun 711 M hingga namanya diabadikan adalah...",
+                    options: ["Khalid bin Walid", "Tariq bin Ziyad", "Amr bin Ash", "Shalahuddin Al-Ayyubi"],
+                    correct: 1,
+                    exp: "Tariq bin Ziyad memimpin penyeberangan Selat Gibraltar (Jabal Tariq) membuka era peradaban Islam di Andalusia."
+                },
+                {
+                    q: "Pusat keemasan intelektual Islam di Baghdad yang terkenal dengan kegiatan penerjemahan dan sains di masa Abbasiyah bernama...",
+                    options: ["Al-Azhar", "Baitul Hikmah", "Qarawiyyin", "Nizamiyyah"],
+                    correct: 1,
+                    exp: "Baitul Hikmah didirikan pada era Khalifah Harun Ar-Rasyid dan mencapai puncak kejayaan di masa Khalifah Al-Ma'mun."
+                }
+            ],
+            "12": [
+                {
+                    q: "Teori Makkah yang menyatakan Islam masuk ke Nusantara langsung dari Arab sejak abad ke-7 M (abad ke-1 H) dipelopori oleh...",
+                    options: ["Snouck Hurgronje", "Buya Hamka", "J. Pijnappel", "Hoesein Djajadiningrat"],
+                    correct: 1,
+                    exp: "Buya Hamka mengemukakan Teori Makkah dengan bukti catatan pelayaran Arab dan permukiman di Barus."
+                },
+                {
+                    q: "Makam kuno bertarikh 1297 M di Samudera Pasai yang membuktikan kedaulatan kesultanan maritim tertua di Sumatera adalah makam...",
+                    options: ["Sultan Hasanuddin", "Sultan Malik as-Saleh", "Sultan Iskandar Muda", "Sultan Trenggana"],
+                    correct: 1,
+                    exp: "Sultan Malik as-Saleh (Meurah Silu) adalah pendiri Samudera Pasai yang wafat pada 1297 M."
+                }
+            ]
+        };
+
+        let currentQuizClass = "7";
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let hasAnsweredCurrentQuestion = false;
+
+        function bukaModalKuis() {
+            currentQuizClass = "7";
+            currentQuizIndex = 0;
+            quizScore = 0;
+            renderQuizCard();
+        }
+
+        function switchQuizClass(kelasVal) {
+            currentQuizClass = String(kelasVal);
+            currentQuizIndex = 0;
+            quizScore = 0;
+            renderQuizCard();
+        }
+
+        function renderQuizCard() {
+            const listSoal = KUIS_DATA[currentQuizClass] || KUIS_DATA["7"];
+            const totalSoal = listSoal.length;
+
+            if (currentQuizIndex >= totalSoal) {
+                // Tampilan Hasil Kuis
+                const html = `
+                    <div class="text-center py-6 space-y-4">
+                        <span class="text-5xl">🎉</span>
+                        <h4 class="font-bold text-title text-lg">Kuis Selesai!</h4>
+                        <p class="text-xs text-muted">Hasil evaluasi pemahaman materi SKI Kelas ${currentQuizClass}:</p>
+                        <div class="inline-block px-6 py-3 rounded-2xl border text-xl font-mono font-bold"
+                             style="background-color: var(--bg-badge); border-color: var(--border-panel); color: var(--accent-primary);">
+                            Skor: ${quizScore} / ${totalSoal} Benar
+                        </div>
+                        <div class="pt-4 flex justify-center gap-3">
+                            <button onclick="bukaModalKuis()" class="px-4 py-2 rounded-xl text-xs font-semibold border hover:opacity-80 transition-all cursor-pointer"
+                                    style="background-color: var(--bg-input); border-color: var(--border-input); color: var(--text-title);">
+                                Ulangi Kuis
+                            </button>
+                            <button onclick="tutupUniversalModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-all cursor-pointer">
+                                Selesai
+                            </button>
+                        </div>
+                    </div>
+                `;
+                bukaUniversalModal(`Kuis SKI Kelas ${currentQuizClass}`, '🎯', html, 'Evaluasi Pembelajaran Mandiri');
+                return;
+            }
+
+            hasAnsweredCurrentQuestion = false;
+            const soalAktif = listSoal[currentQuizIndex];
+
+            const html = `
+                <div class="space-y-4">
+                    <!-- Tab Kelas Kuis -->
+                    <div class="flex flex-wrap items-center gap-1.5 border-b pb-3" style="border-color: var(--border-light);">
+                        <span class="text-xs font-semibold text-muted mr-1">Pilih Kelas:</span>
+                        ${['7', '8', '9', '10', '11', '12'].map(k => `
+                            <button onclick="switchQuizClass('${k}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${currentQuizClass === k ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm' : 'bg-badge text-muted border-border-light hover:bg-active hover:text-title'}">
+                                ${Number(k) <= 9 ? `MTs ${k}` : `MA ${k}`}
+                            </button>
+                        `).join('')}
+                        <span class="ml-auto text-xs font-mono font-bold text-muted">${currentQuizIndex + 1} dari ${totalSoal} Soal</span>
+                    </div>
+
+                    <!-- Pertanyaan -->
+                    <div class="p-3.5 rounded-xl border text-xs md:text-sm font-medium leading-relaxed" style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-title);">
+                        ${soalAktif.q}
+                    </div>
+
+                    <!-- Pilihan Opsi -->
+                    <div id="quiz-options-container" class="space-y-2">
+                        ${soalAktif.options.map((opt, idx) => `
+                            <button type="button" onclick="pilihJawabanKuis(${idx})"
+                                    class="quiz-option-btn w-full text-left px-3.5 py-2.5 rounded-xl border text-xs transition-all flex items-center justify-between cursor-pointer hover:bg-active"
+                                    style="background-color: var(--bg-input); border-color: var(--border-input); color: var(--text-primary);">
+                                <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
+                                <span class="material-symbols-outlined text-sm opacity-0 quiz-opt-icon">check_circle</span>
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <!-- Kotak Penjelasan (Hidden di awal) -->
+                    <div id="quiz-explanation-box" class="hidden p-3 rounded-xl border text-xs space-y-1">
+                        <span class="font-bold text-title block">💡 Penjelasan Sejarah:</span>
+                        <p id="quiz-explanation-text" class="text-secondary leading-relaxed"></p>
+                    </div>
+
+                    <!-- Tombol Lanjut -->
+                    <div class="flex justify-end pt-1">
+                        <button id="btn-next-quiz" onclick="lanjutSoalKuis()" disabled
+                                class="px-4 py-2 rounded-xl text-xs font-semibold border opacity-40 cursor-not-allowed transition-all flex items-center gap-1.5"
+                                style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-title);">
+                            <span>${currentQuizIndex === totalSoal - 1 ? 'Lihat Hasil' : 'Soal Berikutnya'}</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            bukaUniversalModal(`Kuis Interaktif SKI - Kelas ${currentQuizClass}`, '🎯', html, 'Uji Pemahaman Konsep Sejarah');
+        }
+
+        function pilihJawabanKuis(indexPilihan) {
+            if (hasAnsweredCurrentQuestion) return;
+            hasAnsweredCurrentQuestion = true;
+
+            const listSoal = KUIS_DATA[currentQuizClass] || KUIS_DATA["7"];
+            const soal = listSoal[currentQuizIndex];
+            const buttons = document.querySelectorAll('.quiz-option-btn');
+            const expBox = document.getElementById('quiz-explanation-box');
+            const expText = document.getElementById('quiz-explanation-text');
+            const btnNext = document.getElementById('btn-next-quiz');
+
+            const isBenar = (indexPilihan === soal.correct);
+            if (isBenar) quizScore++;
+
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('cursor-pointer', 'hover:bg-active');
+                btn.classList.add('cursor-default');
+
+                if (idx === soal.correct) {
+                    btn.classList.add('bg-emerald-500/20', 'border-emerald-500/60', 'text-emerald-400');
+                    const icon = btn.querySelector('.quiz-opt-icon');
+                    if (icon) { icon.textContent = 'check_circle'; icon.classList.remove('opacity-0'); }
+                } else if (idx === indexPilihan && !isBenar) {
+                    btn.classList.add('bg-rose-500/20', 'border-rose-500/60', 'text-rose-400');
+                    const icon = btn.querySelector('.quiz-opt-icon');
+                    if (icon) { icon.textContent = 'cancel'; icon.classList.remove('opacity-0'); }
+                }
+            });
+
+            if (expBox && expText) {
+                expText.textContent = soal.exp;
+                expBox.style.backgroundColor = isBenar ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+                expBox.style.borderColor = isBenar ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)';
+                expBox.classList.remove('hidden');
+            }
+
+            if (btnNext) {
+                btnNext.disabled = false;
+                btnNext.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnNext.classList.add('cursor-pointer', 'hover:bg-active');
+            }
+        }
+
+        function lanjutSoalKuis() {
+            currentQuizIndex++;
+            renderQuizCard();
+        }
+
+        // 5. TOMBOL MODUL SKI PDF FALLBACK
+        function bukaModulSkiPDF() {
+            const pdfPath = 'assets/materi/modul-ski.pdf';
+            fetch(pdfPath, { method: 'HEAD' })
+                .then(res => {
+                    if (res.ok) {
+                        window.open(pdfPath, '_blank');
+                    } else {
+                        tampilkanInfoModulDigital();
+                    }
+                })
+                .catch(() => {
+                    tampilkanInfoModulDigital();
+                });
+        }
+
+        function tampilkanInfoModulDigital() {
+            const html = `
+                <div class="space-y-4">
+                    <div class="p-4 rounded-xl border flex items-start gap-3.5" style="background-color: var(--bg-badge); border-color: var(--border-light);">
+                        <span class="text-3xl shrink-0">📄</span>
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-title text-sm md:text-base">Modul Kurikulum Digital SKI</h4>
+                            <p class="leading-relaxed text-secondary text-xs">
+                                Seluruh materi pembelajaran Kurikulum SKI Kelas 10, 11, dan 12 telah terintegrasi secara interaktif langsung di dalam aplikasi melalui <strong>Mode Kurikulum</strong>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl border text-xs space-y-2" style="background-color: var(--bg-input); border-color: var(--border-input);">
+                        <span class="font-bold text-title block">💡 Fitur Materi Digital:</span>
+                        <ul class="list-disc list-inside space-y-1 text-muted">
+                            <li>Uraian materi terstruktur per Bab dan Sub-Materi</li>
+                            <li>Sinkronisasi otomatis ke peta sejarah (FlyTo lokasi peristiwa)</li>
+                            <li>Carousel foto artefak & peninggalan bersejarah</li>
+                        </ul>
+                    </div>
+
+                    <div class="pt-2 flex justify-end gap-2">
+                        <button onclick="tutupUniversalModal()" class="px-4 py-2 rounded-xl text-xs font-semibold border hover:opacity-80 transition-all cursor-pointer"
+                                style="background-color: var(--bg-badge); border-color: var(--border-light); color: var(--text-button);">
+                            Tutup
+                        </button>
+                        <button onclick="tutupUniversalModal(); switchAppMode('CURRICULUM');" class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-md">
+                            <span>Buka Mode Kurikulum Sekarang</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            bukaUniversalModal('Modul Pembelajaran SKI', '📄', html, 'Modul Digital Terintegrasi');
+        }
+
+        // Dropdown Header Handler
         function toggleDesktopLainnyaDropdown(e) {
             if (e) e.stopPropagation();
             const menu = document.getElementById("dropdown-lainnya-menu");
@@ -649,10 +1138,18 @@
             if (menu) menu.classList.toggle("hidden");
         }
 
-        // Event listener global untuk menutup dropdown saat klik di luar area
+        // Close on ESC & Outside Click
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                tutupUniversalModal();
+            }
+        });
+
         document.addEventListener("click", (e) => {
             const dropdownLainnya = document.getElementById("dropdown-lainnya-wrapper");
             const dropdownMobile = document.getElementById("mobile-header-dropdown-wrapper");
+            const modalOverlay = document.getElementById('universal-modal-overlay');
+            const modalCard = document.getElementById('universal-modal-card');
 
             if (dropdownLainnya && !dropdownLainnya.contains(e.target)) {
                 const menu = document.getElementById("dropdown-lainnya-menu");
@@ -662,6 +1159,10 @@
             if (dropdownMobile && !dropdownMobile.contains(e.target)) {
                 const menu = document.getElementById("mobile-header-menu");
                 if (menu) menu.classList.add("hidden");
+            }
+
+            if (modalOverlay && !modalOverlay.classList.contains('hidden') && e.target === modalOverlay) {
+                tutupUniversalModal();
             }
         });
     </script>

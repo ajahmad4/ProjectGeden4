@@ -29,9 +29,30 @@ const eraMap = {};
 
 function inisialisasiData() {
     if (isDataInitialized) return;
-    if (typeof dataMarker !== 'undefined') dataMarker.forEach(m => markerMap[m.id] = m);
-    if (typeof dataJalur !== 'undefined') dataJalur.forEach(j => jalurMap[j.id] = j);
-    if (typeof dataWilayah !== 'undefined') dataWilayah.forEach(w => wilayahMap[w.id] = w);
+    if (typeof dataMarker !== 'undefined') {
+        dataMarker.forEach(m => {
+            if (m && m.id) {
+                markerMap[m.id] = m;
+                markerMap[m.id.toLowerCase()] = m;
+            }
+        });
+    }
+    if (typeof dataJalur !== 'undefined') {
+        dataJalur.forEach(j => {
+            if (j && j.id) {
+                jalurMap[j.id] = j;
+                jalurMap[j.id.toLowerCase()] = j;
+            }
+        });
+    }
+    if (typeof dataWilayah !== 'undefined') {
+        dataWilayah.forEach(w => {
+            if (w && w.id) {
+                wilayahMap[w.id] = w;
+                wilayahMap[w.id.toLowerCase()] = w;
+            }
+        });
+    }
     if (typeof TIMELINE_ERAS !== 'undefined' && Array.isArray(TIMELINE_ERAS)) {
         TIMELINE_ERAS.forEach(e => { eraMap[e.id] = e.name || e.nama || ''; });
     }
@@ -216,9 +237,22 @@ function muatLokasiAplikasi() {
 
                     marker.on("click", function () {
                         map.flyTo(dataTitik.koordinat, 12, { animate: true, duration: 1.5 });
-                        const objekTerkait = dataObjekAtlas.find(oa =>
-                            oa.relasi && oa.relasi.markers && oa.relasi.markers.includes(markerId)
-                        );
+                        const eraAktif = (typeof getCurrentEra === 'function') ? getCurrentEra(timeline.currentYear) : null;
+                        let objekTerkait = null;
+
+                        // 1. Prioritaskan objek di era aktif yang menggunakan marker ini
+                        if (eraAktif && typeof dataObjekAtlas !== 'undefined') {
+                            objekTerkait = dataObjekAtlas.find(oa =>
+                                oa.era === eraAktif.id &&
+                                oa.relasi && oa.relasi.markers && oa.relasi.markers.includes(markerId)
+                            );
+                        }
+                        // 2. Fallback jika tidak ada objek di era aktif
+                        if (!objekTerkait && typeof dataObjekAtlas !== 'undefined') {
+                            objekTerkait = dataObjekAtlas.find(oa =>
+                                oa.relasi && oa.relasi.markers && oa.relasi.markers.includes(markerId)
+                            );
+                        }
 
                         if (objekTerkait) {
                             showDetail(objekTerkait);
@@ -373,8 +407,9 @@ function eksekusiNavigasiLokal(idObjekAtlas) {
 
             if (objek.relasi.wilayah) {
                 objek.relasi.wilayah.forEach(id => {
-                    if (wilayahMap[id] && wilayahMap[id].koordinat) {
-                        wilayahMap[id].koordinat.forEach(coord => bounds.extend(coord));
+                    const w = wilayahMap[id] || (typeof id === 'string' ? wilayahMap[id.toLowerCase()] : null);
+                    if (w && w.koordinat) {
+                        w.koordinat.forEach(coord => bounds.extend(coord));
                         hasPoint = true;
                     }
                 });
@@ -544,7 +579,15 @@ function switchAppMode(mode) {
         }
 
         if (typeof map !== 'undefined' && map) {
-            setTimeout(() => map.invalidateSize(), 200);
+            setTimeout(() => {
+                map.invalidateSize();
+                // Adaptasi fokus kamera awal sesuai sebaran marker era aktif
+                const activeCoords = Object.values(activeMarkers).map(m => m.getLatLng ? m.getLatLng() : null).filter(Boolean);
+                if (activeCoords.length > 0) {
+                    const bounds = L.latLngBounds(activeCoords);
+                    map.fitBounds(bounds, { maxZoom: 7, padding: [60, 60], animate: true, duration: 1.2 });
+                }
+            }, 250);
         }
 
     } else if (mode === 'CURRICULUM') {
@@ -619,9 +662,7 @@ function renderJalurDanWilayah(tahunAktif) {
     // 1. RENDER JALUR
     if (typeof dataJalur !== 'undefined') {
         dataJalur.forEach(jalur => {
-            const isAktif = (jalur.tahunMulai === jalur.tahunSelesai)
-                ? (tahunAktif >= jalur.tahunMulai && tahunAktif <= jalur.tahunSelesai)
-                : (tahunAktif >= jalur.tahunMulai && tahunAktif < jalur.tahunSelesai);
+            const isAktif = (tahunAktif >= jalur.tahunMulai && tahunAktif <= jalur.tahunSelesai);
 
             if (isAktif) {
                 const polyline = L.polyline(jalur.koordinat, {
@@ -754,17 +795,27 @@ function resetMapViewState() {
     if (detailPanel) {
         detailPanel.classList.add('hidden');
     }
+    if (typeof tutupSubMateriView === 'function') {
+        tutupSubMateriView();
+    }
 
     const allCards = document.querySelectorAll('#location-list > div, .location-card-item');
     allCards.forEach(card => {
         card.classList.remove('active', 'bg-active', 'border-accent');
     });
 
-    if (typeof map !== 'undefined' && map) {
-        map.flyTo(map.getCenter(), 5, {
+    const modeSelect = document.getElementById('mode-select');
+    const isCurriculum = modeSelect && modeSelect.value === 'CURRICULUM';
+
+    if (isCurriculum && window.narrativeMap) {
+        window.narrativeMap.setView([-2.548926, 118.014863], 5);
+        window.narrativeMap.invalidateSize();
+    } else if (typeof map !== 'undefined' && map) {
+        map.flyTo([1.0, 115.0], 5, {
             animate: true,
-            duration: 2.5
+            duration: 1.5
         });
+        map.invalidateSize();
     }
 }
 
@@ -818,16 +869,16 @@ function bukaSubMateriDariNarasi(storyId, stepIndex, objek) {
 
     // 1. Perbarui Elemen Header & Konten
     const tagEl = document.getElementById('submateri-tag-cerita');
-    if (tagEl) tagEl.textContent = cerita.judulCerita || 'MODUL KURIKULUM SKI';
+    if (tagEl) tagEl.textContent = judulCerita || 'MODUL KURIKULUM SKI';
 
     const periodeEl = document.getElementById('submateri-periode');
     if (periodeEl) periodeEl.textContent = objek ? (objek.tahun ? `${objek.tahun} M` : (objek.periode || '')) : '';
 
     const judulEl = document.getElementById('submateri-judul');
-    if (judulEl) judulEl.textContent = stepData.judul || namaObjek;
+    if (judulEl) judulEl.textContent = stepJudul || namaObjek;
 
     const kontenEl = document.getElementById('submateri-konten');
-    if (kontenEl) kontenEl.innerHTML = stepData.konten || '';
+    if (kontenEl) kontenEl.innerHTML = stepKonten || '';
 
     // 2. Perbarui Kotak Metadata 50:50 (6 Kolom: Tahun, Periode, Kategori, Lokasi, Wilayah, Tokoh)
     const metaBox = document.getElementById('submateri-metadata-box');

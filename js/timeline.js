@@ -55,29 +55,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }, { passive: false });
 
     // --- EVENT: Geser Mouse (Drag Timeline) ---
+    const stopDragging = () => {
+        if (!timeline.dragging) return;
+        timeline.dragging = false;
+
+        // Render final saat drag mouse dilepas
+        if (typeof renderJalurDanWilayah === 'function') {
+            renderJalurDanWilayah(timeline.currentYear);
+        }
+        if (typeof updateEraHeader === 'function') {
+            updateEraHeader(timeline.currentYear);
+        }
+        if (typeof muatLokasiAplikasi === 'function') {
+            muatLokasiAplikasi();
+        }
+    };
+
     timelineTrack.addEventListener("mousedown", (e) => {
         e.preventDefault();
         timeline.dragging = true;
         timeline.startX = e.clientX;
     });
 
-    window.addEventListener("mouseleave", () => {
-        timeline.dragging = false;
-    });
+    window.addEventListener("mouseleave", stopDragging);
+    window.addEventListener("mouseup", stopDragging);
+    window.addEventListener("blur", stopDragging);
     
     window.addEventListener("mousemove", (e) => {
         if (!timeline.dragging) return;
         const deltaX = e.clientX - timeline.startX;
         timeline.startX = e.clientX;
         dragTimeline(deltaX);
-    });
-
-    window.addEventListener("mouseup", () => {
-        timeline.dragging = false;
-    });
-
-    window.addEventListener("blur", () => {
-        timeline.dragging = false;
     });
 
     // --- EVENT: Tombol Keyboard (= untuk Zoom In, - untuk Zoom Out) ---
@@ -182,10 +190,35 @@ function yearFromPixel(deltaX) {
     return deltaX / timeline.pixelPerYear;
 }
 
-// Melakukan pergeseran tahun berdasarkan drag mouse
+// Melakukan pergeseran tahun berdasarkan drag mouse secara efisien (60 FPS)
 function dragTimeline(deltaX) {
     const deltaYear = yearFromPixel(deltaX);
-    setTimelineYear(timeline.currentYear - deltaYear);
+    const newYear = Math.round(Math.max(timeline.minYear, Math.min(timeline.maxYear, timeline.currentYear - deltaYear)));
+
+    if (newYear === timeline.currentYear) return;
+
+    const prevEra = typeof getCurrentEra === 'function' ? getCurrentEra(timeline.currentYear) : null;
+    const nextEra = typeof getCurrentEra === 'function' ? getCurrentEra(newYear) : null;
+    const eraChanged = !prevEra || !nextEra || (prevEra.id !== nextEra.id);
+
+    timeline.currentYear = newYear;
+    if (typeof translateFromYear === 'function') {
+        timeline.currentTranslate = translateFromYear(newYear);
+    }
+    notifyTimelineChanged();
+
+    // Hanya reload DOM list dan layer peta jika melintasi batas era saat drag
+    if (eraChanged) {
+        if (typeof updateEraHeader === 'function') {
+            updateEraHeader(newYear);
+        }
+        if (typeof renderJalurDanWilayah === 'function') {
+            renderJalurDanWilayah(newYear);
+        }
+        if (typeof muatLokasiAplikasi === 'function') {
+            muatLokasiAplikasi();
+        }
+    }
 }
 
 // =========================================================================

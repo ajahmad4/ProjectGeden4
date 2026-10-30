@@ -70,7 +70,7 @@ function exportCurrentDatabaseToExcel() {
 
             rowsKurikulum.push({
                 kelas: chap.kelas || "12",
-                namaKelas: chap.namaKelas || `Kelas ${chap.kelas} MA`,
+                namaKelas: chap.namaKelas || (Number(chap.kelas) <= 9 ? `Kelas ${chap.kelas} MTs` : `Kelas ${chap.kelas} MA`),
                 bab: chap.bab || 1,
                 judulBab: chap.judulBab || "",
                 deskripsiBab: chap.deskripsiBab || "",
@@ -186,6 +186,26 @@ function downloadExcelTemplate() {
 
     // Sheet Kurikulum
     const contohKurikulum = [
+        {
+            kelas: "7",
+            namaKelas: "Kelas 7 MTs",
+            bab: 1,
+            judulBab: "Bab 1: Dakwah Nabi Muhammad SAW di Mekkah & Madinah",
+            deskripsiBab: "Kerasulan Nabi Muhammad SAW, ketabahan dakwah, peristiwa Hijrah, dan pembangunan peradaban Madinah.",
+            id_sub_materi: "materi-7-1-1",
+            nomor_sub_materi: "1.1",
+            judul_sub_materi: "Kondisi Masyarakat Jahiliyah & Wahyu Pertama di Gua Hira",
+            metadata_wilayah: "Mekkah & Jabal Nur, Jazirah Arab",
+            metadata_periode: "570 – 610 M",
+            metadata_fokus: "Kondisi Moral Bangsa Arab & Turunnya Wahyu Pertama",
+            metadata_tokoh: "Nabi Muhammad SAW, Sayyidah Khadijah, Waraqah bin Naufal",
+            relasi_markers: "m-mekkah, m-gua-hira",
+            relasi_jalur: "",
+            relasi_wilayah: "",
+            galeri_urls: "assets/images/era-pra-islam/kelahiran-nabi-1.jpg",
+            galeri_captions: "Kawasan Kota Suci Mekkah al-Mukarramah",
+            konten_html: "<p>Sebelum datangnya risalah Islam, bangsa Arab hidup dalam kemunduran moral...</p>"
+        },
         {
             kelas: "12",
             namaKelas: "Kelas 12 MA",
@@ -387,7 +407,7 @@ function parseSheetKurikulum(rows) {
             mapChapters[chapKey] = {
                 id: chapKey,
                 kelas: kelas,
-                namaKelas: String(row.namaKelas || `Kelas ${kelas} MA`).trim(),
+                namaKelas: String(row.namaKelas || (Number(kelas) <= 9 ? `Kelas ${kelas} MTs` : `Kelas ${kelas} MA`)).trim(),
                 bab: babNum,
                 judulBab: String(row.judulBab || `Bab ${babNum}`).trim(),
                 deskripsiBab: String(row.deskripsiBab || '').trim(),

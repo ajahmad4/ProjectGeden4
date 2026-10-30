@@ -272,5 +272,205 @@ const dataKurikulum = [
         `
       }
     ]
+  },
+
+  // =========================================================================
+  // KELAS 7 MTs: DAKWAH NABI MUHAMMAD SAW & PERADABAN MADINAH
+  // =========================================================================
+  {
+    id: "ski-7-bab-1",
+    kelas: "7",
+    namaKelas: "Kelas 7 MTs",
+    bab: 1,
+    judulBab: "Bab 1: Dakwah Nabi Muhammad SAW di Mekkah & Madinah",
+    deskripsiBab: "Kerasulan Nabi Muhammad SAW, ketabahan dakwah, peristiwa Hijrah, dan pembangunan peradaban Madinah.",
+    subMateri: [
+      {
+        id: "materi-7-1-1",
+        nomor: "1.1",
+        judul: "Kondisi Masyarakat Jahiliyah & Wahyu Pertama di Gua Hira",
+        metadata: {
+          wilayah: "Mekkah & Jabal Nur, Jazirah Arab",
+          periode: "570 – 610 M",
+          fokus: "Kondisi Moral Bangsa Arab & Turunnya Wahyu Pertama",
+          tokoh: "Nabi Muhammad SAW, Sayyidah Khadijah, Waraqah bin Naufal"
+        },
+        relasiPeta: {
+          markers: ["m-mekkah", "m-gua-hira", "m-kabah"],
+          jalur: [],
+          wilayah: []
+        },
+        galeri: [
+          { url: "assets/images/era-pra-islam/kelahiran-nabi-1.jpg", caption: "Kawasan Kota Suci Mekkah al-Mukarramah" }
+        ],
+        konten: `
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">1. Realitas Jahiliyah Pra-Islam</h4>
+          <p class="leading-relaxed mb-3">Sebelum datangnya risalah Islam, bangsa Arab hidup dalam kemunduran moral yang dikenal sebagai era <em>Jahiliyah</em>: penyembahan berhala di sekeliling Ka'bah, fanatisme kabilah (*'ashabiyyah*), penindasan kaum lemah, serta penguburan bayi perempuan hidup-hidup.</p>
+
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">2. Tahannuts di Gua Hira & Kerasulan</h4>
+          <p class="leading-relaxed">Melihat kebobrokan moral kaumnya, Nabi Muhammad SAW kerap berkontemplasi (*tahannuts*) di <strong>Gua Hira</strong> di puncak Jabal Nur. Pada bulan Ramadhan tahun 610 M, Malaikat Jibril menyampaikan wahyu perdana (QS. Al-'Alaq: 1-5), menabalkan beliau sebagai Rasul pembawa risalah rahmat bagi seluruh alam (*Rahmatan lil 'Alamin*).</p>
+        `
+      },
+      {
+        id: "materi-7-1-2",
+        nomor: "1.2",
+        judul: "Peristiwa Hijrah & Pembangunan Masyarakat Madinah",
+        metadata: {
+          wilayah: "Madinah (Yatsrib)",
+          periode: "622 M",
+          fokus: "Persaudaraan Kaum Muslimin & Masjid Nabawi",
+          tokoh: "Nabi Muhammad SAW, Abu Bakar, Kaum Muhajirin & Anshar"
+        },
+        relasiPeta: {
+          markers: ["m-madinah", "m-masjid-nabawi"],
+          jalur: ["j-hijrah-madinah"],
+          wilayah: ["Wilayah-khulafaur-rasyidin"]
+        },
+        galeri: [
+          { url: "assets/images/era-kenabian/masjid-nabawi-1.jpg", caption: "Masjid Nabawi di Madinah Pusat Pembinaan Umat" }
+        ],
+        konten: `
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">1. Hijrah sebagai Tonggak Peradaban</h4>
+          <p class="leading-relaxed mb-3">Menghadapi boikot dan ancaman pembunuhan kaum kafir Quraisy, Rasulullah SAW bersama Abu Bakar Ash-Shiddiq menempuh perjalanan hijrah melintasi padang pasir menuju Yatsrib pada tahun 622 M. Peristiwa ini disambut hangat oleh penduduk Madinah dan menjadi titik awal penanggalan Hijriyah.</p>
+
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">2. Masjid Nabawi & Persaudaraan Madani</h4>
+          <p class="leading-relaxed">Langkah pertama Nabi di Madinah adalah membangun <strong>Masjid Nabawi</strong> sebagai episentrum ibadah, musyawarah, dan pendidikan. Beliau juga mempersaudarakan kaum Muhajirin dan Anshar serta merumuskan <em>Piagam Madinah</em> sebagai dasar kehidupan berbangsa yang toleran.</p>
+        `
+      }
+    ]
+  },
+
+  // =========================================================================
+  // KELAS 8 MTs: DAULAH UMAYYAH & DAULAH ABBASIYAH
+  // =========================================================================
+  {
+    id: "ski-8-bab-1",
+    kelas: "8",
+    namaKelas: "Kelas 8 MTs",
+    bab: 1,
+    judulBab: "Bab 1: Daulah Umayyah & Daulah Abbasiyah: Membangun Peradaban",
+    deskripsiBab: "Kajian kekhalifahan Islam pasca Khulafaur Rasyidin, ekspansi peradaban ke Andalusia, dan kebangkitan sains Baghdad.",
+    subMateri: [
+      {
+        id: "materi-8-1-1",
+        nomor: "1.1",
+        judul: "Kekhalifahan Daulah Umayyah di Damaskus & Andalusia",
+        metadata: {
+          wilayah: "Damaskus (Suriah) & Semenanjung Iberia (Spanyol)",
+          periode: "661 – 750 M (Damaskus) & 756 – 1031 M (Andalusia)",
+          fokus: "Birokrasi Administrasi & Ekspansi Andalusia",
+          tokoh: "Muawiyah bin Abi Sufyan, Abdurrahman Ad-Dakhil, Tariq bin Ziyad"
+        },
+        relasiPeta: {
+          markers: ["m-damaskus", "m-kordoba", "m-gibraltar"],
+          jalur: ["j-ekspansi-andalusia"],
+          wilayah: []
+        },
+        galeri: [
+          { url: "assets/images/era-umayyah/kordoba-1.jpg", caption: "Pesona Arsitektur Masjid Kordoba di Andalusia" }
+        ],
+        konten: `
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">1. Daulah Umayyah Berpusat di Damaskus</h4>
+          <p class="leading-relaxed mb-3">Didirikan oleh <strong>Muawiyah bin Abi Sufyan</strong> pada 661 M dengan ibukota di Damaskus. Di bawah Dinasti Umayyah, sistem administrasi negara disempurnakan dengan mencetak mata uang dinar Islam mandiri, pembentukan dinas pos (Al-Barid), dan pembangunan arsitektur megah seperti Kubah Ash-Sakhrah di Yerusalem.</p>
+
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">2. Gemilang Peradaban di Andalusia</h4>
+          <p class="leading-relaxed">Setelah menyeberangi Selat Gibraltar di bawah panglima Tariq bin Ziyad (711 M), peradaban Islam bersemi di Spanyol. Melalui kepemimpinan Abdurrahman Ad-Dakhil, Kordoba berkembang menjadi mercusuar ilmu pengetahuan dan kebudayaan paling berkilau di Eropa.</p>
+        `
+      },
+      {
+        id: "materi-8-1-2",
+        nomor: "1.2",
+        judul: "Daulah Abbasiyah & Episentrum Sains Baitul Hikmah",
+        metadata: {
+          wilayah: "Baghdad, Irak (Mesopotamia)",
+          periode: "750 – 1258 M",
+          fokus: "The Golden Age of Science & Baitul Hikmah",
+          tokoh: "Harun Ar-Rasyid, Al-Ma'mun, Al-Khawarizmi, Ibnu Sina"
+        },
+        relasiPeta: {
+          markers: ["m-baghdad", "m-baitul-hikmah"],
+          jalur: [],
+          wilayah: ["Wilayah-bani-abbasiyah"]
+        },
+        galeri: [
+          { url: "assets/images/era-abbasiyah/baitul-hikmah-1.jpg", caption: "Ilustrasi Diskusi Cendekiawan Muslim di Baitul Hikmah" }
+        ],
+        konten: `
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">1. Masa Keemasan (The Golden Age) di Baghdad</h4>
+          <p class="leading-relaxed mb-3">Didirikan oleh Abu al-Abbas as-Saffah dan mencapai puncak kegemilangan pada masa Khalifah <strong>Harun Ar-Rasyid</strong> dan putranya <strong>Al-Ma'mun</strong>. Kota Baghdad menjadi pusat perdagangan dan kebudayaan global yang dikunjungi para cendekiawan dari berbagai penjuru dunia.</p>
+
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">2. Warisan Abadi Baitul Hikmah</h4>
+          <p class="leading-relaxed">Lembaga agung <strong>Baitul Hikmah</strong> berfungsi sebagai perpustakaan besar, biro penerjemahan naskah Yunani, Persia, dan India, serta observatorium astronomi. Dari rahim peradaban inilah lahir tokoh penemu aljabar Muhammad bin Musa Al-Khawarizmi dan bapak kedokteran modern Ibnu Sina.</p>
+        `
+      }
+    ]
+  },
+
+  // =========================================================================
+  // KELAS 9 MTs: SEJARAH ISLAM DI NUSANTARA
+  // =========================================================================
+  {
+    id: "ski-9-bab-1",
+    kelas: "9",
+    namaKelas: "Kelas 9 MTs",
+    bab: 1,
+    judulBab: "Bab 1: Sejarah Masuknya Islam di Nusantara & Kerajaan Islam",
+    deskripsiBab: "Jalur niaga maritim para saudagar muslim, situs sejarah Barus, Samudera Pasai, serta dakwah Wali Songo.",
+    subMateri: [
+      {
+        id: "materi-9-1-1",
+        nomor: "1.1",
+        judul: "Jalur Niaga Maritim & Bandar Bersejarah Barus",
+        metadata: {
+          wilayah: "Barus (Fansur), Sumatera Utara",
+          periode: "Abad ke-7 – 13 M",
+          fokus: "Jalur Pelayaran Dagang Kapur Barus & Pemukiman Arab",
+          tokoh: "Syekh Rukunuddin, Saudagar Arab & Nusantara"
+        },
+        relasiPeta: {
+          markers: ["m-barus"],
+          jalur: ["j-jalur-awal-arab"],
+          wilayah: []
+        },
+        galeri: [
+          { url: "assets/images/era-umayyah/jalur-arab-1.jpg", caption: "Peta Rute Jalur Perdagangan Maritim Samudera Hindia" },
+          { url: "assets/images/era-umayyah/jalur-arab-2.jpg", caption: "Kompleks Makam Kuno Papan Tinggi di Barus" }
+        ],
+        konten: `
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">1. Islam Datang Lewat Jalur Damai Perdagangan</h4>
+          <p class="leading-relaxed mb-3">Penyebaran Islam di Nusantara tidak melalui penaklukan militer, melainkan berlangsung secara damai melalui saluran <strong>perdagangan maritim</strong>, perkawinan, tasawuf, dan pendidikan. Letak kepulauan Nusantara di persimpangan Selat Malaka menjadikannya magnet perniagaan rempah-rempah internasional.</p>
+
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">2. Jejak Pelabuhan Barus (Fansur)</h4>
+          <p class="leading-relaxed">Kota pelabuhan <strong>Barus</strong> di pantai barat Sumatera Utara telah disinggahi saudagar muslim Arab sejak abad ke-7 M (era Dinasti Tang & Umayyah). Kompleks makam kuno Mahligai dan Papan Tinggi bertarikh hijriah awal menjadi bukti arkeologis otentik kehadiran Islam perdana di bumi Nusantara.</p>
+        `
+      },
+      {
+        id: "materi-9-1-2",
+        nomor: "1.2",
+        judul: "Samudera Pasai & Peran Dakwah Kultural Walisongo",
+        metadata: {
+          wilayah: "Samudera Pasai (Aceh) & Demak (Jawa)",
+          periode: "Abad ke-13 – 16 M",
+          fokus: "Kerajaan Islam Tertua & Pendekatan Budaya Walisongo",
+          tokoh: "Sultan Malik as-Saleh, Raden Patah, Walisongo"
+        },
+        relasiPeta: {
+          markers: ["m-samudera-pasai", "m-demak"],
+          jalur: ["j-dakwah-samudera-pasai"],
+          wilayah: ["w-samudera-pasai", "w-demak"]
+        },
+        galeri: [
+          { url: "assets/images/era-penyebaran-nusantara/samudera-pasai-1.jpg", caption: "Batu Nisan Kuno Sultan Malik As-Saleh (1297 M)" },
+          { url: "assets/images/era-penyebaran-nusantara/demak-1.jpg", caption: "Masjid Agung Demak Simbol Akulturasi Kultural Jawa" }
+        ],
+        konten: `
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">1. Samudera Pasai: Titik Tolak Kerajaan Islam</h4>
+          <p class="leading-relaxed mb-3">Didirikan oleh Meurah Silu (<strong>Sultan Malik as-Saleh</strong>) pada abad ke-13 M di Aceh Utara, Samudera Pasai menjadi kesultanan maritim berdaulat yang mencetak mata uang dirham emas dan mencetak kader ulama pendakwah ke seluruh kepulauan Nusantara.</p>
+
+          <h4 class="font-bold text-title mb-1.5 text-sm md:text-base">2. Walisongo & Kesultanan Demak</h4>
+          <p class="leading-relaxed">Di Pulau Jawa, dewan sembilan wali (<strong>Walisongo</strong>) bersama Raden Patah mendirikan Kesultanan Demak. Pendekatan dakwah yang santun, merangkul adat istiadat setempat (seperti seni wayang, tembang, dan arsitektur masjid beratap tumpang), membuat Islam diterima luas dengan sukacita oleh rakyat Nusantara.</p>
+        `
+      }
+    ]
   }
 ];

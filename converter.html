@@ -220,11 +220,14 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-slate-400 font-medium">Filter Kelas:</span>
-                            <div class="flex items-center gap-1.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
                                 <button onclick="filterKurikulumClass('all')" id="btn-filter-k-all" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">Semua</button>
-                                <button onclick="filterKurikulumClass('12')" id="btn-filter-k-12" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">Kelas 12</button>
-                                <button onclick="filterKurikulumClass('11')" id="btn-filter-k-11" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">Kelas 11</button>
-                                <button onclick="filterKurikulumClass('10')" id="btn-filter-k-10" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">Kelas 10</button>
+                                <button onclick="filterKurikulumClass('7')" id="btn-filter-k-7" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">MTs 7</button>
+                                <button onclick="filterKurikulumClass('8')" id="btn-filter-k-8" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">MTs 8</button>
+                                <button onclick="filterKurikulumClass('9')" id="btn-filter-k-9" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">MTs 9</button>
+                                <button onclick="filterKurikulumClass('10')" id="btn-filter-k-10" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">MA 10</button>
+                                <button onclick="filterKurikulumClass('11')" id="btn-filter-k-11" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">MA 11</button>
+                                <button onclick="filterKurikulumClass('12')" id="btn-filter-k-12" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200">MA 12</button>
                             </div>
                         </div>
                         <div class="relative w-full sm:w-64">
@@ -552,7 +555,7 @@
         // ==========================================
         function filterKurikulumClass(kelas) {
             currentFilterClass = kelas;
-            ['all', '12', '11', '10'].forEach(k => {
+            ['all', '7', '8', '9', '10', '11', '12'].forEach(k => {
                 const btn = document.getElementById(`btn-filter-k-${k}`);
                 if (btn) {
                     if (k === kelas) {
